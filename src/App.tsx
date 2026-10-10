@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import TaskCard from './TaskCard'
 import './App.css'
 
 const ENTRY_STORAGE_KEY = 'margin-entry'
@@ -127,27 +128,7 @@ function App() {
           )}
         </section>
 
-        <section className="card">
-          <div className="card-heading">
-            <div>
-              <p className="section-label">次の課題</p>
-
-              <h2 className="card-title">
-                登録された課題はありません
-              </h2>
-            </div>
-
-            <span className="badge">0件</span>
-          </div>
-
-          <p className="supporting-text">
-            授業の設定を使って、課題を追加できます。
-          </p>
-
-          <button className="secondary-button" type="button">
-            課題を追加
-          </button>
-        </section>
+        <TaskCard />
 
         <section className="card">
           <div className="card-heading">

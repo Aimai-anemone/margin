@@ -306,3 +306,46 @@ button {
 .delete-button:active {
   transform: scale(0.98);
 }
+
+.task-editor {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.form-field {
+  display: grid;
+  gap: 8px;
+}
+
+.task-summary {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.task-meta {
+  margin: 0;
+  color: #686b64;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.task-first-step {
+  padding: 14px;
+  border: 1px solid #e0e2dc;
+  border-radius: 12px;
+  background-color: #f6f7f3;
+}
+
+.task-first-step p:last-child {
+  margin: 0;
+  color: #30332e;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+select.entry-input {
+  appearance: auto;
+  cursor: pointer;
+}
