@@ -1,5 +1,7 @@
 import { useState } from 'react'
 
+const TASK_STORAGE_KEY = 'margin-task'
+
 type Task = {
   title: string
   deadline: string
@@ -15,7 +17,21 @@ const emptyTask: Task = {
 }
 
 function TaskCard() {
-  const [task, setTask] = useState<Task | null>(null)
+  const [task, setTask] = useState<Task | null>(() => {
+  const savedTask = localStorage.getItem(TASK_STORAGE_KEY)
+
+  if (savedTask === null) {
+    return null
+  }
+
+  try {
+    return JSON.parse(savedTask) as Task
+  } catch {
+    localStorage.removeItem(TASK_STORAGE_KEY)
+    return null
+  }
+})
+
   const [taskDraft, setTaskDraft] = useState<Task>(emptyTask)
   const [isEditing, setIsEditing] = useState(false)
 
@@ -34,26 +50,40 @@ function TaskCard() {
     }))
   }
 
-  function saveTask() {
-    const cleanedTitle = taskDraft.title.trim()
+function saveTask() {
+  const cleanedTitle = taskDraft.title.trim()
 
-    if (cleanedTitle === '') {
-      return
-    }
-
-    setTask({
-      ...taskDraft,
-      title: cleanedTitle,
-      firstStep: taskDraft.firstStep.trim(),
-    })
-
-    setIsEditing(false)
+  if (cleanedTitle === '') {
+    return
   }
+
+  const savedTask: Task = {
+    ...taskDraft,
+    title: cleanedTitle,
+    firstStep: taskDraft.firstStep.trim(),
+  }
+
+  setTask(savedTask)
+
+  localStorage.setItem(
+    TASK_STORAGE_KEY,
+    JSON.stringify(savedTask),
+  )
+
+  setIsEditing(false)
+}
 
   function cancelEditing() {
     setTaskDraft(task ?? emptyTask)
     setIsEditing(false)
   }
+
+  function deleteTask() {
+  setTask(null)
+  setTaskDraft(emptyTask)
+  localStorage.removeItem(TASK_STORAGE_KEY)
+  setIsEditing(false)
+}
 
   function formatDeadline(deadline: string) {
     if (deadline === '') {
@@ -209,6 +239,16 @@ function TaskCard() {
               やめる
             </button>
           </div>
+
+          {task && (
+  <button
+    className="delete-button"
+    type="button"
+    onClick={deleteTask}
+  >
+    課題を削除する
+  </button>
+)}
         </div>
       ) : task ? (
         <div className="task-summary">
