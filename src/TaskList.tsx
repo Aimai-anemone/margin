@@ -66,8 +66,13 @@ function TaskList() {
   const [tasks, setTasks] = useState<Task[]>(loadTasks)
   const [taskDraft, setTaskDraft] = useState(emptyTask)
   const [isAddingTask, setIsAddingTask] = useState(false)
+  const [selectedTaskId, setSelectedTaskId] =
+   useState<string | null>(null)
 
   const sortedTasks = sortTasks(tasks)
+
+  const selectedTask =
+   tasks.find((task) => task.id === selectedTaskId) ?? null
 
   function updateTaskDraft(
     field: keyof typeof emptyTask,
@@ -129,29 +134,88 @@ function addTask() {
       </div>
 
       {sortedTasks.length > 0 && (
-        <div className="task-list">
-          {sortedTasks.map((task) => (
-            <article
-              className="task-list-item"
-              key={task.id}
-            >
-              <h3>{task.title}</h3>
+  <div className="task-list">
+    {sortedTasks.map((task) => {
+      const deadlineText =
+        task.deadline === ''
+          ? '締切は未設定です'
+          : new Intl.DateTimeFormat('ja-JP', {
+              month: 'long',
+              day: 'numeric',
+              weekday: 'short',
+              hour: '2-digit',
+              minute: '2-digit',
+            }).format(new Date(task.deadline))
 
-              <p>
-  {task.deadline === ''
-    ? '締切は未設定です'
-    : new Intl.DateTimeFormat('ja-JP', {
-        month: 'long',
-        day: 'numeric',
-        weekday: 'short',
-        hour: '2-digit',
-        minute: '2-digit',
-      }).format(new Date(task.deadline))}
-</p>
-            </article>
-          ))}
-        </div>
-      )}
+      return (
+        <button
+          className="task-list-item"
+          type="button"
+          key={task.id}
+          onClick={() => setSelectedTaskId(task.id)}
+        >
+          <h3>{task.title}</h3>
+          <p>{deadlineText}</p>
+        </button>
+      )
+    })}
+  </div>
+)}
+      {selectedTask && (
+  <div className="task-detail">
+    <div className="task-detail-header">
+      <div>
+        <p className="section-label">
+          課題の詳細
+        </p>
+
+        <h3>{selectedTask.title}</h3>
+      </div>
+
+      <button
+        className="detail-close-button"
+        type="button"
+        onClick={() => setSelectedTaskId(null)}
+      >
+        閉じる
+      </button>
+    </div>
+
+    <div className="task-detail-row">
+      <span>締切</span>
+
+      <strong>
+        {selectedTask.deadline === ''
+          ? '未設定'
+          : new Intl.DateTimeFormat('ja-JP', {
+              month: 'long',
+              day: 'numeric',
+              weekday: 'short',
+              hour: '2-digit',
+              minute: '2-digit',
+            }).format(
+              new Date(selectedTask.deadline),
+            )}
+      </strong>
+    </div>
+
+    <div className="task-detail-row">
+      <span>形式</span>
+      <strong>{selectedTask.format}</strong>
+    </div>
+
+    <div className="task-detail-step">
+      <p className="section-label">
+        最初の入口
+      </p>
+
+      <p>
+        {selectedTask.firstStep ||
+          '最初の入口は設定されていません。'}
+      </p>
+    </div>
+  </div>
+)}
 
       {!isAddingTask && (
         <>
