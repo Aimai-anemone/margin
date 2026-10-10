@@ -286,3 +286,23 @@ button {
   color: #777b73;
   cursor: not-allowed;
 }
+
+.delete-button {
+  justify-self: start;
+  padding: 7px 0;
+  border: 0;
+  background-color: transparent;
+  color: #8a4f4b;
+  font-size: 13px;
+  font-weight: 620;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  color: #723d39;
+  text-decoration: underline;
+}
+
+.delete-button:active {
+  transform: scale(0.98);
+}

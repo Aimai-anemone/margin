@@ -39,6 +39,13 @@ function App() {
     setIsEditingEntry(false)
   }
 
+  function deleteEntry() {
+  setEntry('')
+  setEntryDraft('')
+  localStorage.removeItem(ENTRY_STORAGE_KEY)
+  setIsEditingEntry(false)
+}
+
   return (
     <div className="app">
       <header className="app-header">
@@ -86,6 +93,16 @@ function App() {
                   やめる
                 </button>
               </div>
+
+              {entry && (
+  <button
+    className="delete-button"
+    type="button"
+    onClick={deleteEntry}
+  >
+    入口を削除する
+  </button>
+)}
             </div>
           ) : (
             <>
