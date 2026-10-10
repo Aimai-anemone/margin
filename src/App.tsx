@@ -1,11 +1,43 @@
+import { useState } from 'react'
 import './App.css'
 
+const ENTRY_STORAGE_KEY = 'margin-entry'
+
 function App() {
+  const [entry, setEntry] = useState(() => {
+  return localStorage.getItem(ENTRY_STORAGE_KEY) ?? ''
+})
+
+  const [entryDraft, setEntryDraft] = useState('')
+  const [isEditingEntry, setIsEditingEntry] = useState(false)
+
   const today = new Intl.DateTimeFormat('ja-JP', {
     month: 'long',
     day: 'numeric',
     weekday: 'long',
   }).format(new Date())
+
+  function startEditingEntry() {
+    setEntryDraft(entry)
+    setIsEditingEntry(true)
+  }
+
+  function saveEntry() {
+    const cleanedEntry = entryDraft.trim()
+
+    if (cleanedEntry === '') {
+      return
+    }
+
+    setEntry(cleanedEntry)
+    localStorage.setItem(ENTRY_STORAGE_KEY, cleanedEntry)
+    setIsEditingEntry(false)
+  }
+
+  function cancelEditingEntry() {
+    setEntryDraft(entry)
+    setIsEditingEntry(false)
+  }
 
   return (
     <div className="app">
@@ -20,17 +52,62 @@ function App() {
         <section className="card primary-card">
           <p className="section-label">今日の入口</p>
 
-          <h1 className="card-title">
-            まだ決まっていません
-          </h1>
+          {isEditingEntry ? (
+            <div className="entry-editor">
+              <label className="input-label" htmlFor="entry-input">
+                最初に何をしますか？
+              </label>
 
-          <p className="supporting-text">
-            次に迷わないよう、最初の一歩だけを決めます。
-          </p>
+              <input
+                id="entry-input"
+                className="entry-input"
+                type="text"
+                value={entryDraft}
+                onChange={(event) => setEntryDraft(event.target.value)}
+                placeholder="例：英語課題のPDFを開く"
+                autoFocus
+              />
 
-          <button className="primary-button" type="button">
-            入口を決める
-          </button>
+              <div className="editor-actions">
+                <button
+                  className="primary-button"
+                  type="button"
+                  onClick={saveEntry}
+                  disabled={entryDraft.trim() === ''}
+                >
+                  保存する
+                </button>
+
+                <button
+                  className="cancel-button"
+                  type="button"
+                  onClick={cancelEditingEntry}
+                >
+                  やめる
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <h1 className="card-title">
+                {entry || 'まだ決まっていません'}
+              </h1>
+
+              <p className="supporting-text">
+                {entry
+                  ? 'この行動から始めれば十分です。'
+                  : '次に迷わないよう、最初の一歩だけを決めます。'}
+              </p>
+
+              <button
+                className="primary-button"
+                type="button"
+                onClick={startEditingEntry}
+              >
+                {entry ? '入口を変更する' : '入口を決める'}
+              </button>
+            </>
+          )}
         </section>
 
         <section className="card">

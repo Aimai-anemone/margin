@@ -220,3 +220,69 @@ button {
     border-radius: 0 0 28px 28px;
   }
 }
+
+.entry-editor {
+  display: grid;
+  gap: 14px;
+}
+
+.input-label {
+  color: #4f534c;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.entry-input {
+  width: 100%;
+  min-height: 50px;
+  padding: 12px 14px;
+  border: 1px solid #cfd2ca;
+  border-radius: 12px;
+  outline: none;
+  background-color: #ffffff;
+  color: #20211f;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.entry-input::placeholder {
+  color: #999c94;
+}
+
+.entry-input:focus {
+  border-color: #526456;
+  box-shadow: 0 0 0 3px rgba(82, 100, 86, 0.12);
+}
+
+.editor-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.cancel-button {
+  min-height: 48px;
+  padding: 11px 17px;
+  border: 1px solid #d6d8d1;
+  border-radius: 13px;
+  background-color: transparent;
+  color: #555850;
+  font-size: 14px;
+  font-weight: 620;
+  cursor: pointer;
+}
+
+.cancel-button:hover {
+  background-color: #f0f2ed;
+}
+
+.cancel-button:active {
+  transform: scale(0.98);
+}
+
+.primary-button:disabled {
+  border-color: #cdd1ca;
+  background-color: #cdd1ca;
+  color: #777b73;
+  cursor: not-allowed;
+}
