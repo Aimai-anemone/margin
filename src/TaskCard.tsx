@@ -79,6 +79,14 @@ function saveTask() {
   }
 
   function deleteTask() {
+  const shouldDelete = window.confirm(
+    'この課題を削除しますか？',
+  )
+
+  if (!shouldDelete) {
+    return
+  }
+
   setTask(null)
   setTaskDraft(emptyTask)
   localStorage.removeItem(TASK_STORAGE_KEY)
