@@ -349,3 +349,31 @@ select.entry-input {
   appearance: auto;
   cursor: pointer;
 }
+
+.task-list {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.task-list-item {
+  padding: 14px;
+  border: 1px solid #e0e2dc;
+  border-radius: 13px;
+  background-color: #f8f9f6;
+}
+
+.task-list-item h3 {
+  margin: 0;
+  color: #282b26;
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.task-list-item p {
+  margin: 7px 0 0;
+  color: #6b6e66;
+  font-size: 13px;
+  line-height: 1.5;
+}
