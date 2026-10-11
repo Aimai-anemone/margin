@@ -388,8 +388,12 @@ select.entry-input {
 
 .task-detail-actions {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
+}
+
+.delete-task-button {
+  grid-column: 1 / -1;
 }
 
 .delete-task-button {
@@ -410,5 +414,26 @@ select.entry-input {
 }
 
 .delete-task-button:active {
+  transform: scale(0.98);
+}
+
+.complete-task-button {
+  min-height: 48px;
+  padding: 11px 17px;
+  border: 1px solid #cfd8cd;
+  border-radius: 13px;
+  background-color: #f3f7f1;
+  color: #3f5a43;
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.complete-task-button:hover {
+  border-color: #b9c8b6;
+  background-color: #eaf1e7;
+}
+
+.complete-task-button:active {
   transform: scale(0.98);
 }

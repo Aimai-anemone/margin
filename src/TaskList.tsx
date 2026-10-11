@@ -8,9 +8,12 @@ type Task = {
   deadline: string
   format: string
   firstStep: string
+  completed: boolean
 }
 
-const emptyTask: Omit<Task, 'id'> = {
+type TaskDraft = Omit<Task, 'id' | 'completed'>
+
+const emptyTask: TaskDraft = {
   title: '',
   deadline: '',
   format: '学校のWebシステム',
@@ -31,7 +34,10 @@ function loadTasks(): Task[] {
       return []
     }
 
-    return parsedTasks as Task[]
+    return parsedTasks.map((task) => ({
+  ...task,
+  completed: task.completed ?? false,
+})) as Task[]
   } catch {
     localStorage.removeItem(TASKS_STORAGE_KEY)
     return []
@@ -72,13 +78,19 @@ function TaskList() {
 const [isEditingSelectedTask, setIsEditingSelectedTask] =
   useState(false)
 
-  const sortedTasks = sortTasks(tasks)
+  const activeTasks = tasks.filter(
+  (task) => !task.completed,
+)
+
+
+
+const sortedTasks = sortTasks(activeTasks)
 
   const selectedTask =
    tasks.find((task) => task.id === selectedTaskId) ?? null
 
   function updateTaskDraft(
-    field: keyof typeof emptyTask,
+    field: keyof TaskDraft,
     value: string,
   ) {
     setTaskDraft((currentTask) => ({
@@ -111,6 +123,7 @@ function addTask() {
     deadline: taskDraft.deadline,
     format: taskDraft.format,
     firstStep: taskDraft.firstStep.trim(),
+    completed: false,
   }
 
   saveTasks([...tasks, newTask])
@@ -166,6 +179,36 @@ function cancelEditingSelectedTask() {
   setIsEditingSelectedTask(false)
 }
 
+function completeSelectedTask() {
+  if (selectedTaskId === null) {
+    return
+  }
+
+  const shouldComplete = window.confirm(
+    'この課題を完了にしますか？',
+  )
+
+  if (!shouldComplete) {
+    return
+  }
+
+  const updatedTasks = tasks.map((task) => {
+    if (task.id !== selectedTaskId) {
+      return task
+    }
+
+    return {
+      ...task,
+      completed: true,
+    }
+  })
+
+  saveTasks(updatedTasks)
+  setSelectedTaskId(null)
+  setIsEditingSelectedTask(false)
+  setTaskDraft(emptyTask)
+}
+
 function deleteSelectedTask() {
   if (selectedTaskId === null) {
     return
@@ -196,14 +239,14 @@ function deleteSelectedTask() {
           <p className="section-label">次の課題</p>
 
           <h2 className="card-title">
-            {tasks.length === 0
+            {activeTasks.length === 0
               ? '登録された課題はありません'
-              : `${tasks.length}件の課題があります`}
+              : `${activeTasks.length}件の課題があります`}
           </h2>
         </div>
 
         <span className="badge">
-          {tasks.length}件
+          {activeTasks.length}件
         </span>
       </div>
 
@@ -293,23 +336,31 @@ function deleteSelectedTask() {
       </p>
     </div>
    {!isEditingSelectedTask && (
-    <div className="task-detail-actions">
-  <button
-    className="secondary-button"
-    type="button"
-    onClick={startEditingSelectedTask}
-  >
-    編集する
-  </button>
+  <div className="task-detail-actions">
+    <button
+      className="secondary-button"
+      type="button"
+      onClick={startEditingSelectedTask}
+    >
+      編集する
+    </button>
 
-  <button
-    className="delete-task-button"
-    type="button"
-    onClick={deleteSelectedTask}
-  >
-    削除する
-  </button>
-</div>
+    <button
+      className="complete-task-button"
+      type="button"
+      onClick={completeSelectedTask}
+    >
+      完了にする
+    </button>
+
+    <button
+      className="delete-task-button"
+      type="button"
+      onClick={deleteSelectedTask}
+    >
+      削除する
+    </button>
+  </div>
 )}
   </div>
 )}
@@ -440,7 +491,7 @@ function deleteSelectedTask() {
 
       {!isAddingTask && (
         <>
-          {tasks.length === 0 && (
+          {activeTasks.length === 0 && (
             <p className="supporting-text">
               最初の課題を追加します。
             </p>
