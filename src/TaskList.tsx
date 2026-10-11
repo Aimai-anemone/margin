@@ -214,6 +214,21 @@ function completeSelectedTask() {
   setTaskDraft(emptyTask)
 }
 
+function restoreCompletedTask(taskId: string) {
+  const updatedTasks = tasks.map((task) => {
+    if (task.id !== taskId) {
+      return task
+    }
+
+    return {
+      ...task,
+      completed: false,
+    }
+  })
+
+  saveTasks(updatedTasks)
+}
+
 function deleteSelectedTask() {
   if (selectedTaskId === null) {
     return
@@ -655,22 +670,36 @@ function deleteSelectedTask() {
       </span>
     </button>
 
-    {isShowingCompletedTasks && (
-      <div className="completed-task-list">
-        {completedTasks.map((task) => (
-          <div
-            className="completed-task-item"
-            key={task.id}
-          >
-            <span>{task.title}</span>
-            <span>完了</span>
-          </div>
-        ))}
+   {isShowingCompletedTasks && (
+  <div className="completed-task-list">
+    {completedTasks.map((task) => (
+      <div
+        className="completed-task-item"
+        key={task.id}
+      >
+        <div className="completed-task-info">
+          <span className="completed-task-title">
+            {task.title}
+          </span>
+
+          <span className="completed-task-status">
+            完了
+          </span>
+        </div>
+
+        <button
+          className="restore-task-button"
+          type="button"
+          onClick={() => restoreCompletedTask(task.id)}
+        >
+          未完了に戻す
+        </button>
       </div>
-    )}
+    ))}
   </div>
 )}
-
+      </div>
+    )}
     </section>
   )
 }
