@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import TaskList from './TaskList'
+import CourseTemplates from './CourseTemplates'
 import './App.css'
 
 const ENTRY_STORAGE_KEY = 'margin-entry'
@@ -129,6 +130,8 @@ function App() {
         </section>
 
          <TaskList />
+
+         <CourseTemplates />
 
         <section className="card">
           <div className="card-heading">

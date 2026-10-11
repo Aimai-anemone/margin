@@ -518,3 +518,66 @@ select.entry-input {
 .restore-task-button:active {
   transform: scale(0.98);
 }
+
+.course-templates {
+  display: grid;
+  gap: 20px;
+}
+
+.course-list {
+  display: grid;
+  gap: 12px;
+}
+
+.course-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #dfe3dc;
+  border-radius: 16px;
+  background: #fafbf8;
+}
+
+.course-list-item h3 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.course-list-item p {
+  margin: 4px 0 0;
+  color: #687067;
+  font-size: 0.9rem;
+}
+
+.course-list-item > span {
+  flex-shrink: 0;
+  color: #596259;
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+.course-editor {
+  display: grid;
+  gap: 18px;
+  padding-top: 4px;
+}
+
+.course-schedule-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .course-list-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .course-list-item > span {
+    text-align: left;
+  }
+}
