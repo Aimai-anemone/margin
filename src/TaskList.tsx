@@ -78,11 +78,16 @@ function TaskList() {
 const [isEditingSelectedTask, setIsEditingSelectedTask] =
   useState(false)
 
+const [isShowingCompletedTasks, setIsShowingCompletedTasks] =
+  useState(false)
+
   const activeTasks = tasks.filter(
   (task) => !task.completed,
 )
 
-
+const completedTasks = tasks.filter(
+  (task) => task.completed,
+)
 
 const sortedTasks = sortTasks(activeTasks)
 
@@ -630,6 +635,42 @@ function deleteSelectedTask() {
 </div>
         </div>
       )}
+
+{completedTasks.length > 0 && (
+  <div className="completed-tasks-section">
+    <button
+      className="completed-tasks-toggle"
+      type="button"
+      onClick={() =>
+        setIsShowingCompletedTasks(
+          (currentValue) => !currentValue,
+        )
+      }
+    >
+      <span>完了済み</span>
+
+      <span>
+        {completedTasks.length}件・
+        {isShowingCompletedTasks ? '閉じる' : '見る'}
+      </span>
+    </button>
+
+    {isShowingCompletedTasks && (
+      <div className="completed-task-list">
+        {completedTasks.map((task) => (
+          <div
+            className="completed-task-item"
+            key={task.id}
+          >
+            <span>{task.title}</span>
+            <span>完了</span>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
+
     </section>
   )
 }

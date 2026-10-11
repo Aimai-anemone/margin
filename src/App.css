@@ -437,3 +437,57 @@ select.entry-input {
 .complete-task-button:active {
   transform: scale(0.98);
 }
+
+.completed-tasks-section {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e2dc;
+}
+
+.completed-tasks-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 0;
+  border: 0;
+  background-color: transparent;
+  color: #585c54;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.completed-tasks-toggle:hover {
+  color: #304034;
+}
+
+.completed-task-list {
+  display: grid;
+  gap: 8px;
+}
+
+.completed-task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 13px;
+  border: 1px solid #e1e3dd;
+  border-radius: 11px;
+  background-color: #f5f6f3;
+  color: #71746d;
+  font-size: 13px;
+}
+
+.completed-task-item span:first-child {
+  text-decoration: line-through;
+}
+
+.completed-task-item span:last-child {
+  flex-shrink: 0;
+  color: #788078;
+  font-size: 12px;
+}
