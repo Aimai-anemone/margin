@@ -530,10 +530,9 @@ select.entry-input {
 }
 
 .course-list-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
   padding: 16px;
   border: 1px solid #dfe3dc;
   border-radius: 16px;
@@ -545,6 +544,9 @@ select.entry-input {
   font-size: 1rem;
   line-height: 1.5;
 }
+.course-list-item > div:first-child {
+  min-width: 0;
+}
 
 .course-list-item p {
   margin: 4px 0 0;
@@ -553,10 +555,9 @@ select.entry-input {
 }
 
 .course-list-item > span {
-  flex-shrink: 0;
   color: #596259;
   font-size: 0.85rem;
-  text-align: right;
+  text-align: left;
 }
 
 .course-editor {
@@ -571,13 +572,7 @@ select.entry-input {
   gap: 12px;
 }
 
-@media (max-width: 480px) {
-  .course-list-item {
-    align-items: flex-start;
-    flex-direction: column;
-  }
 
-  .course-list-item > span {
-    text-align: left;
-  }
+.course-list-item > button {
+  width: 100%;
 }
