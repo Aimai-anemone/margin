@@ -53,6 +53,8 @@ function CourseTemplates() {
 
   const [isAddingCourse, setIsAddingCourse] =
     useState(false)
+    const [editingCourseId, setEditingCourseId] =
+  useState<string | null>(null)
 
   function updateCourseDraft(
     field: keyof CourseDraft,
@@ -72,14 +74,45 @@ function CourseTemplates() {
       JSON.stringify(nextCourses),
     )
   }
+function startEditingCourse(course: Course) {
+  setCourseDraft({
+    name: course.name,
+    weekday: course.weekday,
+    period: course.period,
+    defaultFormat: course.defaultFormat,
+    defaultFirstStep: course.defaultFirstStep,
+  })
 
-  function addCourse() {
-    const cleanedName = courseDraft.name.trim()
+  setEditingCourseId(course.id)
+  setIsAddingCourse(true)
+}
 
-    if (cleanedName === '') {
-      return
-    }
+ function saveCourse() {
+  const cleanedName = courseDraft.name.trim()
 
+  if (cleanedName === '') {
+    return
+  }
+
+  if (editingCourseId !== null) {
+    const updatedCourses = courses.map((course) => {
+      if (course.id !== editingCourseId) {
+        return course
+      }
+
+      return {
+        ...course,
+        name: cleanedName,
+        weekday: courseDraft.weekday,
+        period: courseDraft.period,
+        defaultFormat: courseDraft.defaultFormat,
+        defaultFirstStep:
+          courseDraft.defaultFirstStep.trim(),
+      }
+    })
+
+    saveCourses(updatedCourses)
+  } else {
     const newCourse: Course = {
       id: crypto.randomUUID(),
       name: cleanedName,
@@ -91,12 +124,16 @@ function CourseTemplates() {
     }
 
     saveCourses([...courses, newCourse])
-    setCourseDraft(emptyCourse)
-    setIsAddingCourse(false)
   }
+
+  setCourseDraft(emptyCourse)
+  setEditingCourseId(null)
+  setIsAddingCourse(false)
+}
 
   function cancelAddingCourse() {
     setCourseDraft(emptyCourse)
+    setEditingCourseId(null)
     setIsAddingCourse(false)
   }
 
@@ -136,6 +173,13 @@ function CourseTemplates() {
               </div>
 
               <span>{course.defaultFormat}</span>
+              <button
+  className="secondary-button"
+  type="button"
+  onClick={() => startEditingCourse(course)}
+>
+  編集する
+</button>
             </div>
           ))}
         </div>
@@ -153,7 +197,12 @@ function CourseTemplates() {
           <button
             className="secondary-button"
             type="button"
-            onClick={() => setIsAddingCourse(true)}
+            onClick={() => {
+  setCourseDraft(emptyCourse)
+  setEditingCourseId(null)
+  setIsAddingCourse(true)
+}}
+
           >
             授業を追加
           </button>
@@ -304,7 +353,7 @@ function CourseTemplates() {
             <button
               className="primary-button"
               type="button"
-              onClick={addCourse}
+              onClick={saveCourse}
               disabled={courseDraft.name.trim() === ''}
             >
               保存する
