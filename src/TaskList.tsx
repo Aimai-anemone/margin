@@ -166,6 +166,29 @@ function cancelEditingSelectedTask() {
   setIsEditingSelectedTask(false)
 }
 
+function deleteSelectedTask() {
+  if (selectedTaskId === null) {
+    return
+  }
+
+  const shouldDelete = window.confirm(
+    'この課題を削除しますか？',
+  )
+
+  if (!shouldDelete) {
+    return
+  }
+
+  const remainingTasks = tasks.filter(
+    (task) => task.id !== selectedTaskId,
+  )
+
+  saveTasks(remainingTasks)
+  setSelectedTaskId(null)
+  setIsEditingSelectedTask(false)
+  setTaskDraft(emptyTask)
+}
+
   return (
     <section className="card">
       <div className="card-heading">
@@ -269,13 +292,25 @@ function cancelEditingSelectedTask() {
           '最初の入口は設定されていません。'}
       </p>
     </div>
-    <button
-  className="secondary-button"
-  type="button"
-  onClick={startEditingSelectedTask}
->
-  編集する
-</button>
+   {!isEditingSelectedTask && (
+    <div className="task-detail-actions">
+  <button
+    className="secondary-button"
+    type="button"
+    onClick={startEditingSelectedTask}
+  >
+    編集する
+  </button>
+
+  <button
+    className="delete-task-button"
+    type="button"
+    onClick={deleteSelectedTask}
+  >
+    削除する
+  </button>
+</div>
+)}
   </div>
 )}
 

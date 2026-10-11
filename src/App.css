@@ -385,3 +385,30 @@ select.entry-input {
   border-radius: 14px;
   background-color: #fcfcfa;
 }
+
+.task-detail-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.delete-task-button {
+  min-height: 48px;
+  padding: 11px 17px;
+  border: 1px solid #decfcd;
+  border-radius: 13px;
+  background-color: #fffafa;
+  color: #884944;
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.delete-task-button:hover {
+  border-color: #cfb7b4;
+  background-color: #fbf2f1;
+}
+
+.delete-task-button:active {
+  transform: scale(0.98);
+}
