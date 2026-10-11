@@ -1,6 +1,16 @@
 import { useState } from 'react'
 
 const TASKS_STORAGE_KEY = 'margin-tasks'
+const COURSES_STORAGE_KEY = 'margin-courses'
+
+type Course = {
+  id: string
+  name: string
+  weekday: string
+  period: string
+  defaultFormat: string
+  defaultFirstStep: string
+}
 
 type Task = {
   id: string
@@ -18,6 +28,27 @@ const emptyTask: TaskDraft = {
   deadline: '',
   format: '学校のWebシステム',
   firstStep: '',
+}
+function loadCourses(): Course[] {
+  const savedCourses = localStorage.getItem(
+    COURSES_STORAGE_KEY,
+  )
+
+  if (savedCourses === null) {
+    return []
+  }
+
+  try {
+    const parsedCourses = JSON.parse(savedCourses)
+
+    if (!Array.isArray(parsedCourses)) {
+      return []
+    }
+
+    return parsedCourses as Course[]
+  } catch {
+    return []
+  }
 }
 
 function loadTasks(): Task[] {
@@ -70,6 +101,10 @@ function sortTasks(tasks: Task[]) {
 
 function TaskList() {
   const [tasks, setTasks] = useState<Task[]>(loadTasks)
+  const [courses] = useState<Course[]>(loadCourses)
+const [selectedCourseId, setSelectedCourseId] =
+  useState('')
+
   const [taskDraft, setTaskDraft] = useState(emptyTask)
   const [isAddingTask, setIsAddingTask] = useState(false)
   const [selectedTaskId, setSelectedTaskId] =
@@ -103,7 +138,23 @@ const sortedTasks = sortTasks(activeTasks)
       [field]: value,
     }))
   }
+function selectCourse(courseId: string) {
+  setSelectedCourseId(courseId)
 
+  const selectedCourse = courses.find(
+    (course) => course.id === courseId,
+  )
+
+  if (selectedCourse === undefined) {
+    return
+  }
+
+  setTaskDraft((currentTask) => ({
+    ...currentTask,
+    format: selectedCourse.defaultFormat,
+    firstStep: selectedCourse.defaultFirstStep,
+  }))
+}
   function saveTasks(nextTasks: Task[]) {
   const sortedNextTasks = sortTasks(nextTasks)
 
@@ -133,6 +184,7 @@ function addTask() {
 
   saveTasks([...tasks, newTask])
   setTaskDraft(emptyTask)
+  setSelectedCourseId('')
   setIsAddingTask(false)
 }
 
@@ -529,6 +581,37 @@ function deleteSelectedTask() {
 
       {isAddingTask && (
         <div className="task-editor">
+          {courses.length > 0 && (
+  <div className="form-field">
+    <label
+      className="input-label"
+      htmlFor="new-task-course"
+    >
+      授業テンプレート
+    </label>
+
+    <select
+      id="new-task-course"
+      className="entry-input"
+      value={selectedCourseId}
+      onChange={(event) =>
+        selectCourse(event.target.value)
+      }
+    >
+      <option value="">授業を選択してください</option>
+
+      {courses.map((course) => (
+        <option
+          key={course.id}
+          value={course.id}
+        >
+          {course.name}（{course.weekday}・
+          {course.period}）
+        </option>
+      ))}
+    </select>
+  </div>
+)}
           <div className="form-field">
             <label
               className="input-label"
@@ -642,6 +725,7 @@ function deleteSelectedTask() {
     type="button"
     onClick={() => {
       setTaskDraft(emptyTask)
+      setSelectedCourseId('')
       setIsAddingTask(false)
     }}
   >
