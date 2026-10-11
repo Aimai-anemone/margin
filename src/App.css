@@ -377,3 +377,11 @@ select.entry-input {
   font-size: 13px;
   line-height: 1.5;
 }
+
+.selected-task-editor {
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid #d8dcd5;
+  border-radius: 14px;
+  background-color: #fcfcfa;
+}

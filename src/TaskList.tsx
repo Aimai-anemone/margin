@@ -69,6 +69,9 @@ function TaskList() {
   const [selectedTaskId, setSelectedTaskId] =
    useState<string | null>(null)
 
+const [isEditingSelectedTask, setIsEditingSelectedTask] =
+  useState(false)
+
   const sortedTasks = sortTasks(tasks)
 
   const selectedTask =
@@ -113,6 +116,54 @@ function addTask() {
   saveTasks([...tasks, newTask])
   setTaskDraft(emptyTask)
   setIsAddingTask(false)
+}
+
+function startEditingSelectedTask() {
+  if (selectedTask === null) {
+    return
+  }
+
+  setTaskDraft({
+    title: selectedTask.title,
+    deadline: selectedTask.deadline,
+    format: selectedTask.format,
+    firstStep: selectedTask.firstStep,
+  })
+
+  setIsEditingSelectedTask(true)
+}
+
+function saveEditedTask() {
+  if (selectedTaskId === null) {
+    return
+  }
+
+  const cleanedTitle = taskDraft.title.trim()
+
+  if (cleanedTitle === '') {
+    return
+  }
+
+  const updatedTasks = tasks.map((task) => {
+    if (task.id !== selectedTaskId) {
+      return task
+    }
+
+    return {
+      ...task,
+      title: cleanedTitle,
+      deadline: taskDraft.deadline,
+      format: taskDraft.format,
+      firstStep: taskDraft.firstStep.trim(),
+    }
+  })
+
+  saveTasks(updatedTasks)
+  setIsEditingSelectedTask(false)
+}
+
+function cancelEditingSelectedTask() {
+  setIsEditingSelectedTask(false)
 }
 
   return (
@@ -175,7 +226,11 @@ function addTask() {
       <button
         className="detail-close-button"
         type="button"
-        onClick={() => setSelectedTaskId(null)}
+        onClick={() => {
+  setSelectedTaskId(null)
+  setIsEditingSelectedTask(false)
+}}
+
       >
         閉じる
       </button>
@@ -213,6 +268,137 @@ function addTask() {
         {selectedTask.firstStep ||
           '最初の入口は設定されていません。'}
       </p>
+    </div>
+    <button
+  className="secondary-button"
+  type="button"
+  onClick={startEditingSelectedTask}
+>
+  編集する
+</button>
+  </div>
+)}
+
+{selectedTask && isEditingSelectedTask && (
+  <div className="task-editor selected-task-editor">
+    <p className="section-label">課題を編集</p>
+
+    <div className="form-field">
+      <label
+        className="input-label"
+        htmlFor="edit-task-title"
+      >
+        課題名
+      </label>
+
+      <input
+        id="edit-task-title"
+        className="entry-input"
+        type="text"
+        value={taskDraft.title}
+        onChange={(event) =>
+          updateTaskDraft(
+            'title',
+            event.target.value,
+          )
+        }
+        autoFocus
+      />
+    </div>
+
+    <div className="form-field">
+      <label
+        className="input-label"
+        htmlFor="edit-task-deadline"
+      >
+        締切
+      </label>
+
+      <input
+        id="edit-task-deadline"
+        className="entry-input"
+        type="datetime-local"
+        value={taskDraft.deadline}
+        onChange={(event) =>
+          updateTaskDraft(
+            'deadline',
+            event.target.value,
+          )
+        }
+      />
+    </div>
+
+    <div className="form-field">
+      <label
+        className="input-label"
+        htmlFor="edit-task-format"
+      >
+        課題の形式
+      </label>
+
+      <select
+        id="edit-task-format"
+        className="entry-input"
+        value={taskDraft.format}
+        onChange={(event) =>
+          updateTaskDraft(
+            'format',
+            event.target.value,
+          )
+        }
+      >
+        <option value="Word">Word</option>
+        <option value="PDFを読む">PDFを読む</option>
+
+        <option value="学校のWebシステム">
+          学校のWebシステム
+        </option>
+
+        <option value="紙">紙</option>
+        <option value="その他">その他</option>
+      </select>
+    </div>
+
+    <div className="form-field">
+      <label
+        className="input-label"
+        htmlFor="edit-task-first-step"
+      >
+        最初の入口
+      </label>
+
+      <input
+        id="edit-task-first-step"
+        className="entry-input"
+        type="text"
+        value={taskDraft.firstStep}
+        onChange={(event) =>
+          updateTaskDraft(
+            'firstStep',
+            event.target.value,
+          )
+        }
+        placeholder="例：課題ページを開いて設問を読む"
+      />
+    </div>
+
+    <div className="editor-actions">
+      <button
+        className="primary-button"
+        type="button"
+        onClick={saveEditedTask}
+        disabled={taskDraft.title.trim() === ''}
+      >
+        変更を保存する
+      </button>
+
+      <button
+        className="cancel-button"
+        type="button"
+        onClick={cancelEditingSelectedTask}
+      >
+        やめる
+      </button>
     </div>
   </div>
 )}
