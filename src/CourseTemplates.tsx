@@ -136,7 +136,27 @@ function startEditingCourse(course: Course) {
     setEditingCourseId(null)
     setIsAddingCourse(false)
   }
+function deleteCourse(course: Course) {
+  const shouldDelete = window.confirm(
+    `「${course.name}」を削除しますか？`,
+  )
 
+  if (!shouldDelete) {
+    return
+  }
+
+  const remainingCourses = courses.filter(
+    (savedCourse) => savedCourse.id !== course.id,
+  )
+
+  saveCourses(remainingCourses)
+
+  if (editingCourseId === course.id) {
+    setCourseDraft(emptyCourse)
+    setEditingCourseId(null)
+    setIsAddingCourse(false)
+  }
+}
   return (
     <section className="card course-templates">
       <div className="card-heading">
@@ -179,6 +199,13 @@ function startEditingCourse(course: Course) {
   onClick={() => startEditingCourse(course)}
 >
   編集する
+</button>
+<button
+  className="delete-task-button"
+  type="button"
+  onClick={() => deleteCourse(course)}
+>
+  削除する
 </button>
             </div>
           ))}
