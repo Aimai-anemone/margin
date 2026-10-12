@@ -576,3 +576,7 @@ select.entry-input {
 .course-list-item > button {
   width: 100%;
 }
+
+.data-backup > .secondary-button + .secondary-button {
+   margin-top: 5px; 
+}
