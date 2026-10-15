@@ -6,6 +6,7 @@ import {
 const ENTRY_STORAGE_KEY = 'margin-entry'
 const TASKS_STORAGE_KEY = 'margin-tasks'
 const COURSES_STORAGE_KEY = 'margin-courses'
+const LOOSE_PLANS_STORAGE_KEY = 'margin-loose-plans'
 
 type BackupData = {
   version: 1
@@ -13,6 +14,7 @@ type BackupData = {
   entry: string
   tasks: unknown[]
   courses: unknown[]
+  loosePlans?: unknown[]
 }
 
 function readSavedArray(storageKey: string): unknown[] {
@@ -75,6 +77,24 @@ function isValidCourse(value: unknown) {
   )
 }
 
+function isValidLoosePlan(value: unknown) {
+  if (!isRecord(value)) {
+    return false
+  }
+
+  return (
+    typeof value.id === 'string' &&
+    typeof value.title === 'string' &&
+    typeof value.date === 'string' &&
+    /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])$/.test(value.date) &&
+    (value.dayPeriod === 'morning' ||
+      value.dayPeriod === 'afternoon' ||
+      value.dayPeriod === 'evening') &&
+    typeof value.memo === 'string' &&
+    typeof value.completed === 'boolean'
+  )
+}
+
 function isValidBackupData(
   value: unknown,
 ): value is BackupData {
@@ -89,7 +109,10 @@ function isValidBackupData(
     Array.isArray(value.tasks) &&
     value.tasks.every(isValidTask) &&
     Array.isArray(value.courses) &&
-    value.courses.every(isValidCourse)
+    value.courses.every(isValidCourse) &&
+    (value.loosePlans === undefined ||
+      (Array.isArray(value.loosePlans) &&
+        value.loosePlans.every(isValidLoosePlan)))
   )
 }
 
@@ -101,6 +124,7 @@ function createBackupData(): BackupData {
       localStorage.getItem(ENTRY_STORAGE_KEY) ?? '',
     tasks: readSavedArray(TASKS_STORAGE_KEY),
     courses: readSavedArray(COURSES_STORAGE_KEY),
+    loosePlans: readSavedArray(LOOSE_PLANS_STORAGE_KEY),
   }
 }
 
@@ -164,7 +188,7 @@ async function restoreBackup(
     }
 
     const shouldRestore = window.confirm(
-      '現在の今日の入口、課題、授業テンプレートをバックアップの内容で置き換えますか？',
+      '現在の今日の入口、課題、授業テンプレート、ゆるい予定をバックアップの内容で置き換えますか？',
     )
 
     if (!shouldRestore) {
@@ -191,6 +215,11 @@ async function restoreBackup(
     localStorage.setItem(
       COURSES_STORAGE_KEY,
       JSON.stringify(parsedBackup.courses),
+    )
+
+    localStorage.setItem(
+      LOOSE_PLANS_STORAGE_KEY,
+      JSON.stringify(parsedBackup.loosePlans ?? []),
     )
 
     window.alert(
@@ -221,7 +250,7 @@ async function restoreBackup(
       </div>
 
       <p className="supporting-text">
-        今日の入口、課題、授業テンプレートを
+        今日の入口、課題、授業テンプレート、ゆるい予定を
         1つのファイルに保存します。
       </p>
 

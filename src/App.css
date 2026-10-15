@@ -735,3 +735,166 @@ select.entry-input {
   border-color: #9bab97;
   background-color: #e2ecde;
 }
+
+.loose-plan-closing-section {
+  display: grid;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.closing-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.loose-plan-panel {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.loose-plan-toggle,
+.loose-plan-add-button {
+  min-height: 38px;
+  border: 0;
+  background-color: transparent;
+  color: #466048;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.loose-plan-toggle {
+  padding: 7px 0;
+}
+
+.loose-plan-groups {
+  display: grid;
+  gap: 2px;
+}
+
+.loose-plan-group {
+  padding: 12px 0;
+  border-top: 1px solid #e4e6e1;
+}
+
+.loose-plan-group:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.loose-plan-group-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.loose-plan-group-heading h3 {
+  margin: 0;
+  color: #4f554d;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.loose-plan-add-button {
+  padding: 7px 2px;
+}
+
+.loose-plan-empty {
+  margin: 8px 0 0;
+  color: #979b93;
+  font-size: 13px;
+}
+
+.loose-plan-list {
+  display: grid;
+  gap: 7px;
+  margin-top: 9px;
+}
+
+.loose-plan-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  min-width: 0;
+  border: 1px solid #e0e3dd;
+  border-radius: 11px;
+  background-color: #fafbf8;
+}
+
+.loose-plan-complete-button {
+  min-width: 42px;
+  min-height: 44px;
+  border: 0;
+  border-right: 1px solid #e0e3dd;
+  background-color: transparent;
+  color: #536c55;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.loose-plan-title-button {
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  overflow: hidden;
+  border: 0;
+  background-color: transparent;
+  color: #343832;
+  font-size: 14px;
+  font-weight: 620;
+  line-height: 1.4;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.loose-plan-row.completed {
+  border-color: #e4e6e1;
+  background-color: #f6f7f4;
+}
+
+.loose-plan-row.completed .loose-plan-complete-button,
+.loose-plan-row.completed .loose-plan-title-button {
+  color: #858a81;
+}
+
+.loose-plan-row.completed .loose-plan-title-button {
+  text-decoration: line-through;
+}
+
+.loose-plan-editor {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid #d8dcd5;
+  border-radius: 14px;
+  background-color: #f8faf6;
+}
+
+.loose-plan-memo-input {
+  min-height: 104px;
+  resize: vertical;
+}
+
+.loose-plan-completed-field {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 38px;
+  color: #50554c;
+  font-size: 14px;
+}
+
+.loose-plan-completed-field input {
+  width: 18px;
+  height: 18px;
+}
+
+.loose-plan-delete-button {
+  width: 100%;
+}

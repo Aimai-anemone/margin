@@ -3,6 +3,13 @@ import TaskList from './TaskList'
 import CourseTemplates from './CourseTemplates'
 import DataBackup from './DataBackup'
 import WeeklySchedule from './WeeklySchedule'
+import LoosePlanPanel from './LoosePlans'
+import {
+  getLocalDate,
+  loadLoosePlans,
+  LOOSE_PLANS_STORAGE_KEY,
+  type LoosePlan,
+} from './LoosePlanStorage'
 import './App.css'
 
 const ENTRY_STORAGE_KEY = 'margin-entry'
@@ -17,6 +24,12 @@ function App() {
   const [entryDraft, setEntryDraft] = useState('')
   const [isEditingEntry, setIsEditingEntry] = useState(false)
   const [activeTab, setActiveTab] = useState<ActiveTab>('today')
+  const [loosePlans, setLoosePlans] = useState<LoosePlan[]>(
+    loadLoosePlans,
+  )
+
+  const todayDate = getLocalDate()
+  const tomorrowDate = getLocalDate(1)
 
   const today = new Intl.DateTimeFormat('ja-JP', {
     month: 'long',
@@ -52,6 +65,44 @@ function App() {
   localStorage.removeItem(ENTRY_STORAGE_KEY)
   setIsEditingEntry(false)
 }
+
+  function saveLoosePlans(nextPlans: LoosePlan[]) {
+    setLoosePlans(nextPlans)
+    localStorage.setItem(
+      LOOSE_PLANS_STORAGE_KEY,
+      JSON.stringify(nextPlans),
+    )
+  }
+
+  function saveLoosePlan(nextPlan: LoosePlan) {
+    const hasExistingPlan = loosePlans.some(
+      (plan) => plan.id === nextPlan.id,
+    )
+
+    saveLoosePlans(
+      hasExistingPlan
+        ? loosePlans.map((plan) =>
+            plan.id === nextPlan.id ? nextPlan : plan,
+          )
+        : [...loosePlans, nextPlan],
+    )
+  }
+
+  function deleteLoosePlan(planId: string) {
+    saveLoosePlans(
+      loosePlans.filter((plan) => plan.id !== planId),
+    )
+  }
+
+  function toggleLoosePlanComplete(planId: string) {
+    saveLoosePlans(
+      loosePlans.map((plan) =>
+        plan.id === planId
+          ? { ...plan, completed: !plan.completed }
+          : plan,
+      ),
+    )
+  }
 
   return (
     <div className="app">
@@ -141,6 +192,16 @@ function App() {
           )}
           </section>
 
+          <LoosePlanPanel
+            plans={loosePlans}
+            date={todayDate}
+            heading="今日のゆるい予定"
+            showAddButtons={false}
+            onSave={saveLoosePlan}
+            onDelete={deleteLoosePlan}
+            onToggleComplete={toggleLoosePlanComplete}
+          />
+
           <section className="card">
           <div className="card-heading">
             <div>
@@ -163,18 +224,30 @@ function App() {
           </button>
           </section>
 
-          <section className="closing-section">
-          <div>
+          <section className="closing-section loose-plan-closing-section">
+          <div className="closing-section-header">
+            <div>
             <p className="section-label">一日の終わり</p>
 
             <h2 className="closing-title">
               今日はまだ記録していません
             </h2>
+            </div>
+
+            <button className="text-button" type="button">
+              夜の観察を始める
+            </button>
           </div>
 
-          <button className="text-button" type="button">
-            夜の観察を始める
-          </button>
+          <LoosePlanPanel
+            plans={loosePlans}
+            date={tomorrowDate}
+            heading="明日のゆるい予定"
+            showAddButtons
+            onSave={saveLoosePlan}
+            onDelete={deleteLoosePlan}
+            onToggleComplete={toggleLoosePlanComplete}
+          />
           </section>
           </div>
         )}
@@ -201,7 +274,13 @@ function App() {
             role="region"
             aria-labelledby="weekly-tab"
           >
-            <WeeklySchedule />
+            <WeeklySchedule
+              loosePlans={loosePlans}
+              tomorrowDate={tomorrowDate}
+              onSaveLoosePlan={saveLoosePlan}
+              onDeleteLoosePlan={deleteLoosePlan}
+              onToggleLoosePlanComplete={toggleLoosePlanComplete}
+            />
           </div>
         )}
       </main>

@@ -1,17 +1,19 @@
 import { useState } from 'react'
+import LoosePlanPanel from './LoosePlans'
+import { type LoosePlan } from './LoosePlanStorage'
 
 const WEEKLY_SCHEDULES_STORAGE_KEY = 'margin-weekly-schedules'
 const HOUR_HEIGHT = 72
 const hours = Array.from({ length: 25 }, (_, hour) => hour)
 
 const weekdays = [
+  '日曜日',
   '月曜日',
   '火曜日',
   '水曜日',
   '木曜日',
   '金曜日',
   '土曜日',
-  '日曜日',
 ] as const
 
 type Weekday = (typeof weekdays)[number]
@@ -26,6 +28,14 @@ type TimedSchedule = {
 }
 
 type ScheduleDraft = Omit<TimedSchedule, 'id'>
+
+type WeeklyScheduleProps = {
+  loosePlans: LoosePlan[]
+  tomorrowDate: string
+  onSaveLoosePlan: (plan: LoosePlan) => void
+  onDeleteLoosePlan: (planId: string) => void
+  onToggleLoosePlanComplete: (planId: string) => void
+}
 
 const emptySchedule: ScheduleDraft = {
   title: '',
@@ -179,7 +189,13 @@ function positionOverlappingSchedules(
   return positionedSchedules
 }
 
-function WeeklySchedule() {
+function WeeklySchedule({
+  loosePlans,
+  tomorrowDate,
+  onSaveLoosePlan,
+  onDeleteLoosePlan,
+  onToggleLoosePlanComplete,
+}: WeeklyScheduleProps) {
   const [schedules, setSchedules] = useState<TimedSchedule[]>(
     loadSchedules,
   )
@@ -346,6 +362,18 @@ function WeeklySchedule() {
           </button>
         ))}
       </div>
+
+      <LoosePlanPanel
+        plans={loosePlans}
+        date={tomorrowDate}
+        heading="明日の予定"
+        showAddButtons={false}
+        collapsible
+        hideWhenEmpty
+        onSave={onSaveLoosePlan}
+        onDelete={onDeleteLoosePlan}
+        onToggleComplete={onToggleLoosePlanComplete}
+      />
 
       <button
         className="secondary-button weekly-add-button"
