@@ -2,11 +2,12 @@ import { useState } from 'react'
 import TaskList from './TaskList'
 import CourseTemplates from './CourseTemplates'
 import DataBackup from './DataBackup'
+import WeeklySchedule from './WeeklySchedule'
 import './App.css'
 
 const ENTRY_STORAGE_KEY = 'margin-entry'
 
-type ActiveTab = 'today' | 'tasks'
+type ActiveTab = 'today' | 'tasks' | 'weekly'
 
 function App() {
   const [entry, setEntry] = useState(() => {
@@ -192,6 +193,17 @@ function App() {
             <DataBackup />
           </div>
         )}
+
+        {activeTab === 'weekly' && (
+          <div
+            id="weekly-panel"
+            className="tab-panel"
+            role="region"
+            aria-labelledby="weekly-tab"
+          >
+            <WeeklySchedule />
+          </div>
+        )}
       </main>
 
       <nav
@@ -222,9 +234,16 @@ function App() {
           <span>課題</span>
         </button>
 
-        <button className="nav-item" type="button">
+        <button
+          id="weekly-tab"
+          className={`nav-item ${activeTab === 'weekly' ? 'active' : ''}`}
+          type="button"
+          aria-pressed={activeTab === 'weekly'}
+          aria-controls="weekly-panel"
+          onClick={() => setActiveTab('weekly')}
+        >
           <span className="nav-symbol">△</span>
-          <span>素描室</span>
+          <span>週間</span>
         </button>
 
         <button className="nav-item" type="button">

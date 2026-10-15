@@ -585,3 +585,153 @@ select.entry-input {
 .data-backup > .secondary-button + .secondary-button {
    margin-top: 5px; 
 }
+
+.weekly-schedule {
+  display: grid;
+  gap: 16px;
+}
+
+.weekday-picker {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.weekday-button {
+  min-height: 42px;
+  padding: 6px 2px;
+  border: 1px solid #d9ddd6;
+  border-radius: 11px;
+  background-color: #ffffff;
+  color: #60645c;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.weekday-button.active {
+  border-color: #526456;
+  background-color: #edf2ea;
+  color: #304034;
+}
+
+.weekly-add-button {
+  margin-top: -2px;
+}
+
+.weekly-editor {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid #d8dcd5;
+  border-radius: 14px;
+  background-color: #f8faf6;
+}
+
+.schedule-time-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.schedule-memo-input {
+  min-height: 104px;
+  resize: vertical;
+}
+
+.weekly-editor-error {
+  margin: 0;
+  color: #984b45;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.weekly-delete-button {
+  width: 100%;
+}
+
+.weekly-calendar {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #dfe3dc;
+  border-radius: 14px;
+  background-color: #fcfcfa;
+}
+
+.weekly-time-labels {
+  position: relative;
+  height: 1772px;
+  border-right: 1px solid #e2e5df;
+  background-color: #f7f8f5;
+}
+
+.weekly-time-label {
+  position: absolute;
+  right: 7px;
+  transform: translateY(-50%);
+  color: #81857d;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.weekly-time-label:first-child {
+  transform: translateY(0);
+}
+
+.weekly-time-grid {
+  position: relative;
+  height: 1772px;
+  background-color: #fcfcfa;
+}
+
+.weekly-time-line {
+  position: absolute;
+  right: 0;
+  left: 0;
+  border-top: 1px solid #eef0eb;
+}
+
+.weekly-schedule-block {
+  position: absolute;
+  z-index: 1;
+  left: 4px;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+  min-height: 44px;
+  width: calc(100% - 8px);
+  padding: 9px 10px;
+  overflow: hidden;
+  border: 1px solid #bfcbbc;
+  border-radius: 10px;
+  background-color: #eaf1e7;
+  color: #334535;
+  text-align: left;
+  cursor: pointer;
+}
+
+.weekly-schedule-block strong,
+.weekly-schedule-block span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.weekly-schedule-block strong {
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.weekly-schedule-block span {
+  color: #526456;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.weekly-schedule-block:hover {
+  border-color: #9bab97;
+  background-color: #e2ecde;
+}
