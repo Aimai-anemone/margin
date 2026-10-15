@@ -6,6 +6,8 @@ import './App.css'
 
 const ENTRY_STORAGE_KEY = 'margin-entry'
 
+type ActiveTab = 'today' | 'tasks'
+
 function App() {
   const [entry, setEntry] = useState(() => {
   return localStorage.getItem(ENTRY_STORAGE_KEY) ?? ''
@@ -13,6 +15,7 @@ function App() {
 
   const [entryDraft, setEntryDraft] = useState('')
   const [isEditingEntry, setIsEditingEntry] = useState(false)
+  const [activeTab, setActiveTab] = useState<ActiveTab>('today')
 
   const today = new Intl.DateTimeFormat('ja-JP', {
     month: 'long',
@@ -59,7 +62,14 @@ function App() {
       </header>
 
       <main className="main-content">
-        <section className="card primary-card">
+        {activeTab === 'today' && (
+          <div
+            id="today-panel"
+            className="tab-panel"
+            role="region"
+            aria-labelledby="today-tab"
+          >
+          <section className="card primary-card">
           <p className="section-label">今日の入口</p>
 
           {isEditingEntry ? (
@@ -128,15 +138,9 @@ function App() {
               </button>
             </>
           )}
-        </section>
+          </section>
 
-         <TaskList />
-
-         <CourseTemplates />
-
-         <DataBackup />
-
-        <section className="card">
+          <section className="card">
           <div className="card-heading">
             <div>
               <p className="section-label">帰宅後</p>
@@ -156,9 +160,9 @@ function App() {
           <button className="secondary-button" type="button">
             着手レーンを準備する
           </button>
-        </section>
+          </section>
 
-        <section className="closing-section">
+          <section className="closing-section">
           <div>
             <p className="section-label">一日の終わり</p>
 
@@ -170,16 +174,50 @@ function App() {
           <button className="text-button" type="button">
             夜の観察を始める
           </button>
-        </section>
+          </section>
+          </div>
+        )}
+
+        {activeTab === 'tasks' && (
+          <div
+            id="tasks-panel"
+            className="tab-panel"
+            role="region"
+            aria-labelledby="tasks-tab"
+          >
+            <TaskList />
+
+            <CourseTemplates />
+
+            <DataBackup />
+          </div>
+        )}
       </main>
 
-      <nav className="bottom-navigation">
-        <button className="nav-item active" type="button">
+      <nav
+        className="bottom-navigation"
+        aria-label="画面の切り替え"
+      >
+        <button
+          id="today-tab"
+          className={`nav-item ${activeTab === 'today' ? 'active' : ''}`}
+          type="button"
+          aria-pressed={activeTab === 'today'}
+          aria-controls="today-panel"
+          onClick={() => setActiveTab('today')}
+        >
           <span className="nav-symbol">●</span>
           <span>今日</span>
         </button>
 
-        <button className="nav-item" type="button">
+        <button
+          id="tasks-tab"
+          className={`nav-item ${activeTab === 'tasks' ? 'active' : ''}`}
+          type="button"
+          aria-pressed={activeTab === 'tasks'}
+          aria-controls="tasks-panel"
+          onClick={() => setActiveTab('tasks')}
+        >
           <span className="nav-symbol">□</span>
           <span>課題</span>
         </button>

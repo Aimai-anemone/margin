@@ -40,6 +40,11 @@ button {
   padding: 0 16px 32px;
 }
 
+.tab-panel {
+  display: grid;
+  gap: 14px;
+}
+
 .card {
   padding: 20px;
   border: 1px solid #dcddd7;
