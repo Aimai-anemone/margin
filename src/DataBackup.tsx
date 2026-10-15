@@ -3,6 +3,14 @@ import {
   useState,
   type ChangeEvent,
 } from 'react'
+import { isValidCourseBackup, parseCourse } from './CourseStorage'
+import {
+  TIMETABLE_SETTINGS_KEY,
+  createDefaultTimetableSettings,
+  isTimetableSettings,
+  loadTimetableSettings,
+  type TimetableSettings,
+} from './TimetableStorage'
 const ENTRY_STORAGE_KEY = 'margin-entry'
 const TASKS_STORAGE_KEY = 'margin-tasks'
 const COURSES_STORAGE_KEY = 'margin-courses'
@@ -15,6 +23,7 @@ type BackupData = {
   tasks: unknown[]
   courses: unknown[]
   loosePlans?: unknown[]
+  timetableSettings?: TimetableSettings
 }
 
 function readSavedArray(storageKey: string): unknown[] {
@@ -62,21 +71,6 @@ function isValidTask(value: unknown) {
   )
 }
 
-function isValidCourse(value: unknown) {
-  if (!isRecord(value)) {
-    return false
-  }
-
-  return (
-    typeof value.id === 'string' &&
-    typeof value.name === 'string' &&
-    typeof value.weekday === 'string' &&
-    typeof value.period === 'string' &&
-    typeof value.defaultFormat === 'string' &&
-    typeof value.defaultFirstStep === 'string'
-  )
-}
-
 function isValidLoosePlan(value: unknown) {
   if (!isRecord(value)) {
     return false
@@ -109,7 +103,8 @@ function isValidBackupData(
     Array.isArray(value.tasks) &&
     value.tasks.every(isValidTask) &&
     Array.isArray(value.courses) &&
-    value.courses.every(isValidCourse) &&
+    value.courses.every(isValidCourseBackup) &&
+    (value.timetableSettings === undefined || isTimetableSettings(value.timetableSettings)) &&
     (value.loosePlans === undefined ||
       (Array.isArray(value.loosePlans) &&
         value.loosePlans.every(isValidLoosePlan)))
@@ -117,14 +112,17 @@ function isValidBackupData(
 }
 
 function createBackupData(): BackupData {
+  const timetableSettings = loadTimetableSettings()
   return {
     version: 1,
     createdAt: new Date().toISOString(),
     entry:
       localStorage.getItem(ENTRY_STORAGE_KEY) ?? '',
     tasks: readSavedArray(TASKS_STORAGE_KEY),
-    courses: readSavedArray(COURSES_STORAGE_KEY),
+    courses: readSavedArray(COURSES_STORAGE_KEY).map((course) =>
+      parseCourse(course, timetableSettings.legacyAcademicYear) ?? course),
     loosePlans: readSavedArray(LOOSE_PLANS_STORAGE_KEY),
+    timetableSettings,
   }
 }
 
@@ -188,7 +186,7 @@ async function restoreBackup(
     }
 
     const shouldRestore = window.confirm(
-      '現在の今日の入口、課題、授業テンプレート、ゆるい予定をバックアップの内容で置き換えますか？',
+      '現在の今日の入口、課題、授業テンプレート、ゆるい予定、時間割設定をバックアップの内容で置き換えますか？',
     )
 
     if (!shouldRestore) {
@@ -197,6 +195,11 @@ async function restoreBackup(
       )
       return
     }
+
+    const restoredSettings = parsedBackup.timetableSettings ?? createDefaultTimetableSettings()
+    const restoredCourses = parsedBackup.courses.map((course) =>
+      parseCourse(course, restoredSettings.legacyAcademicYear),
+    )
 
     if (parsedBackup.entry === '') {
       localStorage.removeItem(ENTRY_STORAGE_KEY)
@@ -214,8 +217,10 @@ async function restoreBackup(
 
     localStorage.setItem(
       COURSES_STORAGE_KEY,
-      JSON.stringify(parsedBackup.courses),
+      JSON.stringify(restoredCourses),
     )
+
+    localStorage.setItem(TIMETABLE_SETTINGS_KEY, JSON.stringify(restoredSettings))
 
     localStorage.setItem(
       LOOSE_PLANS_STORAGE_KEY,
@@ -250,8 +255,12 @@ async function restoreBackup(
       </div>
 
       <p className="supporting-text">
-        今日の入口、課題、授業テンプレート、ゆるい予定を
+        今日の入口、課題、授業テンプレート、ゆるい予定、時間割設定を
         1つのファイルに保存します。
+      </p>
+
+      <p className="supporting-text data-storage-notice">
+        Marginのデータは、この端末のブラウザー内に保存されます。別の端末へ自動同期されません。ブラウザーのWebサイトデータを削除すると記録が消える可能性があるため、定期的にバックアップを保存してください。
       </p>
 
       <button

@@ -1,16 +1,12 @@
-import { useState } from 'react'
+import {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react'
+import { type Course } from './CourseStorage'
 
 const TASKS_STORAGE_KEY = 'margin-tasks'
-const COURSES_STORAGE_KEY = 'margin-courses'
-
-type Course = {
-  id: string
-  name: string
-  weekday: string
-  period: string
-  defaultFormat: string
-  defaultFirstStep: string
-}
 
 type Task = {
   id: string
@@ -29,28 +25,6 @@ const emptyTask: TaskDraft = {
   format: '学校のWebシステム',
   firstStep: '',
 }
-function loadCourses(): Course[] {
-  const savedCourses = localStorage.getItem(
-    COURSES_STORAGE_KEY,
-  )
-
-  if (savedCourses === null) {
-    return []
-  }
-
-  try {
-    const parsedCourses = JSON.parse(savedCourses)
-
-    if (!Array.isArray(parsedCourses)) {
-      return []
-    }
-
-    return parsedCourses as Course[]
-  } catch {
-    return []
-  }
-}
-
 function loadTasks(): Task[] {
   const savedTasks = localStorage.getItem(TASKS_STORAGE_KEY)
 
@@ -99,9 +73,17 @@ function sortTasks(tasks: Task[]) {
   })
 }
 
-function TaskList() {
+type TaskListProps = {
+  courses: Course[]
+}
+
+export type TaskListHandle = {
+  startAddingTaskForCourse: (course: Course) => void
+}
+
+const TaskList = forwardRef<TaskListHandle, TaskListProps>(
+  function TaskList({ courses }, ref) {
   const [tasks, setTasks] = useState<Task[]>(loadTasks)
-  const [courses] = useState<Course[]>(loadCourses)
 const [selectedCourseId, setSelectedCourseId] =
   useState('')
 
@@ -115,6 +97,9 @@ const [isEditingSelectedTask, setIsEditingSelectedTask] =
 
 const [isShowingCompletedTasks, setIsShowingCompletedTasks] =
   useState(false)
+  const taskFormRef = useRef<HTMLDivElement>(null)
+  const taskTitleRef = useRef<HTMLInputElement>(null)
+  const initialTaskDraftRef = useRef<TaskDraft>(emptyTask)
 
   const activeTasks = tasks.filter(
   (task) => !task.completed,
@@ -128,6 +113,43 @@ const sortedTasks = sortTasks(activeTasks)
 
   const selectedTask =
    tasks.find((task) => task.id === selectedTaskId) ?? null
+
+  function canReplaceTaskDraft() {
+    return !(isAddingTask || isEditingSelectedTask) ||
+      JSON.stringify(taskDraft) === JSON.stringify(initialTaskDraftRef.current) ||
+      window.confirm('入力中の課題の変更を破棄して、新しい課題フォームを開きますか？')
+  }
+
+  function startAddingTask(course?: Course) {
+      if (!canReplaceTaskDraft()) return
+      const nextDraft = {
+        ...emptyTask,
+        format: course?.defaultFormat ?? emptyTask.format,
+        firstStep: course?.defaultFirstStep ?? emptyTask.firstStep,
+      }
+      initialTaskDraftRef.current = nextDraft
+      setTaskDraft(nextDraft)
+      setSelectedCourseId(course?.id ?? '')
+      setSelectedTaskId(null)
+      setIsEditingSelectedTask(false)
+      setIsAddingTask(true)
+
+      requestAnimationFrame(() => {
+        taskTitleRef.current?.focus({ preventScroll: true })
+        taskFormRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        })
+      })
+  }
+
+  function startAddingTaskForCourse(course: Course) {
+    startAddingTask(course)
+  }
+
+  useImperativeHandle(ref, () => ({
+    startAddingTaskForCourse,
+  }))
 
   function updateTaskDraft(
     field: keyof TaskDraft,
@@ -155,6 +177,7 @@ function selectCourse(courseId: string) {
     firstStep: selectedCourse.defaultFirstStep,
   }))
 }
+
   function saveTasks(nextTasks: Task[]) {
   const sortedNextTasks = sortTasks(nextTasks)
 
@@ -193,12 +216,18 @@ function startEditingSelectedTask() {
     return
   }
 
-  setTaskDraft({
+  if (!canReplaceTaskDraft()) return
+
+  const nextDraft = {
     title: selectedTask.title,
     deadline: selectedTask.deadline,
     format: selectedTask.format,
     firstStep: selectedTask.firstStep,
-  })
+  }
+  initialTaskDraftRef.current = nextDraft
+  setTaskDraft(nextDraft)
+  setIsAddingTask(false)
+  setSelectedCourseId('')
 
   setIsEditingSelectedTask(true)
 }
@@ -572,7 +601,7 @@ function deleteSelectedTask() {
           <button
             className="secondary-button"
             type="button"
-            onClick={() => setIsAddingTask(true)}
+            onClick={() => startAddingTask()}
           >
             新しい課題を追加
           </button>
@@ -580,7 +609,7 @@ function deleteSelectedTask() {
       )}
 
       {isAddingTask && (
-        <div className="task-editor">
+        <div className="task-editor" ref={taskFormRef}>
           {courses.length > 0 && (
   <div className="form-field">
     <label
@@ -622,6 +651,7 @@ function deleteSelectedTask() {
 
             <input
               id="new-task-title"
+              ref={taskTitleRef}
               className="entry-input"
               type="text"
               value={taskDraft.title}
@@ -632,7 +662,6 @@ function deleteSelectedTask() {
                 )
               }
               placeholder="例：心理学リアクションペーパー"
-              autoFocus
             />
           </div>
 
@@ -786,6 +815,7 @@ function deleteSelectedTask() {
     )}
     </section>
   )
-}
+  },
+)
 
 export default TaskList

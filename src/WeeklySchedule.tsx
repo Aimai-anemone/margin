@@ -18,6 +18,16 @@ const weekdays = [
 
 type Weekday = (typeof weekdays)[number]
 
+const scheduleColors = [
+  { value: 'green', label: '緑' },
+  { value: 'red', label: '赤' },
+  { value: 'blue', label: '青' },
+  { value: 'amber', label: '琥珀' },
+  { value: 'purple', label: '紫' },
+] as const
+
+type ScheduleColor = (typeof scheduleColors)[number]['value']
+
 type TimedSchedule = {
   id: string
   title: string
@@ -25,16 +35,29 @@ type TimedSchedule = {
   startTime: string
   endTime: string
   memo: string
+  color: ScheduleColor
 }
 
 type ScheduleDraft = Omit<TimedSchedule, 'id'>
 
 type WeeklyScheduleProps = {
   loosePlans: LoosePlan[]
+  todayDate: string
   tomorrowDate: string
   onSaveLoosePlan: (plan: LoosePlan) => void
   onDeleteLoosePlan: (planId: string) => void
   onToggleLoosePlanComplete: (planId: string) => void
+}
+
+function getWeekdayForDate(dateText: string): Weekday {
+  const [yearText, monthText, dayText] = dateText.split('-')
+  const date = new Date(
+    Number(yearText),
+    Number(monthText) - 1,
+    Number(dayText),
+  )
+
+  return weekdays[date.getDay()]
 }
 
 const emptySchedule: ScheduleDraft = {
@@ -43,6 +66,11 @@ const emptySchedule: ScheduleDraft = {
   startTime: '09:00',
   endTime: '10:00',
   memo: '',
+  color: 'green',
+}
+
+function isScheduleColor(value: unknown): value is ScheduleColor {
+  return scheduleColors.some((color) => color.value === value)
 }
 
 function isTime(value: unknown): value is string {
@@ -82,6 +110,9 @@ function parseTimedSchedule(
     startTime: schedule.startTime,
     endTime: schedule.endTime,
     memo: typeof schedule.memo === 'string' ? schedule.memo : '',
+    color: isScheduleColor(schedule.color)
+      ? schedule.color
+      : 'green',
   }
 }
 
@@ -191,6 +222,7 @@ function positionOverlappingSchedules(
 
 function WeeklySchedule({
   loosePlans,
+  todayDate,
   tomorrowDate,
   onSaveLoosePlan,
   onDeleteLoosePlan,
@@ -217,6 +249,14 @@ function WeeklySchedule({
   const positionedSchedules = positionOverlappingSchedules(
     selectedSchedules,
   )
+  const todayWeekday = getWeekdayForDate(todayDate)
+  const tomorrowWeekday = getWeekdayForDate(tomorrowDate)
+  const loosePlanPanel =
+    selectedWeekday === todayWeekday
+      ? { date: todayDate, heading: '今日の予定' }
+      : selectedWeekday === tomorrowWeekday
+        ? { date: tomorrowDate, heading: '明日の予定' }
+        : null
 
   function saveSchedules(nextSchedules: TimedSchedule[]) {
     const sortedSchedules = sortSchedules(nextSchedules)
@@ -255,6 +295,7 @@ function WeeklySchedule({
       startTime: schedule.startTime,
       endTime: schedule.endTime,
       memo: schedule.memo,
+      color: schedule.color,
     })
     setEditingScheduleId(schedule.id)
     setScheduleError('')
@@ -291,6 +332,7 @@ function WeeklySchedule({
       startTime: scheduleDraft.startTime,
       endTime: scheduleDraft.endTime,
       memo: scheduleDraft.memo,
+      color: scheduleDraft.color,
     }
 
     const nextSchedules =
@@ -363,17 +405,18 @@ function WeeklySchedule({
         ))}
       </div>
 
-      <LoosePlanPanel
-        plans={loosePlans}
-        date={tomorrowDate}
-        heading="明日の予定"
-        showAddButtons={false}
-        collapsible
-        hideWhenEmpty
-        onSave={onSaveLoosePlan}
-        onDelete={onDeleteLoosePlan}
-        onToggleComplete={onToggleLoosePlanComplete}
-      />
+      {loosePlanPanel && (
+        <LoosePlanPanel
+          plans={loosePlans}
+          date={loosePlanPanel.date}
+          heading={loosePlanPanel.heading}
+          collapsible
+          stickyHeading
+          onSave={onSaveLoosePlan}
+          onDelete={onDeleteLoosePlan}
+          onToggleComplete={onToggleLoosePlanComplete}
+        />
+      )}
 
       <button
         className="secondary-button weekly-add-button"
@@ -465,6 +508,55 @@ function WeeklySchedule({
             </div>
           </div>
 
+          <div
+            className="schedule-color-field"
+            role="group"
+            aria-labelledby="schedule-color-label"
+          >
+            <span
+              id="schedule-color-label"
+              className="input-label schedule-color-label"
+            >
+              色
+            </span>
+            <div
+              className="schedule-color-options"
+            >
+              {scheduleColors.map((color) => {
+                const isSelected = scheduleDraft.color === color.value
+
+                return (
+                  <button
+                    key={color.value}
+                    className={`schedule-color-swatch schedule-color-swatch-${color.value} ${
+                      isSelected ? 'selected' : ''
+                    }`}
+                    type="button"
+                    aria-pressed={isSelected}
+                    aria-label={`予定の色：${color.label}${
+                      isSelected ? '（選択中）' : ''
+                    }`}
+                    onClick={() =>
+                      updateScheduleDraft('color', color.value)
+                    }
+                  >
+                    <span aria-hidden="true">
+                      {isSelected ? '✓' : ''}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+            <p className="schedule-color-selected">
+              選択中：
+              {
+                scheduleColors.find(
+                  (color) => color.value === scheduleDraft.color,
+                )?.label
+              }
+            </p>
+          </div>
+
           <div className="form-field">
             <label className="input-label" htmlFor="schedule-memo">
               メモ（任意）
@@ -545,7 +637,7 @@ function WeeklySchedule({
             return (
               <button
                 key={schedule.id}
-                className="weekly-schedule-block"
+                className={`weekly-schedule-block weekly-schedule-block-${schedule.color}`}
                 type="button"
                 style={{
                   top: `${(startMinutes / 60) * HOUR_HEIGHT}px`,

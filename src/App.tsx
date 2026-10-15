@@ -1,9 +1,9 @@
-import { useState } from 'react'
-import TaskList from './TaskList'
-import CourseTemplates from './CourseTemplates'
-import DataBackup from './DataBackup'
+import { useEffect, useState } from 'react'
+import TasksPage from './TasksPage'
 import WeeklySchedule from './WeeklySchedule'
 import LoosePlanPanel from './LoosePlans'
+import SettingsPage from './SettingsPage'
+import { TIMETABLE_SETTINGS_KEY, loadTimetableSettings, saveTimetableSettings, type TimetableSettings } from './TimetableStorage'
 import {
   getLocalDate,
   loadLoosePlans,
@@ -14,7 +14,7 @@ import './App.css'
 
 const ENTRY_STORAGE_KEY = 'margin-entry'
 
-type ActiveTab = 'today' | 'tasks' | 'weekly'
+type ActiveTab = 'today' | 'tasks' | 'weekly' | 'settings'
 
 function App() {
   const [entry, setEntry] = useState(() => {
@@ -24,6 +24,17 @@ function App() {
   const [entryDraft, setEntryDraft] = useState('')
   const [isEditingEntry, setIsEditingEntry] = useState(false)
   const [activeTab, setActiveTab] = useState<ActiveTab>('today')
+  const [timetableSettings, setTimetableSettings] = useState(loadTimetableSettings)
+  useEffect(() => {
+    if (localStorage.getItem(TIMETABLE_SETTINGS_KEY) === null) {
+      saveTimetableSettings(timetableSettings)
+    }
+  }, [timetableSettings])
+
+  function updateTimetableSettings(settings: TimetableSettings) {
+    saveTimetableSettings(settings)
+    setTimetableSettings(settings)
+  }
   const [loosePlans, setLoosePlans] = useState<LoosePlan[]>(
     loadLoosePlans,
   )
@@ -196,7 +207,7 @@ function App() {
             plans={loosePlans}
             date={todayDate}
             heading="今日のゆるい予定"
-            showAddButtons={false}
+            compact
             onSave={saveLoosePlan}
             onDelete={deleteLoosePlan}
             onToggleComplete={toggleLoosePlanComplete}
@@ -224,7 +235,7 @@ function App() {
           </button>
           </section>
 
-          <section className="closing-section loose-plan-closing-section">
+          <section className="card closing-section loose-plan-closing-section">
           <div className="closing-section-header">
             <div>
             <p className="section-label">一日の終わり</p>
@@ -243,7 +254,7 @@ function App() {
             plans={loosePlans}
             date={tomorrowDate}
             heading="明日のゆるい予定"
-            showAddButtons
+            compact
             onSave={saveLoosePlan}
             onDelete={deleteLoosePlan}
             onToggleComplete={toggleLoosePlanComplete}
@@ -259,11 +270,7 @@ function App() {
             role="region"
             aria-labelledby="tasks-tab"
           >
-            <TaskList />
-
-            <CourseTemplates />
-
-            <DataBackup />
+            <TasksPage settings={timetableSettings} onSettingsChange={updateTimetableSettings} />
           </div>
         )}
 
@@ -276,11 +283,23 @@ function App() {
           >
             <WeeklySchedule
               loosePlans={loosePlans}
+              todayDate={todayDate}
               tomorrowDate={tomorrowDate}
               onSaveLoosePlan={saveLoosePlan}
               onDeleteLoosePlan={deleteLoosePlan}
               onToggleLoosePlanComplete={toggleLoosePlanComplete}
             />
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div
+            id="settings-panel"
+            className="tab-panel"
+            role="region"
+            aria-labelledby="settings-tab"
+          >
+            <SettingsPage timetableSettings={timetableSettings} onSaveTimetableSettings={updateTimetableSettings} />
           </div>
         )}
       </main>
@@ -330,7 +349,16 @@ function App() {
           <span>記録</span>
         </button>
 
-        <button className="nav-item" type="button">
+        <button
+          id="settings-tab"
+          className={`nav-item ${
+            activeTab === 'settings' ? 'active' : ''
+          }`}
+          type="button"
+          aria-pressed={activeTab === 'settings'}
+          aria-controls="settings-panel"
+          onClick={() => setActiveTab('settings')}
+        >
           <span className="nav-symbol">○</span>
           <span>設定</span>
         </button>
