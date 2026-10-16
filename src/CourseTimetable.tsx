@@ -43,9 +43,6 @@ function CourseTimetable({
     course.academicYear === settings.academicYear && course.term === settings.term)
   const selectedCourse =
     termCourses.find((course) => course.id === selectedCourseId) ?? null
-  const selectedPeriodTime = selectedCourse && /^\d+限$/.test(selectedCourse.period)
-    ? settings.periods[Number.parseInt(selectedCourse.period, 10) - 1]
-    : undefined
   const placedCourses = termCourses.filter(
     (course) =>
       weekdays.some((weekday) => weekday.value === course.weekday) &&
@@ -138,9 +135,11 @@ function CourseTimetable({
               <div
                 className="course-timetable-period"
                 role="rowheader"
+                aria-label={`${period.label} ${period.startTime}から${period.endTime}`}
               >
                 <strong>{period.label}</strong>
                 <span>{period.startTime}</span>
+                <span className="course-timetable-time-separator" aria-hidden="true">～</span>
                 <span>{period.endTime}</span>
               </div>
               {weekdays.map((weekday) => {
@@ -228,32 +227,32 @@ function CourseTimetable({
             </button>
           </div>
 
-          <p className="course-timetable-detail-meta">
-            <span>{selectedCourse.academicYear}年度・{selectedCourse.term}学期</span>
-            <span>
-              {selectedCourse.weekday || '曜日未設定'}・{selectedCourse.period || '時限未設定'}
-              {selectedPeriodTime && ` · ${selectedPeriodTime.startTime}〜${selectedPeriodTime.endTime}`}
-            </span>
-          </p>
-
-          {selectedCourse.classroom && (
-            <div className="course-timetable-detail-row"><span>教室</span><strong>{selectedCourse.classroom}</strong></div>
-          )}
-          {selectedCourse.teacher && (
-            <div className="course-timetable-detail-row"><span>教員</span><strong>{selectedCourse.teacher}</strong></div>
-          )}
-
-          {selectedCourse.defaultFormat !== '' && (
-            <div className="course-timetable-detail-row">
-              <span>標準の課題形式</span>
-              <strong>{selectedCourse.defaultFormat}</strong>
-            </div>
-          )}
-
-          {selectedCourse.defaultFirstStep !== '' && (
-            <div className="course-timetable-detail-step">
-              <p className="section-label">標準の最初の入口</p>
-              <p>{selectedCourse.defaultFirstStep}</p>
+          {(selectedCourse.classroom || selectedCourse.teacher || selectedCourse.defaultFormat !== '' || selectedCourse.defaultFirstStep !== '') && (
+            <div className="course-timetable-detail-settings">
+              {selectedCourse.classroom && (
+                <div className="course-timetable-detail-setting">
+                  <span className="course-timetable-detail-label">教室</span>
+                  <span>{selectedCourse.classroom}</span>
+                </div>
+              )}
+              {selectedCourse.teacher && (
+                <div className="course-timetable-detail-setting">
+                  <span className="course-timetable-detail-label">教員</span>
+                  <span>{selectedCourse.teacher}</span>
+                </div>
+              )}
+              {selectedCourse.defaultFormat !== '' && (
+                <div className="course-timetable-detail-setting">
+                  <span className="course-timetable-detail-label">課題形式</span>
+                  <span>{selectedCourse.defaultFormat}</span>
+                </div>
+              )}
+              {selectedCourse.defaultFirstStep !== '' && (
+                <div className="course-timetable-detail-setting">
+                  <span className="course-timetable-detail-label">最初の入口</span>
+                  <span>{selectedCourse.defaultFirstStep}</span>
+                </div>
+              )}
             </div>
           )}
 

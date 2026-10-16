@@ -81,7 +81,7 @@ function LoosePlanPanel({
   onDelete,
   onToggleComplete,
 }: LoosePlanPanelProps) {
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(!collapsible)
   const [isShowingEditor, setIsShowingEditor] = useState(false)
   const [editingPlanId, setEditingPlanId] = useState<string | null>(
     null,

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import {
   MAX_PERIODS, isTimetableSettings, validatePeriodTimes,
   type DayMode, type TimetableSettings as Settings,
@@ -43,9 +43,9 @@ function TimetableSettings({ settings, onSave }: Props) {
       <p className="supporting-text">
         表示する曜日と時限を選びます。表示を減らしても、授業は残ります。
       </p>
-      <div className="course-schedule-fields">
-        <div className="form-field">
-          <label className="input-label" htmlFor="timetable-days">表示する曜日</label>
+      <div className="timetable-settings-controls">
+        <div className="form-field timetable-inline-field timetable-days-field">
+          <label className="input-label" htmlFor="timetable-days">表示曜日</label>
           <select id="timetable-days" className="entry-input" value={draft.dayMode}
             onChange={(event) => {
               setDraft({ ...draft, dayMode: event.target.value as DayMode })
@@ -56,7 +56,7 @@ function TimetableSettings({ settings, onSave }: Props) {
             <option value="weekend">平日＋土日</option>
           </select>
         </div>
-        <div className="form-field">
+        <div className="form-field timetable-inline-field timetable-count-field">
           <label className="input-label" htmlFor="timetable-count">時限数</label>
           <select id="timetable-count" className="entry-input" value={draft.periodCount}
             onChange={(event) => {
@@ -71,24 +71,30 @@ function TimetableSettings({ settings, onSave }: Props) {
       </div>
       <div className="timetable-period-settings">
         {draft.periods.slice(0, draft.periodCount).map((period, index) => (
-          <fieldset className="timetable-period-setting" key={index}>
-            <legend>{index + 1}限</legend>
-            <div className="course-schedule-fields">
-              {(['startTime', 'endTime'] as const).map((field) => (
-                <div className="form-field" key={field}>
-                  <label className="input-label" htmlFor={`period-${index}-${field}`}>
-                    {field === 'startTime' ? '開始時刻' : '終了時刻'}
+          <div className="timetable-period-setting" role="group"
+            aria-labelledby={`period-${index}-label`} key={index}>
+            <span className="timetable-period-label" id={`period-${index}-label`}>
+              {index + 1}限
+            </span>
+            <div className="timetable-period-values">
+              {(['startTime', 'endTime'] as const).map((field, fieldIndex) => (
+                <Fragment key={field}>
+                  {fieldIndex === 1 && <span className="timetable-period-separator" aria-hidden="true">～</span>}
+                  <label className="timetable-period-time-field">
+                    <span className="timetable-period-time-label">
+                      {index + 1}限の{field === 'startTime' ? '開始時刻' : '終了時刻'}
+                    </span>
+                    <input id={`period-${index}-${field}`} className="entry-input" type="time"
+                      value={period[field]} onChange={(event) => {
+                        setDraft({ ...draft, periods: draft.periods.map((item, i) =>
+                          i === index ? { ...item, [field]: event.target.value } : item) })
+                        setMessage('')
+                      }} />
                   </label>
-                  <input id={`period-${index}-${field}`} className="entry-input" type="time"
-                    value={period[field]} onChange={(event) => {
-                      setDraft({ ...draft, periods: draft.periods.map((item, i) =>
-                        i === index ? { ...item, [field]: event.target.value } : item) })
-                      setMessage('')
-                    }} />
-                </div>
+                </Fragment>
               ))}
             </div>
-          </fieldset>
+          </div>
         ))}
       </div>
       <p className="supporting-text">

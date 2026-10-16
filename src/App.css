@@ -563,11 +563,22 @@ select.entry-input {
 .course-timetable-scroll {
   min-width: 0;
   overflow-x: auto;
+  overflow-y: hidden;
   overscroll-behavior-x: contain;
   border: 1px solid #e0e2dc;
   border-radius: 14px;
   background-color: #f7f8f5;
+  scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+}
+
+.course-timetable-scroll::-webkit-scrollbar,
+.course-timetable-cell::-webkit-scrollbar {
+  display: none;
+}
+
+.course-timetable-weekdays-only {
+  overflow-x: hidden;
 }
 
 .course-timetable-grid {
@@ -575,15 +586,14 @@ select.entry-input {
   width: 100%;
   min-width: 0;
   gap: 1px;
-  background-color: #e3e5df;
+  background-color: #fcfcfa;
 }
 
 .course-timetable-grid-row {
   display: contents;
 }
 
-.course-timetable-selection,
-.timetable-settings .course-schedule-fields {
+.course-timetable-selection {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -593,11 +603,88 @@ select.entry-input {
   min-width: 0;
 }
 
+.course-timetable .course-timetable-selection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.course-timetable-selection .form-field {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  flex: 1 1 140px;
+  align-items: center;
+  gap: 6px;
+}
+
+.course-timetable-selection .input-label {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.course-timetable-selection .entry-input {
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
 .timetable-settings,
 .timetable-period-settings {
   display: grid;
   min-width: 0;
+}
+
+.timetable-settings {
   gap: 14px;
+}
+
+.timetable-period-settings {
+  gap: 8px;
+}
+
+.timetable-settings-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  min-width: 0;
+}
+
+.timetable-settings .timetable-inline-field {
+  grid-template-columns: max-content auto;
+  align-items: center;
+  gap: 5px;
+}
+
+.timetable-inline-field .input-label {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.timetable-days-field {
+  flex: 1 1 168px;
+}
+
+.timetable-count-field {
+  flex: 0 1 116px;
+}
+
+.timetable-inline-field .entry-input {
+  width: auto;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.timetable-days-field .entry-input {
+  width: 124px;
+}
+
+.timetable-count-field .entry-input {
+  width: 78px;
 }
 
 .timetable-settings .supporting-text {
@@ -605,17 +692,64 @@ select.entry-input {
 }
 
 .timetable-period-setting {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
   min-width: 0;
   margin: 0;
-  padding: 12px;
-  border: 1px solid #e0e2dc;
-  border-radius: 12px;
+  padding: 0;
+  border: 0;
+  background-color: transparent;
 }
 
-.timetable-period-setting legend {
-  padding: 0 4px;
+.timetable-period-label {
   color: #62675f;
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.timetable-period-values {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.timetable-period-time-field {
+  display: block;
+  min-width: 0;
+}
+
+.timetable-period-time-field .entry-input {
+  min-width: 0;
+  min-height: 44px;
+  padding: 7px 5px;
   font-size: 14px;
+}
+
+.timetable-period-time-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.timetable-period-separator {
+  color: #858a81;
+  font-size: 13px;
+}
+
+@media (max-width: 340px) {
+  .timetable-period-setting {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .course-timetable-corner,
@@ -623,7 +757,11 @@ select.entry-input {
 .course-timetable-period {
   display: grid;
   min-width: 0;
+  margin-right: -1px;
+  margin-bottom: -1px;
   padding: 8px 2px;
+  border-right: 1px solid #e2e4de;
+  border-bottom: 1px solid #e2e4de;
   color: #666b63;
   font-size: 12px;
   font-weight: 650;
@@ -631,8 +769,8 @@ select.entry-input {
 }
 
 .course-timetable-period {
-  align-content: start;
-  gap: 4px;
+  align-content: center;
+  gap: 2px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -643,6 +781,18 @@ select.entry-input {
 .course-timetable-period span {
   font-size: 9px;
   font-weight: 400;
+}
+
+.course-timetable-period .course-timetable-time-separator {
+  display: grid;
+  width: 9px;
+  height: 9px;
+  place-items: center;
+  color: #92978f;
+  font-size: 8px;
+  line-height: 1;
+  transform: rotate(90deg);
+  transform-origin: center;
 }
 
 .course-timetable-corner,
@@ -668,10 +818,11 @@ select.entry-input {
   min-width: 0;
   min-height: 0;
   height: 100%;
-  padding: 3px;
+  padding: 0;
   overflow-x: hidden;
   overflow-y: auto;
   background-color: #fcfcfa;
+  scrollbar-width: none;
 }
 
 .course-timetable-cell:not(.course-timetable-cell-multiple) {
@@ -690,7 +841,7 @@ select.entry-input {
   overflow: hidden;
   overflow-wrap: anywhere;
   border: 1px solid #cfd9ca;
-  border-radius: 9px;
+  border-radius: 7px;
   background-color: #edf3e9;
   color: #354736;
   font-size: 12px;
@@ -706,7 +857,7 @@ select.entry-input {
 
 .course-timetable-cell-multiple {
   overscroll-behavior-y: contain;
-  scrollbar-width: thin;
+  scrollbar-width: none;
 }
 
 .course-timetable-course-name {
@@ -745,8 +896,8 @@ select.entry-input {
   min-height: 0;
   padding: 4px;
   place-items: center;
-  border: 1px dashed #dce2d6;
-  border-radius: 9px;
+  border: 0;
+  border-radius: 7px;
   background-color: #f8faf6;
   cursor: pointer;
 }
@@ -813,8 +964,8 @@ select.entry-input {
 
 .course-timetable-detail {
   display: grid;
-  gap: 8px;
-  padding: 13px;
+  gap: 7px;
+  padding: 12px;
   border: 1px solid #d8dcd5;
   border-radius: 14px;
   background-color: #f8faf6;
@@ -842,8 +993,9 @@ select.entry-input {
 .course-timetable-detail-heading h3 {
   margin: 0;
   color: #2d332d;
-  font-size: 16px;
-  line-height: 1.35;
+  font-size: 18px;
+  font-weight: 650;
+  line-height: 1.4;
 }
 
 .course-timetable-detail .detail-close-button {
@@ -862,47 +1014,36 @@ select.entry-input {
   margin-bottom: 3px;
 }
 
-.course-timetable-detail-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 12px;
-  min-width: 0;
-  margin: 0;
-  color: #697068;
-  font-size: 13px;
-  line-height: 1.4;
+.course-timetable-detail-label {
+  margin-right: 5px;
+  color: #747970;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
-.course-timetable-detail-row {
+.course-timetable-detail-settings {
   display: grid;
-  grid-template-columns: max-content minmax(0, 1fr);
-  gap: 7px;
-  color: #62675f;
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-.course-timetable-detail-row strong {
-  color: #30352e;
-  font-weight: 650;
-}
-
-.course-timetable-detail-step {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 3px 8px;
+  gap: 6px;
   min-width: 0;
+  padding-top: 2px;
 }
 
-.course-timetable-detail-step .section-label,
-.course-timetable-detail-step p:last-child {
-  margin: 0;
-}
-
-.course-timetable-detail-step p:last-child {
-  color: #42483f;
+.course-timetable-detail-setting {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  color: #3f453e;
   font-size: 13px;
+  font-weight: 400;
   line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.course-timetable-detail-setting .course-timetable-detail-label {
+  margin-right: 0;
 }
 
 .course-timetable-detail-actions {
@@ -917,6 +1058,14 @@ select.entry-input {
 
 .course-timetable-detail-actions .delete-task-button {
   grid-column: auto;
+}
+
+.course-timetable-detail-actions .primary-button,
+.course-timetable-detail-actions .secondary-button,
+.course-timetable-detail-actions .delete-task-button {
+  min-height: 44px;
+  padding: 8px 10px;
+  font-size: 13px;
 }
 
 .course-list {
@@ -1009,6 +1158,15 @@ select.entry-input {
 .weekly-schedule {
   display: grid;
   gap: 16px;
+}
+
+.weekly-schedule-intro {
+  display: grid;
+  gap: 5px;
+}
+
+.weekly-schedule-intro > .supporting-text {
+  margin: 0;
 }
 
 .weekday-picker {

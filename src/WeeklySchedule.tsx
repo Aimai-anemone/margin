@@ -372,18 +372,20 @@ function WeeklySchedule({
 
   return (
     <section className="card weekly-schedule">
-      <div className="card-heading">
-        <div>
-          <p className="section-label">毎週の予定</p>
-          <h2 className="card-title">週間</h2>
+      <div className="weekly-schedule-intro">
+        <div className="card-heading">
+          <div>
+            <p className="section-label">毎週の予定</p>
+            <h2 className="card-title">週間</h2>
+          </div>
+
+          <span className="badge">{selectedSchedules.length}件</span>
         </div>
 
-        <span className="badge">{selectedSchedules.length}件</span>
+        <p className="supporting-text">
+          曜日ごとの予定を、時間の流れに沿って見渡せます。
+        </p>
       </div>
-
-      <p className="supporting-text">
-        曜日ごとの予定を、時間の流れに沿って見渡せます。
-      </p>
 
       <div
         className="weekday-picker"
@@ -407,6 +409,7 @@ function WeeklySchedule({
 
       {loosePlanPanel && (
         <LoosePlanPanel
+          key={loosePlanPanel.date}
           plans={loosePlans}
           date={loosePlanPanel.date}
           heading={loosePlanPanel.heading}
