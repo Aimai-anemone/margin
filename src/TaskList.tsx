@@ -5,17 +5,7 @@ import {
   useState,
 } from 'react'
 import { type Course } from './CourseStorage'
-
-const TASKS_STORAGE_KEY = 'margin-tasks'
-
-type Task = {
-  id: string
-  title: string
-  deadline: string
-  format: string
-  firstStep: string
-  completed: boolean
-}
+import { TASKS_STORAGE_KEY, loadTasks, sortTasks, type Task } from './TaskStorage'
 
 type TaskDraft = Omit<Task, 'id' | 'completed'>
 
@@ -25,54 +15,6 @@ const emptyTask: TaskDraft = {
   format: '学校のWebシステム',
   firstStep: '',
 }
-function loadTasks(): Task[] {
-  const savedTasks = localStorage.getItem(TASKS_STORAGE_KEY)
-
-  if (savedTasks === null) {
-    return []
-  }
-
-  try {
-    const parsedTasks = JSON.parse(savedTasks)
-
-    if (!Array.isArray(parsedTasks)) {
-      return []
-    }
-
-    return parsedTasks.map((task) => ({
-  ...task,
-  completed: task.completed ?? false,
-})) as Task[]
-  } catch {
-    localStorage.removeItem(TASKS_STORAGE_KEY)
-    return []
-  }
-}
-
-function sortTasks(tasks: Task[]) {
-  return [...tasks].sort((firstTask, secondTask) => {
-    if (
-      firstTask.deadline === '' &&
-      secondTask.deadline === ''
-    ) {
-      return 0
-    }
-
-    if (firstTask.deadline === '') {
-      return 1
-    }
-
-    if (secondTask.deadline === '') {
-      return -1
-    }
-
-    return (
-      new Date(firstTask.deadline).getTime() -
-      new Date(secondTask.deadline).getTime()
-    )
-  })
-}
-
 type TaskListProps = {
   courses: Course[]
 }

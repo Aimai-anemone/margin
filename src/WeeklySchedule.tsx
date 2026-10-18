@@ -41,6 +41,7 @@ type TimedSchedule = {
 type ScheduleDraft = Omit<TimedSchedule, 'id'>
 
 type WeeklyScheduleProps = {
+  startHour: number
   loosePlans: LoosePlan[]
   todayDate: string
   tomorrowDate: string
@@ -154,6 +155,22 @@ function timeToMinutes(time: string) {
   return Number(hourText) * 60 + Number(minuteText)
 }
 
+function displaySegments(schedule: TimedSchedule, startHour: number) {
+  const axisStart = startHour * 60
+  const start = timeToMinutes(schedule.startTime)
+  const end = timeToMinutes(schedule.endTime)
+
+  if (start < axisStart && end > axisStart) {
+    return [
+      { startMinutes: 0, endMinutes: end - axisStart },
+      { startMinutes: start + 1440 - axisStart, endMinutes: 1440 },
+    ]
+  }
+
+  const offset = start >= axisStart ? -axisStart : 1440 - axisStart
+  return [{ startMinutes: start + offset, endMinutes: end + offset }]
+}
+
 type SchedulePosition = {
   schedule: TimedSchedule
   column: number
@@ -221,6 +238,7 @@ function positionOverlappingSchedules(
 }
 
 function WeeklySchedule({
+  startHour,
   loosePlans,
   todayDate,
   tomorrowDate,
@@ -232,7 +250,7 @@ function WeeklySchedule({
     loadSchedules,
   )
   const [selectedWeekday, setSelectedWeekday] =
-    useState<Weekday>('月曜日')
+    useState<Weekday>(() => getWeekdayForDate(todayDate))
   const [scheduleDraft, setScheduleDraft] =
     useState<ScheduleDraft>(emptySchedule)
   const [isShowingEditor, setIsShowingEditor] =
@@ -345,7 +363,6 @@ function WeeklySchedule({
           )
 
     saveSchedules(nextSchedules)
-    setSelectedWeekday(nextSchedule.weekday)
     cancelEditingSchedule()
   }
 
@@ -617,7 +634,7 @@ function WeeklySchedule({
               className="weekly-time-label"
               style={{ top: `${hour * HOUR_HEIGHT}px` }}
             >
-              {`${hour}`.padStart(2, '0')}:00
+              {`${hour === 24 && startHour === 0 ? 24 : (startHour + hour) % 24}`.padStart(2, '0')}:00
             </span>
           ))}
         </div>
@@ -631,21 +648,17 @@ function WeeklySchedule({
             />
           ))}
 
-          {positionedSchedules.map((position) => {
+          {positionedSchedules.flatMap((position) => {
             const { schedule } = position
-            const startMinutes = timeToMinutes(schedule.startTime)
-            const durationMinutes =
-              timeToMinutes(schedule.endTime) - startMinutes
-
-            return (
+            return displaySegments(schedule, startHour).map((segment, index) => (
               <button
-                key={schedule.id}
+                key={`${schedule.id}-${index}`}
                 className={`weekly-schedule-block weekly-schedule-block-${schedule.color}`}
                 type="button"
                 style={{
-                  top: `${(startMinutes / 60) * HOUR_HEIGHT}px`,
+                  top: `${(segment.startMinutes / 60) * HOUR_HEIGHT}px`,
                   height: `${Math.max(
-                    (durationMinutes / 60) * HOUR_HEIGHT,
+                    ((segment.endMinutes - segment.startMinutes) / 60) * HOUR_HEIGHT,
                     44,
                   )}px`,
                   left: `calc(${(position.column / position.columnCount) * 100}% + 4px)`,
@@ -659,7 +672,7 @@ function WeeklySchedule({
                   {schedule.startTime}〜{schedule.endTime}
                 </span>
               </button>
-            )
+            ))
           })}
         </div>
       </div>
