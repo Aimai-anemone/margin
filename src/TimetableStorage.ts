@@ -14,6 +14,11 @@ export type TimetableSettings = {
   academicYear: number
   term: Term
   legacyAcademicYear: number
+  weeklyStartHour?: number
+}
+
+export function isWeeklyStartHour(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 23
 }
 
 export function getAcademicYear(date = new Date()) {
@@ -41,6 +46,7 @@ export function createDefaultTimetableSettings(): TimetableSettings {
     academicYear: getAcademicYear(),
     term: 1,
     legacyAcademicYear: getAcademicYear(),
+    weeklyStartHour: 0,
   }
 }
 
@@ -75,6 +81,7 @@ export function isTimetableSettings(value: unknown): value is TimetableSettings 
     Number(settings.periodCount) < 1 || Number(settings.periodCount) > MAX_PERIODS ||
     !isAcademicYear(settings.academicYear) || !isTerm(settings.term) ||
     !isAcademicYear(settings.legacyAcademicYear) ||
+    (settings.weeklyStartHour !== undefined && !isWeeklyStartHour(settings.weeklyStartHour)) ||
     !Array.isArray(settings.periods) || settings.periods.length !== MAX_PERIODS
   ) return false
   for (const period of settings.periods) {
@@ -88,7 +95,14 @@ export function isTimetableSettings(value: unknown): value is TimetableSettings 
 export function loadTimetableSettings(): TimetableSettings {
   try {
     const value: unknown = JSON.parse(localStorage.getItem(TIMETABLE_SETTINGS_KEY) ?? 'null')
-    if (isTimetableSettings(value)) return value
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      const saved = value as Record<string, unknown>
+      const normalized = {
+        ...saved,
+        weeklyStartHour: isWeeklyStartHour(saved.weeklyStartHour) ? saved.weeklyStartHour : 0,
+      }
+      if (isTimetableSettings(normalized)) return normalized
+    }
   } catch { /* 保存内容を消さず、既定値で表示する。 */ }
   return createDefaultTimetableSettings()
 }

@@ -5,6 +5,10 @@ import {
 } from 'react'
 import { isValidCourseBackup, parseCourse } from './CourseStorage'
 import {
+  hasFiveMinuteCounts, isFiveMinuteCounts, readFiveMinuteCounts, restoreFiveMinuteCounts,
+  type FiveMinuteCount,
+} from './FiveMinuteStorage'
+import {
   DAILY_RECORDS_STORAGE_KEY,
   isDailyRecords,
   readDailyRecords,
@@ -34,6 +38,7 @@ type BackupData = {
   timetableSettings?: TimetableSettings
   dailyRecords?: DailyRecord[]
   weeklySchedules?: unknown[]
+  fiveMinuteStarts?: FiveMinuteCount[]
 }
 
 function readSavedArray(storageKey: string, rejectInvalid = false): unknown[] {
@@ -138,6 +143,7 @@ function isValidBackupData(
       (Array.isArray(value.loosePlans) &&
         value.loosePlans.every(isValidLoosePlan))) &&
     (value.dailyRecords === undefined || isDailyRecords(value.dailyRecords)) &&
+    (value.fiveMinuteStarts === undefined || isFiveMinuteCounts(value.fiveMinuteStarts)) &&
     (value.weeklySchedules === undefined ||
       (Array.isArray(value.weeklySchedules) && value.weeklySchedules.every(isValidWeeklySchedule)))
   )
@@ -157,6 +163,7 @@ function createBackupData(): BackupData {
     timetableSettings,
     dailyRecords: readDailyRecords(),
     weeklySchedules: readSavedArray(WEEKLY_SCHEDULES_STORAGE_KEY, true),
+    fiveMinuteStarts: readFiveMinuteCounts(),
   }
 }
 
@@ -229,8 +236,11 @@ async function restoreBackup(
     if (parsedBackup.weeklySchedules === undefined && readSavedArray(WEEKLY_SCHEDULES_STORAGE_KEY).length > 0) {
       warnings.push('このバックアップには週間予定が含まれていません。復元すると、現在この端末に保存されている週間予定は削除されます。')
     }
+    if (parsedBackup.fiveMinuteStarts === undefined && hasFiveMinuteCounts()) {
+      warnings.push('このバックアップには5分の着手記録が含まれていません。復元すると、現在この端末に保存されている着手回数は削除されます。')
+    }
     const shouldRestore = window.confirm([
-      '現在の今日の入口、課題、授業テンプレート、ゆるい予定、時間割設定、一日の記録、週間予定をバックアップの内容で置き換えますか？',
+      '現在の今日の入口、課題、授業テンプレート、ゆるい予定、時間割設定、一日の記録、週間予定、5分の着手回数をバックアップの内容で置き換えますか？\n進行中の5分タイマーは終了します。',
       ...warnings,
     ].join('\n\n'))
 
@@ -273,6 +283,7 @@ async function restoreBackup(
     )
 
     writeDailyRecords(parsedBackup.dailyRecords ?? [])
+    restoreFiveMinuteCounts(parsedBackup.fiveMinuteStarts ?? [])
     localStorage.setItem(
       WEEKLY_SCHEDULES_STORAGE_KEY,
       JSON.stringify(parsedBackup.weeklySchedules ?? []),
@@ -306,7 +317,7 @@ async function restoreBackup(
       </div>
 
       <p className="supporting-text">
-        今日の入口、課題、授業テンプレート、ゆるい予定、時間割設定、一日の記録、週間予定を
+        今日の入口、課題、授業テンプレート、ゆるい予定、時間割設定、一日の記録、週間予定、5分の着手回数を
         1つのファイルに保存します。
       </p>
 

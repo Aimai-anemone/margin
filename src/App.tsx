@@ -5,6 +5,8 @@ import LoosePlanPanel from './LoosePlans'
 import SettingsPage from './SettingsPage'
 import EndOfDay from './EndOfDay'
 import RecordsPage from './RecordsPage'
+import FiveMinuteStart from './FiveMinuteStart'
+import { useFiveMinuteStart } from './useFiveMinuteStart'
 import { deleteDailyRecord, loadDailyRecords, saveDailyRecord, type DailyRecordInput } from './DailyRecordStorage'
 import { TIMETABLE_SETTINGS_KEY, loadTimetableSettings, saveTimetableSettings, type TimetableSettings } from './TimetableStorage'
 import {
@@ -28,6 +30,8 @@ function App() {
   const [isEditingEntry, setIsEditingEntry] = useState(false)
   const [activeTab, setActiveTab] = useState<ActiveTab>('today')
   const [endOfDayDate, setEndOfDayDate] = useState<string | null>(null)
+  const [isShowingFiveMinute, setIsShowingFiveMinute] = useState(false)
+  const fiveMinute = useFiveMinuteStart()
   const [dailyRecordState, setDailyRecordState] = useState(loadDailyRecords)
   const [timetableSettings, setTimetableSettings] = useState(loadTimetableSettings)
   useEffect(() => {
@@ -47,6 +51,7 @@ function App() {
   const todayDate = getLocalDate()
   const tomorrowDate = getLocalDate(1)
   const todaysRecord = dailyRecordState.records.find((record) => record.date === todayDate)
+  const fiveMinuteCount = fiveMinute.state.counts.find((item) => item.date === fiveMinute.today)?.count ?? 0
 
   const today = new Intl.DateTimeFormat('ja-JP', {
     month: 'long',
@@ -123,6 +128,7 @@ function App() {
 
   function selectTab(tab: ActiveTab) {
     setEndOfDayDate(null)
+    setIsShowingFiveMinute(false)
     if (tab === 'records') reloadRecords()
     setActiveTab(tab)
   }
@@ -154,6 +160,18 @@ function App() {
     window.scrollTo({ top: 0 })
   }
 
+  function openFiveMinute() {
+    setEndOfDayDate(null)
+    setIsShowingFiveMinute(true)
+    void fiveMinute.refresh()
+    window.scrollTo({ top: 0 })
+  }
+
+  function closeFiveMinute() {
+    setIsShowingFiveMinute(false)
+    window.scrollTo({ top: 0 })
+  }
+
   function saveTodaysRecord(record: DailyRecordInput) {
     if (record.date !== getLocalDate()) {
       throw new Error('日付が変わりました。一日の終わりを開き直してください。')
@@ -179,7 +197,9 @@ function App() {
             role="region"
             aria-labelledby="today-tab"
           >
-          {endOfDayDate !== null ? (
+          {isShowingFiveMinute ? (
+            <FiveMinuteStart controller={fiveMinute} onBack={closeFiveMinute} />
+          ) : endOfDayDate !== null ? (
             <EndOfDay
               date={endOfDayDate}
               record={dailyRecordState.records.find((record) => record.date === endOfDayDate)}
@@ -288,11 +308,16 @@ function App() {
           </div>
 
           <p className="supporting-text">
-            SNSや動画を開く前に、最初の行動へ移ります。
+            手をつけにくいことを、5分だけ始めます。
           </p>
 
-          <button className="secondary-button" type="button">
-            着手レーンを準備する
+          {fiveMinuteCount > 0 && <p className="supporting-text">今日、{fiveMinuteCount}回取り組みました</p>}
+          {fiveMinute.error && <p className="five-minute-entry-message" role="alert">{fiveMinute.error}</p>}
+          {fiveMinute.notice && <p className="five-minute-entry-message" role="status">{fiveMinute.notice}</p>}
+          <button className="secondary-button" type="button" onClick={openFiveMinute}>
+            {fiveMinute.state.activeTimer
+              ? fiveMinute.state.activeTimer.counted ? '5分の結果を見る' : '5分へ戻る'
+              : '5分だけ始める'}
           </button>
           </section>
 
@@ -332,6 +357,7 @@ function App() {
             aria-labelledby="weekly-tab"
           >
             <WeeklySchedule
+              startHour={timetableSettings.weeklyStartHour ?? 0}
               loosePlans={loosePlans}
               todayDate={todayDate}
               tomorrowDate={tomorrowDate}

@@ -165,7 +165,7 @@ function RecordsPage({
               <div className="record-missing-days">
                 {recentDates.map((date) => (
                   <button className="secondary-button" type="button" key={date} onClick={() => startCreating(date)}>
-                    {date === getLocalDate() ? '今日・' : date === getLocalDate(-1) ? '昨日・' : ''}{formatDate(date)}
+                    {date === getLocalDate() ? '今日・' : date === getLocalDate(-1) ? '昨日・' : '一昨日・'}{formatDate(date)}
                   </button>
                 ))}
               </div>
