@@ -648,7 +648,7 @@ select.entry-input {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 10px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -675,16 +675,16 @@ select.entry-input {
   width: auto;
   min-width: 0;
   min-height: 44px;
-  padding: 8px 10px;
-  font-size: 14px;
+  padding: 8px;
+  font-size: 13px;
 }
 
 .timetable-days-field .entry-input {
-  width: 124px;
+  width: 112px;
 }
 
 .timetable-count-field .entry-input {
-  width: 78px;
+  width: 92px;
 }
 
 .timetable-settings .supporting-text {
@@ -712,18 +712,21 @@ select.entry-input {
 
 .timetable-period-values {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: 104px 16px 104px;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 8px;
   min-width: 0;
 }
 
 .timetable-period-time-field {
   display: block;
+  width: 104px;
   min-width: 0;
 }
 
 .timetable-period-time-field .entry-input {
+  width: 100%;
   min-width: 0;
   min-height: 44px;
   padding: 7px 5px;
@@ -742,6 +745,9 @@ select.entry-input {
 }
 
 .timetable-period-separator {
+  display: grid;
+  width: 16px;
+  place-items: center;
   color: #858a81;
   font-size: 13px;
 }
@@ -1891,4 +1897,541 @@ select.entry-input {
   top: 8px;
   z-index: 2;
   align-self: start;
+}
+
+.end-of-day-entry,
+.end-of-day-page,
+.end-of-day-section,
+.end-of-day-save {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+}
+
+.end-of-day-entry .supporting-text,
+.end-of-day-page .supporting-text {
+  margin: 0;
+}
+
+.end-of-day-header {
+  display: grid;
+  min-width: 0;
+  justify-items: start;
+  gap: 6px;
+  padding: 0 4px 2px;
+}
+
+.end-of-day-header .cancel-button {
+  min-height: 44px;
+  padding: 8px 0;
+}
+
+.end-of-day-date {
+  margin: 0;
+  color: #697068;
+  font-size: 13px;
+}
+
+.end-of-day-plan-group {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.end-of-day-plan {
+  display: grid;
+  grid-template-columns: 1.5em 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  font-size: 14px;
+}
+
+.end-of-day-complete-button {
+  min-height: 44px;
+  padding: 6px;
+  border: 1px solid #d6dcd2;
+  border-radius: 12px;
+  background-color: #f8faf6;
+  color: #3d5744;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.end-of-day-plan-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.end-of-day-plan.completed .end-of-day-plan-title {
+  color: #858a81;
+  text-decoration: line-through;
+}
+
+.end-of-day-input-group {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.end-of-day-duration {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+}
+
+.end-of-day-time-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.end-of-day-time-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #62675f;
+  font-size: 14px;
+}
+
+.end-of-day-time-field .entry-input {
+  width: 76px;
+  min-height: 48px;
+  padding: 10px;
+  text-align: right;
+  font-size: 16px;
+}
+
+.end-of-day-time-field .entry-input:disabled {
+  background-color: #eceee8;
+  color: #858a81;
+  cursor: not-allowed;
+}
+
+.end-of-day-insight {
+  min-height: 96px;
+  max-height: 320px;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.end-of-day-error {
+  margin: 0;
+  color: #8b4d40;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.end-of-day-date-notice {
+  margin: 0;
+  color: #62675f;
+  line-height: 1.7;
+}
+
+.end-of-day-page .loose-plan-editor,
+.end-of-day-insight,
+.end-of-day-save {
+  scroll-margin-bottom: 110px;
+}
+
+.end-of-day-complete-button:focus-visible,
+.end-of-day-page .cancel-button:focus-visible {
+  outline: 2px solid #3d5744;
+  outline-offset: 2px;
+}
+
+.records-page,
+.records-section,
+.record-list,
+.record-missing-days {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+}
+
+.records-page .supporting-text {
+  margin: 0;
+}
+
+.records-heading {
+  display: grid;
+  min-width: 0;
+  justify-items: start;
+  gap: 8px;
+  padding: 0 4px 2px;
+}
+
+.records-heading .cancel-button {
+  min-height: 44px;
+  padding: 8px 0;
+}
+
+.record-date {
+  margin: 0;
+  color: #697068;
+  font-size: 14px;
+}
+
+.record-missing-days .secondary-button {
+  min-height: 44px;
+  padding: 9px 12px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.record-list-item {
+  display: grid;
+  min-width: 0;
+  width: 100%;
+  gap: 6px;
+  padding: 16px;
+  color: #30362e;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: left;
+  cursor: pointer;
+}
+
+.record-list-item:hover {
+  background-color: #f8faf6;
+}
+
+.record-list-date {
+  color: #343832;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.record-plan-summary {
+  color: #697068;
+}
+
+.record-time-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 12px;
+}
+
+.record-list-preview {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  color: #697068;
+}
+
+.record-saved-plan {
+  display: grid;
+  grid-template-columns: 1.5em minmax(0, 1fr);
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.record-saved-period,
+.record-saved-status {
+  color: #697068;
+}
+
+.record-saved-title,
+.record-saved-status,
+.record-saved-memo,
+.record-insight {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.record-saved-title.completed {
+  color: #858a81;
+  text-decoration: line-through;
+}
+
+.record-saved-memo,
+.record-plan-memo {
+  color: #697068;
+  font-size: 13px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.record-plan-memo {
+  grid-column: 3;
+}
+
+.record-time-values {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 12px;
+  margin: 0 0 4px;
+  font-size: 14px;
+}
+
+.record-time-values dt {
+  color: #697068;
+}
+
+.record-time-values dd {
+  margin: 0;
+}
+
+.record-insight {
+  white-space: pre-wrap;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.record-detail-actions {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+}
+
+.record-delete-button {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid #dedbd4;
+  border-radius: 12px;
+  background-color: transparent;
+  color: #8b4d40;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.record-list-item:focus-visible,
+.record-delete-button:focus-visible,
+.records-heading .cancel-button:focus-visible {
+  outline: 2px solid #3d5744;
+  outline-offset: 2px;
+}
+
+.record-summary {
+  --record-intended-color: #8f9f88;
+  --record-unintended-color: #c4ae86;
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+}
+
+.record-summary-periods {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid #dfe3dc;
+  border-radius: 14px;
+  background-color: #eceee8;
+}
+
+.record-summary-period {
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 6px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background-color: transparent;
+  color: #62675f;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.record-summary-period.selected {
+  border-color: #ccd3c7;
+  background-color: #fcfcfa;
+  color: #304034;
+  font-weight: 650;
+}
+
+.record-summary-period:focus-visible {
+  outline: 2px solid #3d5744;
+  outline-offset: 1px;
+}
+
+.record-summary-card {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+  padding: 16px;
+}
+
+.record-summary-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+
+.record-summary-note {
+  margin: 0;
+  color: #697068;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.record-summary .supporting-text {
+  font-size: 13px;
+}
+
+.record-summary-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.record-summary-metrics dt {
+  color: #697068;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.record-summary-metrics dd {
+  margin: 3px 0 0;
+  overflow-wrap: anywhere;
+  color: #343832;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.record-summary-breakdown,
+.record-summary-plans {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7e0;
+}
+
+.record-summary-subtitle {
+  margin: 0;
+  color: #4f574a;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.record-summary-chart {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  margin: 4px 0 0;
+}
+
+.record-summary-donut {
+  position: relative;
+  width: 116px;
+  max-width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: conic-gradient(var(--record-intended-color) var(--record-intended-share), var(--record-unintended-color) 0);
+}
+
+.record-summary-donut-center {
+  position: absolute;
+  inset: 16%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 50%;
+  background-color: #fcfcfa;
+  color: #697068;
+  font-size: 12px;
+  text-align: center;
+}
+
+.record-summary-donut-total {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: #343832;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.record-summary-donut-total.long {
+  font-size: 13px;
+}
+
+.record-summary-legend {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+}
+
+.record-summary-legend-item {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 2px 6px;
+  min-width: 0;
+  color: #4f574a;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.record-summary-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.record-summary-swatch.intended {
+  background-color: var(--record-intended-color);
+}
+
+.record-summary-swatch.unintended {
+  background-color: var(--record-unintended-color);
+}
+
+.record-summary-legend-value {
+  grid-column: 2;
+  color: #343832;
+}
+
+.record-summary-zero {
+  display: grid;
+  gap: 4px;
+}
+
+.record-summary-zero > p,
+.record-summary-plan-result {
+  margin: 0;
+}
+
+.record-summary-plan-result {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  color: #4f574a;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (max-width: 360px) {
+  .record-summary-chart {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .record-summary-legend {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
 }

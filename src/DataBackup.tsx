@@ -5,6 +5,13 @@ import {
 } from 'react'
 import { isValidCourseBackup, parseCourse } from './CourseStorage'
 import {
+  DAILY_RECORDS_STORAGE_KEY,
+  isDailyRecords,
+  readDailyRecords,
+  writeDailyRecords,
+  type DailyRecord,
+} from './DailyRecordStorage'
+import {
   TIMETABLE_SETTINGS_KEY,
   createDefaultTimetableSettings,
   isTimetableSettings,
@@ -15,6 +22,7 @@ const ENTRY_STORAGE_KEY = 'margin-entry'
 const TASKS_STORAGE_KEY = 'margin-tasks'
 const COURSES_STORAGE_KEY = 'margin-courses'
 const LOOSE_PLANS_STORAGE_KEY = 'margin-loose-plans'
+const WEEKLY_SCHEDULES_STORAGE_KEY = 'margin-weekly-schedules'
 
 type BackupData = {
   version: 1
@@ -24,9 +32,11 @@ type BackupData = {
   courses: unknown[]
   loosePlans?: unknown[]
   timetableSettings?: TimetableSettings
+  dailyRecords?: DailyRecord[]
+  weeklySchedules?: unknown[]
 }
 
-function readSavedArray(storageKey: string): unknown[] {
+function readSavedArray(storageKey: string, rejectInvalid = false): unknown[] {
   const savedValue = localStorage.getItem(storageKey)
 
   if (savedValue === null) {
@@ -37,11 +47,15 @@ function readSavedArray(storageKey: string): unknown[] {
     const parsedValue = JSON.parse(savedValue)
 
     if (!Array.isArray(parsedValue)) {
+      if (rejectInvalid) throw new Error('保存データを確認できません。')
       return []
     }
 
     return parsedValue
   } catch {
+    if (rejectInvalid) {
+      throw new Error('保存された週間予定を読み込めないため、書き出しを中止しました。保存内容は変更していません。')
+    }
     return []
   }
 }
@@ -89,6 +103,21 @@ function isValidLoosePlan(value: unknown) {
   )
 }
 
+function isValidWeeklySchedule(value: unknown) {
+  if (!isRecord(value)) return false
+  const timePattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/
+  return typeof value.id === 'string' && value.id.trim() !== '' &&
+    typeof value.title === 'string' && value.title.trim() !== '' &&
+    typeof value.weekday === 'string' &&
+    ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'].includes(value.weekday) &&
+    typeof value.startTime === 'string' && timePattern.test(value.startTime) &&
+    typeof value.endTime === 'string' && timePattern.test(value.endTime) &&
+    value.startTime < value.endTime &&
+    (value.memo === undefined || typeof value.memo === 'string') &&
+    (value.color === undefined ||
+      (typeof value.color === 'string' && ['green', 'red', 'blue', 'amber', 'purple'].includes(value.color)))
+}
+
 function isValidBackupData(
   value: unknown,
 ): value is BackupData {
@@ -107,7 +136,10 @@ function isValidBackupData(
     (value.timetableSettings === undefined || isTimetableSettings(value.timetableSettings)) &&
     (value.loosePlans === undefined ||
       (Array.isArray(value.loosePlans) &&
-        value.loosePlans.every(isValidLoosePlan)))
+        value.loosePlans.every(isValidLoosePlan))) &&
+    (value.dailyRecords === undefined || isDailyRecords(value.dailyRecords)) &&
+    (value.weeklySchedules === undefined ||
+      (Array.isArray(value.weeklySchedules) && value.weeklySchedules.every(isValidWeeklySchedule)))
   )
 }
 
@@ -123,11 +155,16 @@ function createBackupData(): BackupData {
       parseCourse(course, timetableSettings.legacyAcademicYear) ?? course),
     loosePlans: readSavedArray(LOOSE_PLANS_STORAGE_KEY),
     timetableSettings,
+    dailyRecords: readDailyRecords(),
+    weeklySchedules: readSavedArray(WEEKLY_SCHEDULES_STORAGE_KEY, true),
   }
 }
 
 function downloadBackup() {
   const backupData = createBackupData()
+  if (!isValidBackupData(backupData)) {
+    throw new Error('保存されたデータに確認が必要な内容があるため、書き出しを中止しました。保存内容は変更していません。')
+  }
 
   const backupText = JSON.stringify(
     backupData,
@@ -185,9 +222,17 @@ async function restoreBackup(
       return
     }
 
-    const shouldRestore = window.confirm(
-      '現在の今日の入口、課題、授業テンプレート、ゆるい予定、時間割設定をバックアップの内容で置き換えますか？',
-    )
+    const warnings: string[] = []
+    if (parsedBackup.dailyRecords === undefined && readSavedArray(DAILY_RECORDS_STORAGE_KEY).length > 0) {
+      warnings.push('このバックアップには一日の記録が含まれていません。復元すると、現在この端末に保存されている一日の記録は削除されます。')
+    }
+    if (parsedBackup.weeklySchedules === undefined && readSavedArray(WEEKLY_SCHEDULES_STORAGE_KEY).length > 0) {
+      warnings.push('このバックアップには週間予定が含まれていません。復元すると、現在この端末に保存されている週間予定は削除されます。')
+    }
+    const shouldRestore = window.confirm([
+      '現在の今日の入口、課題、授業テンプレート、ゆるい予定、時間割設定、一日の記録、週間予定をバックアップの内容で置き換えますか？',
+      ...warnings,
+    ].join('\n\n'))
 
     if (!shouldRestore) {
       setRestoreMessage(
@@ -227,6 +272,12 @@ async function restoreBackup(
       JSON.stringify(parsedBackup.loosePlans ?? []),
     )
 
+    writeDailyRecords(parsedBackup.dailyRecords ?? [])
+    localStorage.setItem(
+      WEEKLY_SCHEDULES_STORAGE_KEY,
+      JSON.stringify(parsedBackup.weeklySchedules ?? []),
+    )
+
     window.alert(
       'バックアップを復元しました。Marginを再読み込みします。',
     )
@@ -255,7 +306,7 @@ async function restoreBackup(
       </div>
 
       <p className="supporting-text">
-        今日の入口、課題、授業テンプレート、ゆるい予定、時間割設定を
+        今日の入口、課題、授業テンプレート、ゆるい予定、時間割設定、一日の記録、週間予定を
         1つのファイルに保存します。
       </p>
 
@@ -266,7 +317,14 @@ async function restoreBackup(
       <button
         className="secondary-button"
         type="button"
-        onClick={downloadBackup}
+        onClick={() => {
+          try {
+            downloadBackup()
+            setRestoreMessage('')
+          } catch {
+            setRestoreMessage('バックアップを書き出せませんでした。保存データや、ブラウザーの設定を確認してください。保存内容は変更していません。')
+          }
+        }}
       >
         バックアップを書き出す
       </button>

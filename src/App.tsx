@@ -3,6 +3,9 @@ import TasksPage from './TasksPage'
 import WeeklySchedule from './WeeklySchedule'
 import LoosePlanPanel from './LoosePlans'
 import SettingsPage from './SettingsPage'
+import EndOfDay from './EndOfDay'
+import RecordsPage from './RecordsPage'
+import { deleteDailyRecord, loadDailyRecords, saveDailyRecord, type DailyRecordInput } from './DailyRecordStorage'
 import { TIMETABLE_SETTINGS_KEY, loadTimetableSettings, saveTimetableSettings, type TimetableSettings } from './TimetableStorage'
 import {
   getLocalDate,
@@ -14,7 +17,7 @@ import './App.css'
 
 const ENTRY_STORAGE_KEY = 'margin-entry'
 
-type ActiveTab = 'today' | 'tasks' | 'weekly' | 'settings'
+type ActiveTab = 'today' | 'tasks' | 'weekly' | 'records' | 'settings'
 
 function App() {
   const [entry, setEntry] = useState(() => {
@@ -24,6 +27,8 @@ function App() {
   const [entryDraft, setEntryDraft] = useState('')
   const [isEditingEntry, setIsEditingEntry] = useState(false)
   const [activeTab, setActiveTab] = useState<ActiveTab>('today')
+  const [endOfDayDate, setEndOfDayDate] = useState<string | null>(null)
+  const [dailyRecordState, setDailyRecordState] = useState(loadDailyRecords)
   const [timetableSettings, setTimetableSettings] = useState(loadTimetableSettings)
   useEffect(() => {
     if (localStorage.getItem(TIMETABLE_SETTINGS_KEY) === null) {
@@ -41,6 +46,7 @@ function App() {
 
   const todayDate = getLocalDate()
   const tomorrowDate = getLocalDate(1)
+  const todaysRecord = dailyRecordState.records.find((record) => record.date === todayDate)
 
   const today = new Intl.DateTimeFormat('ja-JP', {
     month: 'long',
@@ -115,6 +121,47 @@ function App() {
     )
   }
 
+  function selectTab(tab: ActiveTab) {
+    setEndOfDayDate(null)
+    if (tab === 'records') reloadRecords()
+    setActiveTab(tab)
+  }
+
+  function reloadRecords() {
+    const latest = loadDailyRecords()
+    setDailyRecordState(latest)
+    return latest
+  }
+
+  function saveRecord(record: DailyRecordInput, operation: 'create' | 'update') {
+    const records = saveDailyRecord(record, operation)
+    setDailyRecordState({ records, error: '' })
+  }
+
+  function deleteRecord(date: string) {
+    const records = deleteDailyRecord(date)
+    setDailyRecordState({ records, error: '' })
+  }
+
+  function openEndOfDay() {
+    setDailyRecordState(loadDailyRecords())
+    setEndOfDayDate(getLocalDate())
+    window.scrollTo({ top: 0 })
+  }
+
+  function closeEndOfDay() {
+    setEndOfDayDate(null)
+    window.scrollTo({ top: 0 })
+  }
+
+  function saveTodaysRecord(record: DailyRecordInput) {
+    if (record.date !== getLocalDate()) {
+      throw new Error('日付が変わりました。一日の終わりを開き直してください。')
+    }
+    const records = saveDailyRecord(record)
+    setDailyRecordState({ records, error: '' })
+  }
+
   return (
     <div className="app">
       <header className="app-header">
@@ -132,6 +179,20 @@ function App() {
             role="region"
             aria-labelledby="today-tab"
           >
+          {endOfDayDate !== null ? (
+            <EndOfDay
+              date={endOfDayDate}
+              record={dailyRecordState.records.find((record) => record.date === endOfDayDate)}
+              loadError={dailyRecordState.error}
+              loosePlans={loosePlans}
+              onBack={closeEndOfDay}
+              onSave={saveTodaysRecord}
+              onSaveLoosePlan={saveLoosePlan}
+              onDeleteLoosePlan={deleteLoosePlan}
+              onToggleLoosePlanComplete={toggleLoosePlanComplete}
+            />
+          ) : (
+          <>
           <section className="card primary-card">
           <p className="section-label">今日の入口</p>
 
@@ -235,31 +296,20 @@ function App() {
           </button>
           </section>
 
-          <section className="card closing-section loose-plan-closing-section">
-          <div className="closing-section-header">
-            <div>
-            <p className="section-label">一日の終わり</p>
-
-            <h2 className="closing-title">
-              今日はまだ記録していません
-            </h2>
-            </div>
-
-            <button className="text-button" type="button">
-              夜の観察を始める
+          <section className="card end-of-day-entry">
+            <h2 className="closing-title">一日の終わり</h2>
+            <p className="supporting-text">
+              {todaysRecord
+                ? '今日の記録は保存済みです。必要なときに見直せます。'
+                : '今日を静かに振り返り、明日の準備をします。'}
+            </p>
+            {dailyRecordState.error && <p className="end-of-day-error" role="alert">{dailyRecordState.error}</p>}
+            <button className="secondary-button" type="button" onClick={openEndOfDay}>
+              {todaysRecord ? '今日の記録を見直す' : '今日を振り返る'}
             </button>
-          </div>
-
-          <LoosePlanPanel
-            plans={loosePlans}
-            date={tomorrowDate}
-            heading="明日のゆるい予定"
-            compact
-            onSave={saveLoosePlan}
-            onDelete={deleteLoosePlan}
-            onToggleComplete={toggleLoosePlanComplete}
-          />
           </section>
+          </>
+          )}
           </div>
         )}
 
@@ -292,6 +342,27 @@ function App() {
           </div>
         )}
 
+        {activeTab === 'records' && (
+          <div
+            id="records-panel"
+            className="tab-panel"
+            role="region"
+            aria-labelledby="records-tab"
+          >
+            <RecordsPage
+              records={dailyRecordState.records}
+              loadError={dailyRecordState.error}
+              loosePlans={loosePlans}
+              onReloadRecords={reloadRecords}
+              onSaveRecord={saveRecord}
+              onDeleteRecord={deleteRecord}
+              onSaveLoosePlan={saveLoosePlan}
+              onDeleteLoosePlan={deleteLoosePlan}
+              onToggleLoosePlanComplete={toggleLoosePlanComplete}
+            />
+          </div>
+        )}
+
         {activeTab === 'settings' && (
           <div
             id="settings-panel"
@@ -314,7 +385,7 @@ function App() {
           type="button"
           aria-pressed={activeTab === 'today'}
           aria-controls="today-panel"
-          onClick={() => setActiveTab('today')}
+          onClick={() => selectTab('today')}
         >
           <span className="nav-symbol">●</span>
           <span>今日</span>
@@ -326,7 +397,7 @@ function App() {
           type="button"
           aria-pressed={activeTab === 'tasks'}
           aria-controls="tasks-panel"
-          onClick={() => setActiveTab('tasks')}
+          onClick={() => selectTab('tasks')}
         >
           <span className="nav-symbol">□</span>
           <span>課題</span>
@@ -338,13 +409,20 @@ function App() {
           type="button"
           aria-pressed={activeTab === 'weekly'}
           aria-controls="weekly-panel"
-          onClick={() => setActiveTab('weekly')}
+          onClick={() => selectTab('weekly')}
         >
           <span className="nav-symbol">△</span>
           <span>週間</span>
         </button>
 
-        <button className="nav-item" type="button">
+        <button
+          id="records-tab"
+          className={`nav-item ${activeTab === 'records' ? 'active' : ''}`}
+          type="button"
+          aria-pressed={activeTab === 'records'}
+          aria-controls="records-panel"
+          onClick={() => selectTab('records')}
+        >
           <span className="nav-symbol">◇</span>
           <span>記録</span>
         </button>
@@ -357,7 +435,7 @@ function App() {
           type="button"
           aria-pressed={activeTab === 'settings'}
           aria-controls="settings-panel"
-          onClick={() => setActiveTab('settings')}
+          onClick={() => selectTab('settings')}
         >
           <span className="nav-symbol">○</span>
           <span>設定</span>
