@@ -3,43 +3,26 @@ import {
   useState,
   type ChangeEvent,
 } from 'react'
-import { isValidCourseBackup, parseCourse } from './CourseStorage'
+import { MAX_BACKUP_FILE_SIZE, isValidBackupData, prepareBackupForRestore, type BackupData } from './BackupValidation'
+import { parseCourse } from './CourseStorage'
 import {
-  hasFiveMinuteCounts, isFiveMinuteCounts, readFiveMinuteCounts, restoreFiveMinuteCounts,
-  type FiveMinuteCount,
+  hasFiveMinuteCounts, readFiveMinuteCounts, restoreFiveMinuteCounts,
 } from './FiveMinuteStorage'
 import {
   DAILY_RECORDS_STORAGE_KEY,
-  isDailyRecords,
   readDailyRecords,
   writeDailyRecords,
-  type DailyRecord,
 } from './DailyRecordStorage'
 import {
   TIMETABLE_SETTINGS_KEY,
   createDefaultTimetableSettings,
-  isTimetableSettings,
   loadTimetableSettings,
-  type TimetableSettings,
 } from './TimetableStorage'
 const ENTRY_STORAGE_KEY = 'margin-entry'
 const TASKS_STORAGE_KEY = 'margin-tasks'
 const COURSES_STORAGE_KEY = 'margin-courses'
 const LOOSE_PLANS_STORAGE_KEY = 'margin-loose-plans'
 const WEEKLY_SCHEDULES_STORAGE_KEY = 'margin-weekly-schedules'
-
-type BackupData = {
-  version: 1
-  createdAt: string
-  entry: string
-  tasks: unknown[]
-  courses: unknown[]
-  loosePlans?: unknown[]
-  timetableSettings?: TimetableSettings
-  dailyRecords?: DailyRecord[]
-  weeklySchedules?: unknown[]
-  fiveMinuteStarts?: FiveMinuteCount[]
-}
 
 function readSavedArray(storageKey: string, rejectInvalid = false): unknown[] {
   const savedValue = localStorage.getItem(storageKey)
@@ -63,90 +46,6 @@ function readSavedArray(storageKey: string, rejectInvalid = false): unknown[] {
     }
     return []
   }
-}
-
-function isRecord(
-  value: unknown,
-): value is Record<string, unknown> {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    !Array.isArray(value)
-  )
-}
-
-function isValidTask(value: unknown) {
-  if (!isRecord(value)) {
-    return false
-  }
-
-  return (
-    typeof value.id === 'string' &&
-    typeof value.title === 'string' &&
-    typeof value.deadline === 'string' &&
-    typeof value.format === 'string' &&
-    typeof value.firstStep === 'string' &&
-    typeof value.completed === 'boolean'
-  )
-}
-
-function isValidLoosePlan(value: unknown) {
-  if (!isRecord(value)) {
-    return false
-  }
-
-  return (
-    typeof value.id === 'string' &&
-    typeof value.title === 'string' &&
-    typeof value.date === 'string' &&
-    /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])$/.test(value.date) &&
-    (value.dayPeriod === 'morning' ||
-      value.dayPeriod === 'afternoon' ||
-      value.dayPeriod === 'evening') &&
-    typeof value.memo === 'string' &&
-    typeof value.completed === 'boolean'
-  )
-}
-
-function isValidWeeklySchedule(value: unknown) {
-  if (!isRecord(value)) return false
-  const timePattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/
-  return typeof value.id === 'string' && value.id.trim() !== '' &&
-    typeof value.title === 'string' && value.title.trim() !== '' &&
-    typeof value.weekday === 'string' &&
-    ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'].includes(value.weekday) &&
-    typeof value.startTime === 'string' && timePattern.test(value.startTime) &&
-    typeof value.endTime === 'string' && timePattern.test(value.endTime) &&
-    value.startTime < value.endTime &&
-    (value.memo === undefined || typeof value.memo === 'string') &&
-    (value.color === undefined ||
-      (typeof value.color === 'string' && ['green', 'red', 'blue', 'amber', 'purple'].includes(value.color)))
-}
-
-function isValidBackupData(
-  value: unknown,
-): value is BackupData {
-  if (!isRecord(value)) {
-    return false
-  }
-
-  return (
-    value.version === 1 &&
-    typeof value.createdAt === 'string' &&
-    typeof value.entry === 'string' &&
-    Array.isArray(value.tasks) &&
-    value.tasks.every(isValidTask) &&
-    Array.isArray(value.courses) &&
-    value.courses.every(isValidCourseBackup) &&
-    (value.timetableSettings === undefined || isTimetableSettings(value.timetableSettings)) &&
-    (value.loosePlans === undefined ||
-      (Array.isArray(value.loosePlans) &&
-        value.loosePlans.every(isValidLoosePlan))) &&
-    (value.dailyRecords === undefined || isDailyRecords(value.dailyRecords)) &&
-    (value.fiveMinuteStarts === undefined || isFiveMinuteCounts(value.fiveMinuteStarts)) &&
-    (value.weeklySchedules === undefined ||
-      (Array.isArray(value.weeklySchedules) && value.weeklySchedules.every(isValidWeeklySchedule)))
-  )
 }
 
 function createBackupData(): BackupData {
@@ -218,16 +117,25 @@ async function restoreBackup(
   }
 
   try {
-    const backupText = await selectedFile.text()
-    const parsedBackup: unknown =
-      JSON.parse(backupText)
-
-    if (!isValidBackupData(parsedBackup)) {
-      setRestoreMessage(
-        'Marginの正しいバックアップファイルではありません。',
-      )
+    if (selectedFile.size > MAX_BACKUP_FILE_SIZE) {
+      setRestoreMessage('バックアップファイルが大きすぎます。5MB以下のファイルを選んでください。復元は行っていません。')
       return
     }
+    let parsedValue: unknown
+    try {
+      const backupText = await selectedFile.text()
+      parsedValue = JSON.parse(backupText)
+    } catch {
+      setRestoreMessage('ファイルを読み込めませんでした。JSON形式のバックアップを選んでください。復元は行っていません。')
+      return
+    }
+
+    const prepared = prepareBackupForRestore(parsedValue)
+    if (prepared.error !== undefined) {
+      setRestoreMessage(prepared.error)
+      return
+    }
+    const parsedBackup = prepared.data
 
     const warnings: string[] = []
     if (parsedBackup.dailyRecords === undefined && readSavedArray(DAILY_RECORDS_STORAGE_KEY).length > 0) {
@@ -359,7 +267,7 @@ async function restoreBackup(
 />
 
 {restoreMessage !== '' && (
-  <p className="supporting-text">
+  <p className="supporting-text" role="status">
     {restoreMessage}
   </p>
 )}

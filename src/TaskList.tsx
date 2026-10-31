@@ -5,7 +5,7 @@ import {
   useState,
 } from 'react'
 import { type Course } from './CourseStorage'
-import { TASKS_STORAGE_KEY, loadTasks, sortTasks, type Task } from './TaskStorage'
+import { TASKS_STORAGE_KEY, formatTaskDeadline, isValidTaskDeadline, loadTasks, sortTasks, type Task } from './TaskStorage'
 
 type TaskDraft = Omit<Task, 'id' | 'completed'>
 
@@ -296,16 +296,7 @@ function deleteSelectedTask() {
       {sortedTasks.length > 0 && (
   <div className="task-list">
     {sortedTasks.map((task) => {
-      const deadlineText =
-        task.deadline === ''
-          ? '締切は未設定です'
-          : new Intl.DateTimeFormat('ja-JP', {
-              month: 'long',
-              day: 'numeric',
-              weekday: 'short',
-              hour: '2-digit',
-              minute: '2-digit',
-            }).format(new Date(task.deadline))
+      const deadlineText = formatTaskDeadline(task.deadline)
 
       return (
         <button
@@ -349,17 +340,7 @@ function deleteSelectedTask() {
       <span>締切</span>
 
       <strong>
-        {selectedTask.deadline === ''
-          ? '未設定'
-          : new Intl.DateTimeFormat('ja-JP', {
-              month: 'long',
-              day: 'numeric',
-              weekday: 'short',
-              hour: '2-digit',
-              minute: '2-digit',
-            }).format(
-              new Date(selectedTask.deadline),
-            )}
+        {formatTaskDeadline(selectedTask.deadline, '未設定')}
       </strong>
     </div>
 
@@ -455,6 +436,9 @@ function deleteSelectedTask() {
           )
         }
       />
+      {!isValidTaskDeadline(selectedTask.deadline) && (
+        <p className="supporting-text">保存済みの締切を確認できません。必要に応じて締切を選び直してください。</p>
+      )}
     </div>
 
     <div className="form-field">
@@ -740,6 +724,9 @@ function deleteSelectedTask() {
           <span className="completed-task-status">
             完了
           </span>
+          {!isValidTaskDeadline(task.deadline) && (
+            <span className="completed-task-status">締切の情報を確認してください</span>
+          )}
         </div>
 
         <button
