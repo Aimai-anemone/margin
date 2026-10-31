@@ -4,14 +4,14 @@ import {
   type ChangeEvent,
 } from 'react'
 import { MAX_BACKUP_FILE_SIZE, isValidBackupData, prepareBackupForRestore, type BackupData } from './BackupValidation'
+import { backupRestoreMessage, restoreBackupValues } from './BackupRestore'
 import { parseCourse } from './CourseStorage'
 import {
-  hasFiveMinuteCounts, readFiveMinuteCounts, restoreFiveMinuteCounts,
+  FIVE_MINUTE_STORAGE_KEY, hasFiveMinuteCounts, readFiveMinuteCounts,
 } from './FiveMinuteStorage'
 import {
   DAILY_RECORDS_STORAGE_KEY,
   readDailyRecords,
-  writeDailyRecords,
 } from './DailyRecordStorage'
 import {
   TIMETABLE_SETTINGS_KEY,
@@ -116,17 +116,24 @@ async function restoreBackup(
     return
   }
 
+  let didRestore = false
   try {
     if (selectedFile.size > MAX_BACKUP_FILE_SIZE) {
       setRestoreMessage('バックアップファイルが大きすぎます。5MB以下のファイルを選んでください。復元は行っていません。')
       return
     }
+    let backupText: string
+    try {
+      backupText = await selectedFile.text()
+    } catch {
+      setRestoreMessage('ファイルを読み込めませんでした。ファイルを選び直してください。復元は行っていません。')
+      return
+    }
     let parsedValue: unknown
     try {
-      const backupText = await selectedFile.text()
       parsedValue = JSON.parse(backupText)
     } catch {
-      setRestoreMessage('ファイルを読み込めませんでした。JSON形式のバックアップを選んでください。復元は行っていません。')
+      setRestoreMessage('JSON形式を確認できませんでした。Marginから書き出したバックアップを選んでください。復元は行っていません。')
       return
     }
 
@@ -164,38 +171,22 @@ async function restoreBackup(
       parseCourse(course, restoredSettings.legacyAcademicYear),
     )
 
-    if (parsedBackup.entry === '') {
-      localStorage.removeItem(ENTRY_STORAGE_KEY)
-    } else {
-      localStorage.setItem(
-        ENTRY_STORAGE_KEY,
-        parsedBackup.entry,
-      )
+    // 新しい文字列は先にすべて用意し、確認後の退避・書き込みだけを一括処理する。
+    const result = restoreBackupValues([
+      { key: ENTRY_STORAGE_KEY, value: parsedBackup.entry === '' ? null : parsedBackup.entry },
+      { key: TASKS_STORAGE_KEY, value: JSON.stringify(parsedBackup.tasks) },
+      { key: COURSES_STORAGE_KEY, value: JSON.stringify(restoredCourses) },
+      { key: TIMETABLE_SETTINGS_KEY, value: JSON.stringify(restoredSettings) },
+      { key: LOOSE_PLANS_STORAGE_KEY, value: JSON.stringify(parsedBackup.loosePlans ?? []) },
+      { key: DAILY_RECORDS_STORAGE_KEY, value: JSON.stringify(parsedBackup.dailyRecords ?? []) },
+      { key: FIVE_MINUTE_STORAGE_KEY, value: JSON.stringify({ counts: parsedBackup.fiveMinuteStarts ?? [], activeTimer: null }) },
+      { key: WEEKLY_SCHEDULES_STORAGE_KEY, value: JSON.stringify(parsedBackup.weeklySchedules ?? []) },
+    ])
+    if (result.status !== 'success') {
+      setRestoreMessage(backupRestoreMessage(result))
+      return
     }
-
-    localStorage.setItem(
-      TASKS_STORAGE_KEY,
-      JSON.stringify(parsedBackup.tasks),
-    )
-
-    localStorage.setItem(
-      COURSES_STORAGE_KEY,
-      JSON.stringify(restoredCourses),
-    )
-
-    localStorage.setItem(TIMETABLE_SETTINGS_KEY, JSON.stringify(restoredSettings))
-
-    localStorage.setItem(
-      LOOSE_PLANS_STORAGE_KEY,
-      JSON.stringify(parsedBackup.loosePlans ?? []),
-    )
-
-    writeDailyRecords(parsedBackup.dailyRecords ?? [])
-    restoreFiveMinuteCounts(parsedBackup.fiveMinuteStarts ?? [])
-    localStorage.setItem(
-      WEEKLY_SCHEDULES_STORAGE_KEY,
-      JSON.stringify(parsedBackup.weeklySchedules ?? []),
-    )
+    didRestore = true
 
     window.alert(
       'バックアップを復元しました。Marginを再読み込みします。',
@@ -204,7 +195,9 @@ async function restoreBackup(
     window.location.reload()
   } catch {
     setRestoreMessage(
-      'ファイルを読み込めませんでした。JSON形式のバックアップを選んでください。',
+      didRestore
+        ? 'バックアップの保存は完了しましたが、再読み込みできませんでした。画面を手動で再読み込みしてください。'
+        : '復元の準備または保存データの確認ができなかったため、復元を中止しました。保存内容は変更していません。ブラウザーの保存設定を確認してください。',
     )
   } finally {
     event.target.value = ''
@@ -232,6 +225,7 @@ async function restoreBackup(
       <p className="supporting-text data-storage-notice">
         Marginのデータは、この端末のブラウザー内に保存されます。別の端末へ自動同期されません。ブラウザーのWebサイトデータを削除すると記録が消える可能性があるため、定期的にバックアップを保存してください。
       </p>
+      <p className="supporting-text">復元前に、現在のデータをバックアップしておくことをおすすめします。</p>
 
       <button
         className="secondary-button"
