@@ -4299,3 +4299,55 @@ select.entry-input {
     transition: none;
   }
 }
+
+/* Quiet Precision: 授業表示の旧来の緑を既存の青灰色へそろえる。 */
+.course-timetable .course-timetable-course {
+  border-color: #a8c0c9;
+  background: #e2edf1;
+  color: #243f50;
+}
+
+.course-timetable .course-timetable-classroom {
+  color: #385865;
+}
+
+.course-timetable .course-timetable-course:hover,
+.course-timetable .course-timetable-course:active,
+.course-timetable .course-timetable-course[aria-expanded="true"] {
+  border-color: #7fa3af;
+  background: #d7e6eb;
+}
+
+.course-timetable .course-timetable-course:focus-visible {
+  outline-color: var(--focus-ring-color);
+}
+
+.course-timetable .course-timetable-detail {
+  border-color: var(--color-border);
+  background: var(--color-surface-subtle);
+  color: var(--color-text);
+}
+
+.course-timetable .course-timetable-detail-heading h3,
+.course-timetable .course-timetable-detail-setting {
+  color: var(--color-text);
+}
+
+.course-timetable .course-timetable-detail-label {
+  color: var(--color-text-muted);
+}
+
+.course-timetable .course-timetable-detail .detail-close-button,
+.course-timetable .course-timetable-detail-actions .secondary-button {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-accent);
+}
+
+.settings-page .timetable-period-values {
+  grid-template-columns: 98px 16px 98px;
+}
+
+.settings-page .timetable-period-time-field {
+  width: 98px;
+}
