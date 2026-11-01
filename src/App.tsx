@@ -7,6 +7,9 @@ import EndOfDay from './EndOfDay'
 import RecordsPage from './RecordsPage'
 import FiveMinuteStart from './FiveMinuteStart'
 import { useFiveMinuteStart } from './useFiveMinuteStart'
+import { useHabits } from './useHabits'
+import HabitsPage from './HabitsPage'
+import TodayHabitsCard from './TodayHabitsCard'
 import { loadEntryState, saveEntryValue } from './EntryStorage'
 import { requireStoredData, storageFailureMessage } from './StorageSafety'
 import { deleteDailyRecord, loadDailyRecords, saveDailyRecord, type DailyRecordInput } from './DailyRecordStorage'
@@ -31,6 +34,8 @@ function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('today')
   const [endOfDayDate, setEndOfDayDate] = useState<string | null>(null)
   const [isShowingFiveMinute, setIsShowingFiveMinute] = useState(false)
+  const [isShowingHabits, setIsShowingHabits] = useState(false)
+  const habits = useHabits()
   const fiveMinute = useFiveMinuteStart()
   const [dailyRecordState, setDailyRecordState] = useState(loadDailyRecords)
   const [timetableState, setTimetableState] = useState(loadTimetableSettingsState)
@@ -151,6 +156,7 @@ function App() {
   }
 
   function selectTab(tab: ActiveTab) {
+    setIsShowingHabits(false)
     setEndOfDayDate(null)
     setIsShowingFiveMinute(false)
     if (tab === 'records') reloadRecords()
@@ -222,7 +228,9 @@ function App() {
             role="region"
             aria-labelledby="today-tab"
           >
-          {isShowingFiveMinute ? (
+          {isShowingHabits ? (
+            <HabitsPage controller={habits} onBack={() => { setIsShowingHabits(false); window.scrollTo({ top: 0 }) }} />
+          ) : isShowingFiveMinute ? (
             <FiveMinuteStart controller={fiveMinute} onBack={closeFiveMinute} />
           ) : endOfDayDate !== null ? (
             <EndOfDay
@@ -322,6 +330,11 @@ function App() {
             onDelete={deleteLoosePlan}
             onToggleComplete={toggleLoosePlanComplete}
           />
+
+          <TodayHabitsCard habits={habits.data.habits} error={habits.error} onOpen={() => {
+            setIsShowingHabits(true)
+            window.scrollTo({ top: 0 })
+          }} />
 
           <section className="card">
           <div className="card-heading">

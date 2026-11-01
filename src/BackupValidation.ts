@@ -3,6 +3,7 @@ import { isDailyRecords, isValidRecordDate, type DailyRecord } from './DailyReco
 import { isFiveMinuteCounts, type FiveMinuteCount } from './FiveMinuteStorage'
 import { isValidTaskDeadline } from './TaskStorage'
 import { isTimetableSettings, type TimetableSettings } from './TimetableStorage'
+import { parseHabits, parseHabitRecords, hasValidHabitRelations, type Habit, type HabitRecord } from './HabitStorage'
 
 export const MAX_BACKUP_FILE_SIZE = 5 * 1024 * 1024
 const SHORT_TEXT_LIMIT = 200
@@ -19,6 +20,8 @@ export type BackupData = {
   dailyRecords?: DailyRecord[]
   weeklySchedules?: unknown[]
   fiveMinuteStarts?: FiveMinuteCount[]
+  habits?: Habit[]
+  habitRecords?: HabitRecord[]
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -58,6 +61,7 @@ function isValidWeeklySchedule(value: unknown) {
 // 書き出しは従来の検証を維持し、制限を超える既存データも退避できるようにする。
 export function isValidBackupData(value: unknown): value is BackupData {
   return isRecord(value) && value.version === 1 &&
+    validBackupHabits(value) &&
     typeof value.createdAt === 'string' && typeof value.entry === 'string' &&
     Array.isArray(value.tasks) && value.tasks.every(isValidTask) &&
     Array.isArray(value.courses) && value.courses.every(isValidCourseBackup) &&
@@ -67,6 +71,16 @@ export function isValidBackupData(value: unknown): value is BackupData {
     (value.fiveMinuteStarts === undefined || isFiveMinuteCounts(value.fiveMinuteStarts)) &&
     (value.weeklySchedules === undefined ||
       (Array.isArray(value.weeklySchedules) && value.weeklySchedules.every(isValidWeeklySchedule)))
+}
+
+function validBackupHabits(value: Record<string, unknown>) {
+  const hasHabits = Object.hasOwn(value, 'habits')
+  const hasRecords = Object.hasOwn(value, 'habitRecords')
+  if (!hasHabits && !hasRecords) return true
+  if (!hasHabits || !hasRecords) return false
+  const habits = parseHabits(value.habits)
+  const records = parseHabitRecords(value.habitRecords)
+  return habits !== null && records !== null && hasValidHabitRelations(habits, records)
 }
 
 type TextRule = { field: string; label: string; max: number }
@@ -141,6 +155,7 @@ function idError(items: unknown[], label: string) {
 
 function validateRestoreData(value: unknown) {
   if (!isRecord(value)) return 'Marginの正しいバックアップファイルではありません。復元は行っていません。'
+  if (!validBackupHabits(value)) return '習慣と習慣実績の両方が必要です。件数・文字数・曜日・日時・IDの重複・実績と習慣の対応も確認してください。復元は行っていません。'
   const entryError = textError(value, [longText('entry', '今日の入口'), shortText('createdAt', '作成日時')], 'バックアップ')
   if (entryError) return entryError
   for (const rule of collectionRules) {
@@ -196,6 +211,9 @@ function pickBackupFields(data: BackupData): BackupData {
   const settings = data.timetableSettings
   return {
     version: 1, createdAt: data.createdAt, entry: data.entry,
+    ...(data.habits === undefined ? {} : {
+      habits: parseHabits(data.habits)!, habitRecords: parseHabitRecords(data.habitRecords)!,
+    }),
     tasks: data.tasks.map((task) => pickFields(task, ['id', 'title', 'deadline', 'format', 'firstStep', 'completed'])),
     courses: data.courses.map((course) => {
       const picked = pickFields(course, ['id', 'name', 'weekday', 'period', 'defaultFormat', 'defaultFirstStep', 'classroom', 'teacher', 'academicYear', 'term'])

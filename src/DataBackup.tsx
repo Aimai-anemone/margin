@@ -5,6 +5,11 @@ import {
 } from 'react'
 import { MAX_BACKUP_FILE_SIZE, isValidBackupData, prepareBackupForRestore, type BackupData } from './BackupValidation'
 import { backupRestoreMessage, restoreBackupValues } from './BackupRestore'
+import {
+  HABITS_STORAGE_KEY, HABIT_RECORDS_STORAGE_KEY, readHabitData,
+  loadHabitState, loadHabitRecordState, habitRecoveryRequired, clearHabitRecoveryAfterRestore,
+  markHabitRecoveryRequired,
+} from './HabitStorage'
 import { loadCourseState, parseCourse } from './CourseStorage'
 import { loadEntryState } from './EntryStorage'
 import { loadTaskState } from './TaskStorage'
@@ -63,6 +68,7 @@ function readForBackup<T>(label: string, read: () => T): T {
 }
 
 function createBackupData(): BackupData {
+  const habitData = readHabitData()
   const timetableSettings = requireStoredData(loadTimetableSettingsState())
   return {
     version: 1,
@@ -75,6 +81,8 @@ function createBackupData(): BackupData {
     dailyRecords: readForBackup('一日の記録', readDailyRecords),
     weeklySchedules: requireStoredData(loadWeeklyScheduleState()),
     fiveMinuteStarts: readForBackup('5分の着手', readFiveMinuteCounts),
+    habits: habitData.habits,
+    habitRecords: habitData.records,
   }
 }
 
@@ -157,6 +165,13 @@ async function restoreBackup(
     const parsedBackup = prepared.data
 
     const warnings: string[] = []
+    if (parsedBackup.habits === undefined) {
+      const habits = loadHabitState()
+      const records = loadHabitRecordState()
+      if (habitRecoveryRequired() || habits.status === 'error' || records.status === 'error' || habits.data.length > 0 || records.data.length > 0) {
+        warnings.push('このバックアップには習慣のデータが含まれていません。復元すると、現在の習慣と実績は削除されます。')
+      }
+    }
     if (parsedBackup.dailyRecords === undefined && readSavedArray(DAILY_RECORDS_STORAGE_KEY).length > 0) {
       warnings.push('このバックアップには一日の記録が含まれていません。復元すると、現在この端末に保存されている一日の記録は削除されます。')
     }
@@ -167,7 +182,7 @@ async function restoreBackup(
       warnings.push('このバックアップには5分の着手記録が含まれていません。復元すると、現在この端末に保存されている着手回数は削除されます。')
     }
     const shouldRestore = window.confirm([
-      '現在の今日の入口、課題、授業テンプレート、ゆるい予定、時間割設定、一日の記録、週間予定、5分の着手回数をバックアップの内容で置き換えますか？\n進行中の5分タイマーは終了します。',
+      '現在の今日の入口、課題、授業テンプレート、ゆるい予定、時間割設定、一日の記録、週間予定、5分の着手回数、習慣と実績をバックアップの内容で置き換えますか？\n進行中の5分タイマーは終了します。',
       ...warnings,
     ].join('\n\n'))
 
@@ -193,12 +208,16 @@ async function restoreBackup(
       { key: DAILY_RECORDS_STORAGE_KEY, value: JSON.stringify(parsedBackup.dailyRecords ?? []) },
       { key: FIVE_MINUTE_STORAGE_KEY, value: JSON.stringify({ counts: parsedBackup.fiveMinuteStarts ?? [], activeTimer: null }) },
       { key: WEEKLY_SCHEDULES_STORAGE_KEY, value: JSON.stringify(parsedBackup.weeklySchedules ?? []) },
+      { key: HABITS_STORAGE_KEY, value: JSON.stringify(parsedBackup.habits ?? []) },
+      { key: HABIT_RECORDS_STORAGE_KEY, value: JSON.stringify(parsedBackup.habitRecords ?? []) },
     ])
     if (result.status !== 'success') {
+      if (result.status === 'rollback-failed') markHabitRecoveryRequired()
       setRestoreMessage(backupRestoreMessage(result))
       return
     }
     didRestore = true
+    clearHabitRecoveryAfterRestore()
 
     window.alert(
       'バックアップを復元しました。Marginを再読み込みします。',
@@ -230,7 +249,7 @@ async function restoreBackup(
       </div>
 
       <p className="supporting-text">
-        今日の入口、課題、授業テンプレート、ゆるい予定、時間割設定、一日の記録、週間予定、5分の着手回数を
+        今日の入口、課題、授業テンプレート、ゆるい予定、時間割設定、一日の記録、週間予定、5分の着手回数、習慣と実績を
         1つのファイルに保存します。
       </p>
 
