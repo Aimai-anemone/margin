@@ -234,7 +234,7 @@ function RecordsPage({
             <button className="record-delete-button" type="button" onClick={() => deleteRecord(selectedRecord)}>削除する</button>
           </div>
         </>
-      ) : <p className="card supporting-text">記録が見つかりません。記録一覧へ戻って確認してください。</p>}
+      ) : <p className="card supporting-text quiet-empty">記録が見つかりません。記録一覧へ戻って確認してください。</p>}
     </div>
   )
 }

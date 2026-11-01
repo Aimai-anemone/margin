@@ -44,7 +44,7 @@ function RecordSummary({ records, period, onPeriodChange }: Props) {
         ))}
       </div>
 
-      <div className="card record-summary-card" id="record-period-summary" role="region" aria-label="選択期間の要約">
+      <div className={`card record-summary-card${summary.recordCount === 0 ? ' record-summary-card-empty' : ''}`} id="record-period-summary" role="region" aria-label="選択期間の要約">
         <div className="record-summary-heading">
           <h2 className="closing-title">{summary.recordCount === 0 && period === 'all' ? '全期間' : formatRecordPeriod(period, summary.range, today)}</h2>
           <p className="record-summary-note">記録した日数：{summary.recordCount}日</p>

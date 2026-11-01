@@ -261,7 +261,7 @@ function EndOfDay({
             </div>
           </section>
 
-          <section className="card end-of-day-section">
+          <section className="card end-of-day-section end-of-day-insight-section">
             <label className="closing-title" htmlFor="daily-insight">{mode === 'today' ? '今日' : 'この日'}、気づいたことはありますか？</label>
             <p className="supporting-text" id="daily-insight-help">集中できた場面や、気になったことを短く残せます。</p>
             <textarea ref={insightRef} id="daily-insight" className="entry-input end-of-day-insight"

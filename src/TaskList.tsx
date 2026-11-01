@@ -536,7 +536,7 @@ function deleteSelectedTask() {
       {!isAddingTask && (
         <>
           {taskState.status !== 'error' && activeTasks.length === 0 && (
-            <p className="supporting-text">
+            <p className="supporting-text quiet-empty">
               最初の課題を追加します。
             </p>
           )}

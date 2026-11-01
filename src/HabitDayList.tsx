@@ -90,7 +90,7 @@ export default function HabitDayList({ controller, initialHabitId, onBack, onMan
         <p className="supporting-text">記録時：{record.habitName}{record.selectedContent !== null && `・${record.selectedContent}`}</p>
         <button className="cancel-button" type="button" disabled={!inRange} onClick={cancel}>記録を取り消す</button>
       </>}
-    </section> : items.length === 0 ? <p className={`${compact ? '' : 'card '}supporting-text`}>この日の対象の習慣はありません。</p>
+    </section> : items.length === 0 ? <p className={`${compact ? '' : 'card '}supporting-text quiet-empty`}>この日の対象の習慣はありません。</p>
       : items.slice(0, compact && !showAll ? 5 : undefined).map((item) => {
         const saved = controller.data.records.find((entry) => entry.habitId === item.id && entry.date === date)
         return <section className={compact ? 'habit-compact-item' : 'card habit-day-item'} key={item.id}>
