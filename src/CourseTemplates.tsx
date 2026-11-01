@@ -7,6 +7,7 @@ import {
 import { isCoursePeriod, isCourseWeekday, type Course } from './CourseStorage'
 import { getAcademicYear, getYearOptions, isAcademicYear, isTerm, terms, type Term } from './TimetableStorage'
 import { storageFailureMessage } from './StorageSafety'
+import { createId } from './IdGeneration'
 
 type CourseDraft = Omit<Course, 'id'>
 export type CoursePlacement = Pick<Course, 'weekday' | 'period' | 'academicYear' | 'term'>
@@ -189,8 +190,15 @@ function startEditingCourse(course: Course) {
 
     if (!saveCourses(updatedCourses)) return
   } else {
+    let id: string
+    try {
+      id = createId()
+    } catch (error) {
+      setCourseError(storageFailureMessage(error))
+      return
+    }
     const newCourse: Course = {
-      id: crypto.randomUUID(),
+      id,
       name: cleanedName,
       classroom: courseDraft.classroom.trim(),
       teacher: courseDraft.teacher.trim(),

@@ -3,6 +3,7 @@ import LoosePlanPanel from './LoosePlans'
 import { type LoosePlan } from './LoosePlanStorage'
 import { loadWeeklyScheduleState, writeWeeklySchedules, weekdays, scheduleColors, type Weekday, type TimedSchedule } from './WeeklyScheduleStorage'
 import { requireStoredData, storageFailureMessage } from './StorageSafety'
+import { createId } from './IdGeneration'
 
 const HOUR_HEIGHT = 72
 const hours = Array.from({ length: 25 }, (_, hour) => hour)
@@ -248,8 +249,16 @@ function WeeklySchedule({
       return
     }
 
+    let id: string
+    try {
+      id = editingScheduleId ?? createId()
+    } catch (error) {
+      setScheduleError(storageFailureMessage(error))
+      return
+    }
+
     const nextSchedule: TimedSchedule = {
-      id: editingScheduleId ?? crypto.randomUUID(),
+      id,
       title: cleanedTitle,
       weekday: scheduleDraft.weekday,
       startTime: scheduleDraft.startTime,
