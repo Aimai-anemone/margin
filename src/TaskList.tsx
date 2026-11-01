@@ -283,7 +283,7 @@ function deleteSelectedTask() {
 }
 
   return (
-    <section className="card">
+    <section className="card tasks-list-section">
       <div className="card-heading">
         <div>
           <p className="section-label">次の課題</p>

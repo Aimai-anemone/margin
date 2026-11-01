@@ -3505,3 +3505,610 @@ select.entry-input {
     border-radius: 0 0 var(--radius-large) var(--radius-large);
   }
 }
+
+/* Quiet Precision Phase 2: 記録と予定は行で読み進め、入力は淡い面で区別する。 */
+.end-of-day-page {
+  gap: 0;
+}
+
+.end-of-day-header {
+  gap: 4px;
+  padding: 0 0 18px;
+}
+
+.end-of-day-header .card-title,
+.five-minute-heading .card-title,
+.records-heading .card-title {
+  color: var(--color-text);
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.end-of-day-date,
+.record-date {
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.end-of-day-page > .end-of-day-section,
+.end-of-day-page > .loose-plan-panel,
+.end-of-day-page > .end-of-day-save {
+  min-width: 0;
+  margin: 0;
+  padding: 18px 0;
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+}
+
+.end-of-day-page .closing-title {
+  color: var(--color-text);
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.end-of-day-page .end-of-day-plan-group + .end-of-day-plan-group {
+  border-top: 1px solid var(--color-border);
+}
+
+.end-of-day-page .end-of-day-complete-button {
+  border-color: var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-accent);
+}
+
+.end-of-day-page .end-of-day-input-group {
+  margin-top: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.end-of-day-page .end-of-day-time-field,
+.end-of-day-page .end-of-day-date-notice {
+  color: var(--color-text-muted);
+}
+
+.end-of-day-page .entry-input,
+.five-minute-page .entry-input,
+.tasks-list-section .entry-input,
+.weekly-schedule .entry-input {
+  border-color: var(--color-border-input);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.end-of-day-page .end-of-day-insight {
+  min-width: 0;
+  line-height: 1.65;
+}
+
+.end-of-day-page .habit-compact-item {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.end-of-day-page .habit-step-choice {
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+}
+
+.end-of-day-page .habit-step-choice[aria-pressed="true"] {
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.end-of-day-page .habit-rest-choice {
+  justify-self: start;
+  width: auto;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.end-of-day-page .primary-button,
+.five-minute-page .primary-button,
+.tasks-list-section .primary-button,
+.weekly-schedule .primary-button,
+.records-page .primary-button {
+  border-radius: 8px;
+}
+
+.end-of-day-page .storage-message,
+.end-of-day-page .end-of-day-error,
+.five-minute-page .five-minute-message,
+.tasks-list-section .storage-message,
+.weekly-schedule .storage-message,
+.records-page .end-of-day-error {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-danger);
+  border-radius: 8px;
+  background: var(--color-surface-subtle);
+  color: var(--color-danger);
+}
+
+.five-minute-page {
+  gap: 16px;
+}
+
+.five-minute-heading {
+  gap: 4px;
+  padding-bottom: 14px;
+}
+
+.five-minute-page > .five-minute-setup,
+.five-minute-page > .five-minute-session {
+  padding: 18px 0;
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+}
+
+.five-minute-page > .five-minute-session {
+  padding: 20px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface-subtle);
+}
+
+.five-minute-page .five-minute-methods {
+  gap: 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.five-minute-page .five-minute-method {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.five-minute-page .five-minute-method.selected {
+  border-bottom-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.five-minute-page .five-minute-tasks {
+  gap: 0;
+}
+
+.five-minute-page .five-minute-task {
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text);
+}
+
+.five-minute-page .five-minute-task.selected {
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.five-minute-page .five-minute-content {
+  color: var(--color-text);
+}
+
+.five-minute-page .five-minute-clock {
+  margin: 6px 0;
+  color: var(--color-text);
+  font-size: clamp(44px, 13vw, 56px);
+  font-weight: 600;
+}
+
+.five-minute-page .five-minute-stop-confirm {
+  border-top-color: var(--color-border);
+}
+
+.tasks-list-section,
+.course-timetable {
+  min-width: 0;
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+}
+
+.tasks-list-section .card-title,
+.course-timetable .card-title {
+  font-size: 20px;
+}
+
+.tasks-list-section .badge,
+.course-timetable .badge,
+.weekly-schedule .badge {
+  border-radius: 6px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.tasks-list-section .task-list {
+  gap: 0;
+  margin: 12px 0;
+}
+
+.tasks-list-section .task-list-item {
+  width: 100%;
+  min-height: 56px;
+  padding: 12px 2px;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tasks-list-section .task-list-item:hover,
+.tasks-list-section .task-list-item:active,
+.records-page .record-list-item:hover,
+.records-page .record-list-item:active {
+  background: var(--color-surface-subtle);
+}
+
+.tasks-list-section .task-list-item h3 {
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+.tasks-list-section .task-list-item p,
+.tasks-list-section .task-meta {
+  color: var(--color-text-muted);
+}
+
+.tasks-list-section .task-detail,
+.tasks-list-section .task-editor {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface-subtle);
+}
+
+.tasks-list-section .task-detail h3 {
+  overflow-wrap: anywhere;
+  color: var(--color-text);
+}
+
+.tasks-list-section .task-detail-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tasks-list-section .task-detail-row,
+.tasks-list-section .task-detail-step {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tasks-list-section .task-detail-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.tasks-list-section .task-detail-row span {
+  color: var(--color-text-muted);
+}
+
+.tasks-list-section .task-detail-row strong {
+  overflow-wrap: anywhere;
+  font-weight: 500;
+}
+
+.tasks-list-section .task-first-step {
+  border-color: var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.tasks-list-section .completed-task-item {
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+}
+
+.tasks-list-section .restore-task-button,
+.tasks-list-section .secondary-button,
+.weekly-schedule .secondary-button {
+  min-height: 44px;
+  border-color: var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-accent);
+}
+
+.tasks-list-section > .secondary-button {
+  background: var(--color-accent-soft);
+}
+
+.tasks-list-section .complete-task-button {
+  border-color: var(--color-border);
+  border-radius: 8px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.tasks-list-section .delete-task-button {
+  border-color: var(--color-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-danger);
+}
+
+.course-timetable-scroll {
+  border-color: var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-subtle);
+}
+
+.course-timetable-grid,
+.course-timetable-cell {
+  background: var(--color-surface);
+}
+
+.course-timetable-corner,
+.course-timetable-weekday,
+.course-timetable-period {
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.course-timetable-period span {
+  color: var(--color-text-muted);
+}
+
+.course-timetable-empty-button {
+  border-radius: 5px;
+  background: var(--color-surface-subtle);
+}
+
+.course-timetable-course {
+  box-shadow: none;
+}
+
+.course-timetable-unplaced {
+  border-color: var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-subtle);
+}
+
+.weekly-schedule {
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+}
+
+.weekly-schedule-intro .card-title {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.weekly-schedule .weekday-picker {
+  gap: 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.weekly-schedule .weekday-button {
+  min-height: 44px;
+  padding-inline: 2px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.weekly-schedule .weekday-button.active {
+  border-bottom-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.weekly-schedule .weekly-add-button {
+  border-color: var(--color-border);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.weekly-schedule .weekly-editor {
+  border-color: var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface-subtle);
+}
+
+.weekly-schedule .weekly-calendar {
+  border-color: var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.weekly-schedule .weekly-time-labels {
+  border-right-color: var(--color-border);
+  background: var(--color-surface-subtle);
+}
+
+.weekly-schedule .weekly-time-label {
+  color: var(--color-text-muted);
+}
+
+.weekly-schedule .weekly-time-grid {
+  background: var(--color-surface);
+}
+
+.weekly-schedule .weekly-time-line {
+  border-top-color: var(--color-border);
+}
+
+.weekly-schedule .weekly-schedule-block {
+  box-shadow: none;
+}
+
+.weekly-loose-plan-panel > .loose-plan-collapsed-bar,
+.weekly-loose-plan-panel > .loose-plan-panel-heading,
+.weekly-loose-plan-panel > .loose-plan-panel-content {
+  border-color: var(--color-border);
+  background: var(--color-surface-subtle);
+  color: var(--color-text);
+}
+
+.weekly-loose-plan-panel .loose-plan-collapsed-title,
+.weekly-loose-plan-panel .loose-plan-collapsed-date,
+.weekly-loose-plan-panel .loose-plan-collapsed-summary-item {
+  color: var(--color-text-muted);
+}
+
+.records-page {
+  gap: 0;
+}
+
+.records-heading {
+  gap: 4px;
+  padding: 0 0 18px;
+}
+
+.records-page > .records-section,
+.records-page > .record-summary,
+.records-page > .record-list,
+.records-page > .record-detail-actions {
+  min-width: 0;
+  margin: 0;
+  padding: 18px 0;
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+}
+
+.records-page .record-summary-periods {
+  gap: 0;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+}
+
+.records-page .record-summary-period {
+  min-height: 44px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: var(--color-text-muted);
+}
+
+.records-page .record-summary-period.selected {
+  border-bottom-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.records-page .record-summary-card {
+  gap: 12px;
+  padding: 12px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.records-page .record-summary-metrics {
+  gap: 12px;
+}
+
+.records-page .record-summary-metrics dd {
+  color: var(--color-text);
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+
+.records-page .record-summary-metrics > div:first-child dd {
+  font-size: 28px;
+  font-weight: 650;
+}
+
+.records-page .record-summary-note,
+.records-page .record-summary-metrics dt,
+.records-page .record-plan-summary {
+  color: var(--color-text-muted);
+}
+
+.records-page .record-summary-breakdown,
+.records-page .record-summary-plans {
+  border-top-color: var(--color-border);
+}
+
+.records-page .record-summary-subtitle,
+.records-page .record-summary-legend-item,
+.records-page .record-summary-plan-result {
+  color: var(--color-text);
+}
+
+.records-page .record-summary-donut-center {
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+}
+
+.records-page .record-summary-donut-total,
+.records-page .record-summary-legend-value {
+  color: var(--color-text);
+}
+
+.records-page .record-list {
+  gap: 0;
+}
+
+.records-page .record-list-item {
+  width: 100%;
+  min-height: 56px;
+  padding: 14px 2px;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+}
+
+.records-page .record-list-date {
+  color: var(--color-text);
+}
+
+.records-page .record-list-preview,
+.records-page .record-saved-period,
+.records-page .record-saved-status,
+.records-page .record-time-values dt {
+  color: var(--color-text-muted);
+}
+
+.records-page .record-missing-day {
+  border-bottom-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.records-page .record-time-values dd,
+.records-page .record-insight {
+  color: var(--color-text);
+}
+
+.records-page .record-delete-button {
+  border-color: var(--color-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-danger);
+}
+
+.records-page .record-list-item:focus-visible,
+.records-page .record-summary-period:focus-visible,
+.weekly-schedule .weekday-button:focus-visible,
+.five-minute-page .five-minute-method:focus-visible,
+.five-minute-page .five-minute-task:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
