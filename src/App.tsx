@@ -212,21 +212,23 @@ function App() {
     setDailyRecordState({ records, error: '' })
   }
 
+  const isTodayDedicated = activeTab === 'today' && (isShowingHabits || isShowingFiveMinute || endOfDayDate !== null)
+
   return (
     <div className="app">
-      <header className="app-header">
+      {!isTodayDedicated && <header className={`app-header${activeTab === 'today' ? ' today-app-header' : ''}`}>
         <div>
           <p className="app-name">Margin</p>
           <p className="today-date">{today}</p>
         </div>
-      </header>
+      </header>}
 
-      <main className="main-content">
+      <main className={`main-content${isTodayDedicated ? ' main-content-dedicated' : ''}`}>
         {timetableError && <p className="weekly-editor-error" role="alert">{timetableError}</p>}
         {activeTab === 'today' && (
           <div
             id="today-panel"
-            className="tab-panel"
+            className="tab-panel today-tab-panel"
             role="region"
             aria-labelledby="today-tab"
           >
@@ -250,7 +252,7 @@ function App() {
             />
           ) : (
           <>
-          <section className="card primary-card">
+          <section className={`card primary-card today-entry-card${!entry && !isEditingEntry ? ' today-entry-card-empty' : ''}`}>
           <p className="section-label">今日の入口</p>
           {(entryState.error || entryError) && <p className="storage-message" role="alert">{entryState.error || entryError}</p>}
 
@@ -341,7 +343,7 @@ function App() {
             window.scrollTo({ top: 0 })
           }} />
 
-          <section className="card">
+          <section className="card today-five-minute-entry">
           <div className="card-heading">
             <div>
               <p className="section-label">帰宅後</p>

@@ -82,7 +82,7 @@ function HabitManager({ controller, onBack, onDaily }: Props & { onDaily: () => 
   return (
     <div className="habits-page">
       <header className="habit-page-heading">
-        <button className="cancel-button" type="button" onClick={() => { if (canClose()) onBack() }}>今日へ戻る</button>
+        <button className="cancel-button dedicated-page-back" type="button" onClick={() => { if (canClose()) onBack() }}><span aria-hidden="true">←</span>今日へ戻る</button>
         <h1 className="card-title">習慣</h1>
         <div className="habit-frequency-options" role="group" aria-label="習慣画面">
           <button className="habit-choice" type="button" aria-pressed={false} onClick={() => { if (canClose()) onDaily() }}>今日の習慣</button>
@@ -158,13 +158,13 @@ function HabitManager({ controller, onBack, onDaily }: Props & { onDaily: () => 
                 <h3>{habit.name}</h3>
                 <p className="supporting-text">{frequencyLabel(habit)}</p>
                 {status === 'active' && habit.trigger && <p className="habit-trigger-preview">{habit.trigger}</p>}
-                <div className="habit-actions">
+                <div className="habit-actions habit-item-actions">
                   <button className="secondary-button" type="button" disabled={!!controller.error} onClick={() => openEditor(habit)}>編集する</button>
                   <button className={status === 'active' ? 'secondary-button' : 'primary-button'} type="button" disabled={!!controller.error} onClick={() => perform(
                     () => controller.changeStatus(habit.id, status === 'active' ? 'paused' : 'active'),
                     status === 'active' ? '習慣を休止しました。' : '習慣を再開しました。',
                   )}>{status === 'active' ? '休止する' : '再開する'}</button>
-                  <button className="cancel-button" type="button" disabled={!!controller.error} onClick={() => perform(
+                  <button className="text-button habit-hide-button" type="button" disabled={!!controller.error} onClick={() => perform(
                     () => controller.changeStatus(habit.id, 'hidden'), '習慣を一覧から非表示にしました。',
                   )}>一覧から非表示</button>
                 </div>

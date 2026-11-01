@@ -44,10 +44,61 @@ a:focus-visible,
   font-size: 14px;
 }
 
+.today-app-header {
+  padding-top: var(--space-5);
+  padding-bottom: var(--space-4);
+}
+
 .main-content {
   display: grid;
   gap: 14px;
   padding: 0 16px 32px;
+}
+
+.main-content-dedicated {
+  padding-top: var(--space-4);
+}
+
+.tab-panel.today-tab-panel {
+  gap: var(--space-3);
+}
+
+.today-entry-card-empty,
+.today-tab-panel .habit-entry,
+.today-five-minute-entry,
+.today-tab-panel .end-of-day-entry {
+  padding-block: var(--space-4);
+}
+
+.today-entry-card .section-label,
+.today-five-minute-entry .section-label {
+  margin-bottom: 6px;
+}
+
+.today-entry-card .supporting-text,
+.today-five-minute-entry .supporting-text {
+  margin: var(--space-2) 0 var(--space-3);
+}
+
+.today-tab-panel .habit-entry > .supporting-text,
+.today-tab-panel .end-of-day-entry .supporting-text {
+  margin: 6px 0 var(--space-3);
+}
+
+.today-tab-panel .habit-entry-names {
+  margin: var(--space-1) 0 var(--space-3);
+}
+
+.today-tab-panel .end-of-day-entry {
+  gap: var(--space-2);
+}
+
+.today-tab-panel > .loose-plan-panel-compact.loose-plan-panel-empty {
+  padding-block: var(--space-3);
+}
+
+.today-tab-panel .loose-plan-panel-compact .loose-plan-date {
+  display: none;
 }
 
 .tab-panel {
@@ -1974,6 +2025,29 @@ select.entry-input {
   padding: 8px 0;
 }
 
+.end-of-day-section {
+  gap: var(--space-2);
+  padding-block: var(--space-4);
+}
+
+.end-of-day-section.end-of-day-plans-empty {
+  padding-block: var(--space-3);
+}
+
+.end-of-day-section .end-of-day-save-hint {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.end-of-day-page > .loose-plan-panel {
+  gap: var(--space-3);
+  padding-block: var(--space-4);
+}
+
+.end-of-day-page > .loose-plan-panel .loose-plan-panel-content {
+  gap: var(--space-2);
+}
+
 .end-of-day-date {
   margin: 0;
   color: #697068;
@@ -2019,8 +2093,8 @@ select.entry-input {
 .end-of-day-input-group {
   display: grid;
   min-width: 0;
-  gap: 12px;
-  padding-top: 8px;
+  gap: var(--space-2);
+  padding-top: var(--space-1);
 }
 
 .end-of-day-duration {
@@ -2059,7 +2133,7 @@ select.entry-input {
 }
 
 .end-of-day-insight {
-  min-height: 96px;
+  min-height: 72px;
   max-height: 320px;
   overflow-y: auto;
   overflow-wrap: anywhere;
@@ -2500,6 +2574,10 @@ select.entry-input {
   justify-self: start;
 }
 
+.five-minute-heading {
+  gap: var(--space-2);
+}
+
 .five-minute-page .supporting-text,
 .five-minute-page .section-label,
 .five-minute-page .five-minute-message p,
@@ -2604,8 +2682,24 @@ select.entry-input {
   gap: 14px;
 }
 
+.habits-page,
+.habit-group {
+  gap: var(--space-3);
+}
+
+.habit-page-heading {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-2);
+}
+
 .habit-page-heading .card-title {
-  margin-block: 12px 8px;
+  margin: 0;
+}
+
+.habit-page-heading .habit-frequency-options,
+.habit-page-heading .supporting-text {
+  margin: 0;
 }
 
 .habit-entry,
@@ -2678,6 +2772,22 @@ select.entry-input {
   margin: 0;
   padding: 10px 12px;
   overflow-wrap: anywhere;
+}
+
+.habit-item-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.habit-item-actions .habit-hide-button {
+  grid-column: 1 / -1;
+  justify-self: start;
+  min-height: var(--control-height-compact);
+  padding-inline: var(--space-1);
+  color: var(--color-accent-text);
+  text-align: left;
 }
 
 .habit-frequency {
@@ -2760,20 +2870,27 @@ select.entry-input {
 .habit-record-editor {
   display: grid;
   min-width: 0;
-  gap: 12px;
+  gap: var(--space-2);
   overflow-wrap: anywhere;
 }
 
 .habit-step-choice {
   display: grid;
-  gap: 6px;
-  padding: 12px;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
   text-align: left;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
+.habit-step-choice span:first-child {
+  font-size: var(--font-size-body);
+  font-weight: 650;
+}
+
 .habit-step-choice span:last-child {
+  font-size: var(--font-size-body);
+  line-height: 1.5;
   font-weight: 400;
 }
 
@@ -2784,6 +2901,10 @@ select.entry-input {
 
 .habit-rest-choice[aria-pressed="true"] {
   text-decoration: underline;
+}
+
+.habit-record-editor .habit-rest-choice {
+  margin-top: var(--space-1);
 }
 
 .habit-day-item {
@@ -2820,14 +2941,14 @@ select.entry-input {
 .habit-day-content {
   display: grid;
   min-width: 0;
-  gap: 10px;
+  gap: var(--space-2);
   overflow-wrap: anywhere;
 }
 
 .habit-compact-item,
 .habit-readonly-item {
   min-width: 0;
-  padding-block: 8px;
+  padding-block: 6px;
   overflow-wrap: anywhere;
 }
 
@@ -2872,6 +2993,22 @@ select.entry-input {
 .habit-day-content button:focus-visible {
   outline: 2px solid #3d5744;
   outline-offset: 2px;
+}
+
+.habit-page-heading .dedicated-page-back,
+.end-of-day-header .dedicated-page-back,
+.five-minute-heading .dedicated-page-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+  width: auto;
+  min-height: var(--control-height-compact);
+  padding: var(--space-2) var(--space-1);
+  border: 0;
+  border-radius: var(--radius-small);
+  background-color: transparent;
+  color: var(--color-accent-text);
 }
 
 @media (prefers-reduced-motion: reduce) {

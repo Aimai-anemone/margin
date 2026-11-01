@@ -52,7 +52,7 @@ function FiveMinuteStart({ controller, onBack }: Props) {
   return (
     <div className="five-minute-page">
       <header className="five-minute-heading">
-        <button className="cancel-button" type="button" onClick={onBack}>今日へ戻る</button>
+        <button className="cancel-button dedicated-page-back" type="button" onClick={onBack}><span aria-hidden="true">←</span>今日へ戻る</button>
         <h1 className="card-title">5分の着手レーン</h1>
       </header>
 
