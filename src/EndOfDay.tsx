@@ -170,7 +170,7 @@ function EndOfDay({
   return (
     <div className="end-of-day-page">
       <header className="end-of-day-header">
-        <button className="cancel-button" type="button" onClick={onBack}>{backLabel}</button>
+        <button className="cancel-button dedicated-page-back" type="button" onClick={onBack}><span aria-hidden="true">←</span>{backLabel}</button>
         <h1 className="card-title">{mode === 'today' ? '一日の終わり' : mode === 'edit' ? '記録を編集' : 'この日を記録'}</h1>
         <p className="end-of-day-date">
           {new Intl.DateTimeFormat('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })
@@ -186,13 +186,14 @@ function EndOfDay({
         </p>
       ) : (
         <>
-          <section className="card end-of-day-section">
+          <section className={`card end-of-day-section${displayedPlans.length === 0 ? ' end-of-day-plans-empty' : ''}`}>
             <h2 className="closing-title">{mode === 'today' ? '今日のゆるい予定' : mode === 'edit' ? '保存されたゆるい予定' : 'この日のゆるい予定'}</h2>
             <p className="supporting-text">
               {mode !== 'edit' && loosePlansLoadError ? 'ゆるい予定を確認できません。' : displayedPlans.length === 0
                 ? (mode === 'today' ? '今日のゆるい予定はありません。' : 'この日のゆるい予定はありません。')
                 : `${displayedPlans.length}件中${displayedPlans.filter((plan) => plan.completed).length}件を完了`}
             </p>
+            {mode !== 'edit' && !loosePlansLoadError && <p className="supporting-text end-of-day-save-hint">予定の変更はすぐに保存されます。</p>}
             {((mode !== 'edit' && loosePlansLoadError) || loosePlanError) && <p className="storage-message" role="alert">{(mode !== 'edit' && loosePlansLoadError) || loosePlanError}</p>}
             {mode === 'edit' && <p className="supporting-text">保存された予定の完了状態だけを訂正できます。元の予定には反映されません。</p>}
             {dayPeriods.map((period) => {
@@ -236,7 +237,7 @@ function EndOfDay({
 
           {habits && <section className="card end-of-day-section habit-end-of-day">
             <h2 className="closing-title">{date === getLocalDate() ? '今日の習慣' : 'この日の習慣'}</h2>
-            {isRecentHabitDate(date) && <p className="supporting-text">習慣は選んだ時点で保存されます。</p>}
+            {isRecentHabitDate(date) && <p className="supporting-text">習慣は選ぶとすぐに保存されます。</p>}
             <HabitDayList controller={habits} targetDate={date} compact />
           </section>}
 
@@ -264,7 +265,7 @@ function EndOfDay({
             <label className="closing-title" htmlFor="daily-insight">{mode === 'today' ? '今日' : 'この日'}、気づいたことはありますか？</label>
             <p className="supporting-text" id="daily-insight-help">集中できた場面や、気になったことを短く残せます。</p>
             <textarea ref={insightRef} id="daily-insight" className="entry-input end-of-day-insight"
-              rows={3} value={insight} aria-describedby="daily-insight-help"
+              rows={2} value={insight} aria-describedby="daily-insight-help"
               onChange={(event) => { setInsight(event.target.value); setMessage('') }} />
           </section>
 
@@ -285,8 +286,8 @@ function EndOfDay({
             </button>
             {message && <p className="supporting-text" role="status">{message}</p>}
             <p className="supporting-text">{mode === 'edit'
-              ? '完了状態・時間・気づきは、このボタンで保存します。'
-              : '予定の変更はそのつど保存されます。時間と気づきは、このボタンで保存します。'}</p>
+              ? '予定の完了状態・時間・気づきを保存します。'
+              : '時間と気づきを保存します。'}</p>
           </div>
         </>
       )}

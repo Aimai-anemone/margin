@@ -46,13 +46,12 @@ function RecordSummary({ records, period, onPeriodChange }: Props) {
 
       <div className="card record-summary-card" id="record-period-summary" role="region" aria-label="選択期間の要約">
         <div className="record-summary-heading">
-          <h2 className="closing-title">{formatRecordPeriod(period, summary.range, today)}</h2>
+          <h2 className="closing-title">{summary.recordCount === 0 && period === 'all' ? '全期間' : formatRecordPeriod(period, summary.range, today)}</h2>
           <p className="record-summary-note">記録した日数：{summary.recordCount}日</p>
         </div>
-        {summary.recordCount === 0 && period !== 'all' && (
-          <p className="supporting-text">{period === 'day' ? '今日の記録はまだありません。' : 'この期間の記録はまだありません。'}</p>
-        )}
-
+        {summary.recordCount === 0 ? (
+          <p className="supporting-text record-summary-empty">この期間には、まだ記録がありません。一日の終わりを記録すると、ここに傾向が表示されます。</p>
+        ) : <>
         <dl className="record-summary-metrics">
           <div>
             <dt>スクリーンタイム合計</dt>
@@ -121,6 +120,7 @@ function RecordSummary({ records, period, onPeriodChange }: Props) {
             </p>
           )}
         </div>
+        </>}
       </div>
     </section>
   )

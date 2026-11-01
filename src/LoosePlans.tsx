@@ -214,7 +214,7 @@ function LoosePlanPanel({
     <section
       className={`card loose-plan-panel ${
         stickyHeading ? 'weekly-loose-plan-panel' : ''
-      } ${compact ? 'loose-plan-panel-compact' : ''}`}
+      } ${compact ? 'loose-plan-panel-compact' : ''} ${plansForDate.length === 0 ? 'loose-plan-panel-empty' : ''}`}
     >
       {collapsible && !isExpanded ? (
         <button

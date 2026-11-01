@@ -150,7 +150,7 @@ function RecordsPage({
 
   return (
     <div className="records-page">
-      <header className="records-heading">
+      <header className={`records-heading${view.kind === 'list' ? ' records-heading-list' : ''}`}>
         {view.kind !== 'list' && <button className="cancel-button" type="button" onClick={showList}>記録へ戻る</button>}
         <h1 className="card-title">{view.kind === 'list' ? '記録' : '記録の詳細'}</h1>
         {view.kind === 'list' ? (
@@ -171,19 +171,18 @@ function RecordsPage({
               <p className="supporting-text">今日を含む3日分まで、あとから記録できます。</p>
               <div className="record-missing-days">
                 {recentDates.map((date) => (
-                  <button className="secondary-button" type="button" key={date} onClick={() => startCreating(date)}>
-                    {date === getLocalDate() ? '今日・' : date === getLocalDate(-1) ? '昨日・' : '一昨日・'}{formatDate(date)}
+                  <button className="record-missing-day" type="button" key={date} onClick={() => startCreating(date)}>
+                    <span>{date === getLocalDate() ? '今日' : date === getLocalDate(-1) ? '昨日' : '一昨日'}</span>
+                    <span>{formatDate(date)}</span>
+                    <span aria-hidden="true">›</span>
                   </button>
                 ))}
               </div>
             </section>
           )}
 
-          <section className="record-list" aria-labelledby="record-list-heading">
+          {sortedRecords.length > 0 && <section className="record-list" aria-labelledby="record-list-heading">
             <h2 className="closing-title" id="record-list-heading">過去の記録</h2>
-            {!loadError && sortedRecords.length === 0 && (
-              <p className="card supporting-text">まだ記録はありません。一日の終わりを振り返ると、ここに残ります。</p>
-            )}
             {sortedRecords.map((record) => (
               <button className="card record-list-item" type="button" key={record.date}
                 aria-label={`${formatDate(record.date)}の記録を見る`} onClick={() => showDetail(record.date)}>
@@ -194,7 +193,7 @@ function RecordsPage({
                 {record.insight && <span className="record-list-preview">{record.insight}</span>}
               </button>
             ))}
-          </section>
+          </section>}
         </>
       ) : selectedRecord ? (
         <>

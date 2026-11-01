@@ -26,7 +26,6 @@ function SettingsPage({ timetableSettings, onSaveTimetableSettings, loadError = 
   return (
     <div className="settings-page">
       <div className="settings-page-heading">
-        <p className="section-label">設定</p>
         <h1 className="card-title">設定</h1>
       </div>
 
@@ -34,6 +33,7 @@ function SettingsPage({ timetableSettings, onSaveTimetableSettings, loadError = 
 
       <section className="card weekly-start-settings">
         <h2 className="card-title">週間予定</h2>
+        <p className="supporting-text">選んだ時刻から24時間分を表示します。</p>
         <div className="form-field weekly-start-field">
           <label className="input-label" htmlFor="weekly-start-hour">週間予定の開始時刻</label>
           <select id="weekly-start-hour" className="entry-input"
@@ -45,7 +45,6 @@ function SettingsPage({ timetableSettings, onSaveTimetableSettings, loadError = 
             ))}
           </select>
         </div>
-        <p className="supporting-text">選んだ時刻から24時間分を表示します。</p>
         {(loadError || weeklyStartError) && <p className="weekly-editor-error" role="alert">{loadError || weeklyStartError}</p>}
       </section>
 

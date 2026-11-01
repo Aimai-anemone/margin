@@ -43,7 +43,8 @@ export default function HabitDayList({ controller, initialHabitId, onBack, onMan
 
   return <div className={compact ? 'habit-day-content' : 'habits-page'}>
     {!compact && <header className="habit-page-heading">
-      <button className="cancel-button" type="button" onClick={habit ? () => { setSelectedId(null); setError(''); setMessage('') } : onBack}>
+      <button className="cancel-button dedicated-page-back" type="button" onClick={habit ? () => { setSelectedId(null); setError(''); setMessage('') } : onBack}>
+        <span aria-hidden="true">←</span>
         {habit ? '選択日の習慣へ戻る' : '今日へ戻る'}
       </button>
       <h1 className="card-title">習慣</h1>
@@ -60,7 +61,7 @@ export default function HabitDayList({ controller, initialHabitId, onBack, onMan
         })}
       </div>
     </header>}
-    <p className="supporting-text">{formatDate(date)}</p>
+    {!compact && !inRange && <p className="supporting-text">{formatDate(date)}</p>}
     {!inRange && <p className="supporting-text">{readOnly ? 'この日の習慣記録は閲覧のみです。' : '日付が変わり、この日の習慣を記録できる期間を過ぎました。'}</p>}
     {(controller.error || error) && <p className="storage-message" role="alert">{controller.error || error}</p>}
     {message && <p className="supporting-text" role="status">{message}</p>}
@@ -76,7 +77,7 @@ export default function HabitDayList({ controller, initialHabitId, onBack, onMan
       <h2 className="closing-title">{habit.name}</h2>
       {habit.trigger && <p className="supporting-text">{habit.trigger}</p>}
       <p>今日はどこまでできましたか？</p>
-      <p className="supporting-text">選ぶとすぐに保存します。あとから選び直せます。</p>
+      {!compact && <p className="supporting-text">選ぶとすぐに保存します。あとから選び直せます。</p>}
       {habitSteps.map((step) => <button type="button" className="habit-choice habit-step-choice" key={step.value}
         disabled={!inRange} aria-pressed={record?.result === step.value} onClick={() => save(step.value)}>
         <span>{step.label}{record?.result === step.value && '（記録済み）'}</span>
