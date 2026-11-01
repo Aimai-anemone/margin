@@ -14,6 +14,7 @@ type Props = {
   records: DailyRecord[]
   loadError: string
   loosePlans: LoosePlan[]
+  loosePlansLoadError?: string
   onReloadRecords: () => { records: DailyRecord[]; error: string }
   onSaveRecord: (record: DailyRecordInput, operation: 'create' | 'update') => void
   onDeleteRecord: (date: string) => void
@@ -40,7 +41,7 @@ function planSummary(record: DailyRecord) {
 }
 
 function RecordsPage({
-  records, loadError, loosePlans, onReloadRecords, onSaveRecord, onDeleteRecord,
+  records, loadError, loosePlans, loosePlansLoadError, onReloadRecords, onSaveRecord, onDeleteRecord,
   onSaveLoosePlan, onDeleteLoosePlan, onToggleLoosePlanComplete,
 }: Props) {
   const [view, setView] = useState<RecordsView>({ kind: 'list' })
@@ -132,6 +133,7 @@ function RecordsPage({
         record={selectedRecord}
         loadError={loadError}
         loosePlans={loosePlans}
+        loosePlansLoadError={loosePlansLoadError}
         onBack={view.kind === 'edit' ? () => showDetail(view.date) : showList}
         onSave={saveRecord}
         onSaveLoosePlan={onSaveLoosePlan}

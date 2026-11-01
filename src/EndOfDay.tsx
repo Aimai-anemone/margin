@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { storageFailureMessage } from './StorageSafety'
 import LoosePlanPanel from './LoosePlans'
 import { dayPeriods, getLocalDate, type LoosePlan } from './LoosePlanStorage'
 import { canCreateDailyRecord, parseDurationInput, type DailyRecord, type DailyRecordInput } from './DailyRecordStorage'
@@ -10,6 +11,7 @@ type Props = {
   record?: DailyRecord
   loadError: string
   loosePlans: LoosePlan[]
+  loosePlansLoadError?: string
   onBack: () => void
   onSave: (record: DailyRecordInput) => void
   onSaveLoosePlan: (plan: LoosePlan) => void
@@ -63,7 +65,7 @@ function DurationFields({ id, label, value, disabled = false, error, onChange }:
 }
 
 function EndOfDay({
-  date, mode = 'today', backLabel = '今日へ戻る', record, loadError, loosePlans, onBack, onSave,
+  date, mode = 'today', backLabel = '今日へ戻る', record, loadError, loosePlans, loosePlansLoadError = '', onBack, onSave,
   onSaveLoosePlan, onDeleteLoosePlan, onToggleLoosePlanComplete,
 }: Props) {
   const [screenTime, setScreenTime] = useState(() => toTimeInput(record?.screenTimeMinutes))
@@ -76,6 +78,7 @@ function EndOfDay({
   const [unintendedError, setUnintendedError] = useState('')
   const [saveError, setSaveError] = useState('')
   const [message, setMessage] = useState('')
+  const [loosePlanError, setLoosePlanError] = useState('')
   const insightRef = useRef<HTMLTextAreaElement>(null)
   const displayedPlans = mode === 'edit' ? savedPlans : loosePlans.filter((plan) => plan.date === date)
   const screenTimeIsEmpty = screenTime.hours.trim() === '' && screenTime.minutes.trim() === ''
@@ -182,10 +185,11 @@ function EndOfDay({
           <section className="card end-of-day-section">
             <h2 className="closing-title">{mode === 'today' ? '今日のゆるい予定' : mode === 'edit' ? '保存されたゆるい予定' : 'この日のゆるい予定'}</h2>
             <p className="supporting-text">
-              {displayedPlans.length === 0
+              {mode !== 'edit' && loosePlansLoadError ? 'ゆるい予定を確認できません。' : displayedPlans.length === 0
                 ? (mode === 'today' ? '今日のゆるい予定はありません。' : 'この日のゆるい予定はありません。')
                 : `${displayedPlans.length}件中${displayedPlans.filter((plan) => plan.completed).length}件を完了`}
             </p>
+            {((mode !== 'edit' && loosePlansLoadError) || loosePlanError) && <p className="storage-message" role="alert">{(mode !== 'edit' && loosePlansLoadError) || loosePlanError}</p>}
             {mode === 'edit' && <p className="supporting-text">保存された予定の完了状態だけを訂正できます。元の予定には反映されません。</p>}
             {dayPeriods.map((period) => {
               const plans = displayedPlans.map((plan, index) => ({ plan, index }))
@@ -204,7 +208,13 @@ function EndOfDay({
                               setSavedPlans((currentPlans) => currentPlans.map((savedPlan, savedIndex) =>
                                 savedIndex === index ? { ...savedPlan, completed: !savedPlan.completed } : savedPlan))
                             } else {
-                              onToggleLoosePlanComplete(plan.id)
+                              try {
+                                onToggleLoosePlanComplete(plan.id)
+                                setLoosePlanError('')
+                              } catch (error) {
+                                setLoosePlanError(storageFailureMessage(error))
+                                return
+                              }
                             }
                             setMessage('')
                           }
@@ -250,6 +260,7 @@ function EndOfDay({
 
           {mode === 'today' && <LoosePlanPanel
             plans={loosePlans} date={tomorrowDate} heading="明日のゆるい予定"
+            loadError={loosePlansLoadError}
             onSave={(plan) => { if (checkDateBeforeAction()) onSaveLoosePlan(plan) }}
             onDelete={(planId) => { if (checkDateBeforeAction()) onDeleteLoosePlan(planId) }}
             onToggleComplete={(planId) => { if (checkDateBeforeAction()) onToggleLoosePlanComplete(planId) }}

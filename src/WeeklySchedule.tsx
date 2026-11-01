@@ -1,48 +1,18 @@
 import { useState } from 'react'
 import LoosePlanPanel from './LoosePlans'
 import { type LoosePlan } from './LoosePlanStorage'
+import { loadWeeklyScheduleState, writeWeeklySchedules, weekdays, scheduleColors, type Weekday, type TimedSchedule } from './WeeklyScheduleStorage'
+import { requireStoredData, storageFailureMessage } from './StorageSafety'
 
-const WEEKLY_SCHEDULES_STORAGE_KEY = 'margin-weekly-schedules'
 const HOUR_HEIGHT = 72
 const hours = Array.from({ length: 25 }, (_, hour) => hour)
-
-const weekdays = [
-  '日曜日',
-  '月曜日',
-  '火曜日',
-  '水曜日',
-  '木曜日',
-  '金曜日',
-  '土曜日',
-] as const
-
-type Weekday = (typeof weekdays)[number]
-
-const scheduleColors = [
-  { value: 'green', label: '緑' },
-  { value: 'red', label: '赤' },
-  { value: 'blue', label: '青' },
-  { value: 'amber', label: '琥珀' },
-  { value: 'purple', label: '紫' },
-] as const
-
-type ScheduleColor = (typeof scheduleColors)[number]['value']
-
-type TimedSchedule = {
-  id: string
-  title: string
-  weekday: Weekday
-  startTime: string
-  endTime: string
-  memo: string
-  color: ScheduleColor
-}
 
 type ScheduleDraft = Omit<TimedSchedule, 'id'>
 
 type WeeklyScheduleProps = {
   startHour: number
   loosePlans: LoosePlan[]
+  loosePlansLoadError?: string
   todayDate: string
   tomorrowDate: string
   onSaveLoosePlan: (plan: LoosePlan) => void
@@ -68,77 +38,6 @@ const emptySchedule: ScheduleDraft = {
   endTime: '10:00',
   memo: '',
   color: 'green',
-}
-
-function isScheduleColor(value: unknown): value is ScheduleColor {
-  return scheduleColors.some((color) => color.value === value)
-}
-
-function isTime(value: unknown): value is string {
-  return (
-    typeof value === 'string' &&
-    /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)
-  )
-}
-
-function parseTimedSchedule(
-  value: unknown,
-): TimedSchedule | null {
-  if (
-    typeof value !== 'object' ||
-    value === null ||
-    Array.isArray(value)
-  ) {
-    return null
-  }
-
-  const schedule = value as Record<string, unknown>
-
-  if (
-    typeof schedule.id !== 'string' ||
-    typeof schedule.title !== 'string' ||
-    !weekdays.includes(schedule.weekday as Weekday) ||
-    !isTime(schedule.startTime) ||
-    !isTime(schedule.endTime)
-  ) {
-    return null
-  }
-
-  return {
-    id: schedule.id,
-    title: schedule.title,
-    weekday: schedule.weekday as Weekday,
-    startTime: schedule.startTime,
-    endTime: schedule.endTime,
-    memo: typeof schedule.memo === 'string' ? schedule.memo : '',
-    color: isScheduleColor(schedule.color)
-      ? schedule.color
-      : 'green',
-  }
-}
-
-function loadSchedules(): TimedSchedule[] {
-  const savedSchedules = localStorage.getItem(
-    WEEKLY_SCHEDULES_STORAGE_KEY,
-  )
-
-  if (savedSchedules === null) {
-    return []
-  }
-
-  try {
-    const parsedSchedules: unknown = JSON.parse(savedSchedules)
-
-    if (!Array.isArray(parsedSchedules)) {
-      return []
-    }
-
-    return parsedSchedules
-      .map(parseTimedSchedule)
-      .filter((schedule): schedule is TimedSchedule => schedule !== null)
-  } catch {
-    return []
-  }
 }
 
 function sortSchedules(schedules: TimedSchedule[]) {
@@ -240,15 +139,15 @@ function positionOverlappingSchedules(
 function WeeklySchedule({
   startHour,
   loosePlans,
+  loosePlansLoadError,
   todayDate,
   tomorrowDate,
   onSaveLoosePlan,
   onDeleteLoosePlan,
   onToggleLoosePlanComplete,
 }: WeeklyScheduleProps) {
-  const [schedules, setSchedules] = useState<TimedSchedule[]>(
-    loadSchedules,
-  )
+  const [scheduleState, setScheduleState] = useState(loadWeeklyScheduleState)
+  const schedules = scheduleState.data
   const [selectedWeekday, setSelectedWeekday] =
     useState<Weekday>(() => getWeekdayForDate(todayDate))
   const [scheduleDraft, setScheduleDraft] =
@@ -279,11 +178,16 @@ function WeeklySchedule({
   function saveSchedules(nextSchedules: TimedSchedule[]) {
     const sortedSchedules = sortSchedules(nextSchedules)
 
-    setSchedules(sortedSchedules)
-    localStorage.setItem(
-      WEEKLY_SCHEDULES_STORAGE_KEY,
-      JSON.stringify(sortedSchedules),
-    )
+    try {
+      requireStoredData(scheduleState)
+      writeWeeklySchedules(sortedSchedules)
+      setScheduleState({ status: 'ready', data: sortedSchedules, error: '' })
+      setScheduleError('')
+      return true
+    } catch (error) {
+      setScheduleError(storageFailureMessage(error))
+      return false
+    }
   }
 
   function updateScheduleDraft(
@@ -297,6 +201,7 @@ function WeeklySchedule({
   }
 
   function startAddingSchedule() {
+    if (scheduleState.status === 'error') return
     setScheduleDraft({
       ...emptySchedule,
       weekday: selectedWeekday,
@@ -362,7 +267,7 @@ function WeeklySchedule({
               : schedule,
           )
 
-    saveSchedules(nextSchedules)
+    if (!saveSchedules(nextSchedules)) return
     cancelEditingSchedule()
   }
 
@@ -379,11 +284,11 @@ function WeeklySchedule({
       return
     }
 
-    saveSchedules(
+    if (!saveSchedules(
       schedules.filter(
         (schedule) => schedule.id !== editingScheduleId,
       ),
-    )
+    )) return
     cancelEditingSchedule()
   }
 
@@ -396,7 +301,7 @@ function WeeklySchedule({
             <h2 className="card-title">週間</h2>
           </div>
 
-          <span className="badge">{selectedSchedules.length}件</span>
+          <span className="badge">{scheduleState.status === 'error' ? '確認' : `${selectedSchedules.length}件`}</span>
         </div>
 
         <p className="supporting-text">
@@ -428,6 +333,7 @@ function WeeklySchedule({
         <LoosePlanPanel
           key={loosePlanPanel.date}
           plans={loosePlans}
+          loadError={loosePlansLoadError}
           date={loosePlanPanel.date}
           heading={loosePlanPanel.heading}
           collapsible
@@ -442,10 +348,12 @@ function WeeklySchedule({
         className="secondary-button weekly-add-button"
         type="button"
         onClick={startAddingSchedule}
+        disabled={scheduleState.status === 'error'}
       >
         予定を追加する
       </button>
 
+      {(scheduleState.error || scheduleError) && <p className="storage-message" role="alert">{scheduleState.error || scheduleError}</p>}
       {isShowingEditor && (
         <div className="weekly-editor">
           <p className="section-label">
@@ -592,10 +500,6 @@ function WeeklySchedule({
               rows={4}
             />
           </div>
-
-          {scheduleError !== '' && (
-            <p className="weekly-editor-error">{scheduleError}</p>
-          )}
 
           <div className="editor-actions">
             <button

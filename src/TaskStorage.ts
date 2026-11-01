@@ -1,3 +1,5 @@
+import { readStoredJson, saveStoredJson, type SafeStorage } from './StorageSafety'
+
 export const TASKS_STORAGE_KEY = 'margin-tasks'
 
 export type Task = {
@@ -42,23 +44,28 @@ export function formatTaskDeadline(value: string, emptyText = '締切は未設�
   }).format(date)
 }
 
-export function loadTasks(): Task[] {
-  try {
-    const parsed: unknown = JSON.parse(localStorage.getItem(TASKS_STORAGE_KEY) ?? '[]')
-    if (!Array.isArray(parsed)) return []
-    return parsed.filter((value): value is Task => {
-      if (typeof value !== 'object' || value === null) return false
-      const task = value as Record<string, unknown>
-      return typeof task.id === 'string' && typeof task.title === 'string' &&
-        typeof task.deadline === 'string' && typeof task.format === 'string' &&
-        typeof task.firstStep === 'string' &&
-        (task.completed === undefined || typeof task.completed === 'boolean')
-    }).map((task) => ({ ...task, completed: task.completed ?? false }))
-  } catch {
-    // 読み取りだけを行い、壊れた保存内容も削除しない。
-    return []
+function parseTasks(value: unknown): Task[] | null {
+  if (!Array.isArray(value)) return null
+  const tasks: Task[] = []
+  const ids = new Set<string>()
+  for (const item of value) {
+    if (typeof item !== 'object' || item === null || Array.isArray(item)) return null
+    const task = item as Record<string, unknown>
+    if (typeof task.id !== 'string' || !task.id.trim() || ids.has(task.id) ||
+      typeof task.title !== 'string' || typeof task.deadline !== 'string' ||
+      typeof task.format !== 'string' || typeof task.firstStep !== 'string' ||
+      (task.completed !== undefined && typeof task.completed !== 'boolean')) return null
+    ids.add(task.id)
+    tasks.push({ ...task, id: task.id, title: task.title, deadline: task.deadline,
+      format: task.format, firstStep: task.firstStep, completed: task.completed ?? false })
   }
+  return tasks
 }
+
+export const loadTaskState = (storage?: SafeStorage) => readStoredJson(TASKS_STORAGE_KEY, '課題', [], parseTasks, storage)
+// 5分着手の読み取り専用一覧との互換性を維持する。保存・書き出しには結果全体を使う。
+export const loadTasks = () => loadTaskState().data
+export const writeTasks = (tasks: Task[], storage?: SafeStorage) => saveStoredJson(TASKS_STORAGE_KEY, '課題', tasks, parseTasks, [], storage)
 
 export function sortTasks(tasks: Task[]) {
   return [...tasks].sort((firstTask, secondTask) => {

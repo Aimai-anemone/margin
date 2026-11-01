@@ -7,24 +7,24 @@ import EndOfDay from './EndOfDay'
 import RecordsPage from './RecordsPage'
 import FiveMinuteStart from './FiveMinuteStart'
 import { useFiveMinuteStart } from './useFiveMinuteStart'
+import { loadEntryState, saveEntryValue } from './EntryStorage'
+import { requireStoredData, storageFailureMessage } from './StorageSafety'
 import { deleteDailyRecord, loadDailyRecords, saveDailyRecord, type DailyRecordInput } from './DailyRecordStorage'
 import { TIMETABLE_SETTINGS_KEY, loadTimetableSettings, saveTimetableSettings, type TimetableSettings } from './TimetableStorage'
 import {
   getLocalDate,
-  loadLoosePlans,
-  LOOSE_PLANS_STORAGE_KEY,
+  loadLoosePlanState,
+  writeLoosePlans,
   type LoosePlan,
 } from './LoosePlanStorage'
 import './App.css'
 
-const ENTRY_STORAGE_KEY = 'margin-entry'
-
 type ActiveTab = 'today' | 'tasks' | 'weekly' | 'records' | 'settings'
 
 function App() {
-  const [entry, setEntry] = useState(() => {
-  return localStorage.getItem(ENTRY_STORAGE_KEY) ?? ''
-})
+  const [entryState, setEntryState] = useState(loadEntryState)
+  const entry = entryState.data
+  const [entryError, setEntryError] = useState('')
 
   const [entryDraft, setEntryDraft] = useState('')
   const [isEditingEntry, setIsEditingEntry] = useState(false)
@@ -44,9 +44,8 @@ function App() {
     saveTimetableSettings(settings)
     setTimetableSettings(settings)
   }
-  const [loosePlans, setLoosePlans] = useState<LoosePlan[]>(
-    loadLoosePlans,
-  )
+  const [loosePlanState, setLoosePlanState] = useState(loadLoosePlanState)
+  const loosePlans = loosePlanState.data
 
   const todayDate = getLocalDate()
   const tomorrowDate = getLocalDate(1)
@@ -60,6 +59,7 @@ function App() {
   }).format(new Date())
 
   function startEditingEntry() {
+    if (entryState.status === 'error') return
     setEntryDraft(entry)
     setIsEditingEntry(true)
   }
@@ -71,9 +71,15 @@ function App() {
       return
     }
 
-    setEntry(cleanedEntry)
-    localStorage.setItem(ENTRY_STORAGE_KEY, cleanedEntry)
-    setIsEditingEntry(false)
+    try {
+      requireStoredData(entryState)
+      saveEntryValue(cleanedEntry)
+      setEntryState({ status: 'ready', data: cleanedEntry, error: '' })
+      setEntryError('')
+      setIsEditingEntry(false)
+    } catch (error) {
+      setEntryError(storageFailureMessage(error))
+    }
   }
 
   function cancelEditingEntry() {
@@ -82,18 +88,22 @@ function App() {
   }
 
   function deleteEntry() {
-  setEntry('')
-  setEntryDraft('')
-  localStorage.removeItem(ENTRY_STORAGE_KEY)
-  setIsEditingEntry(false)
+  try {
+    requireStoredData(entryState)
+    saveEntryValue(null)
+    setEntryState({ status: 'missing', data: '', error: '' })
+    setEntryDraft('')
+    setEntryError('')
+    setIsEditingEntry(false)
+  } catch (error) {
+    setEntryError(storageFailureMessage(error))
+  }
 }
 
   function saveLoosePlans(nextPlans: LoosePlan[]) {
-    setLoosePlans(nextPlans)
-    localStorage.setItem(
-      LOOSE_PLANS_STORAGE_KEY,
-      JSON.stringify(nextPlans),
-    )
+    requireStoredData(loosePlanState)
+    writeLoosePlans(nextPlans)
+    setLoosePlanState({ status: 'ready', data: nextPlans, error: '' })
   }
 
   function saveLoosePlan(nextPlan: LoosePlan) {
@@ -205,6 +215,7 @@ function App() {
               record={dailyRecordState.records.find((record) => record.date === endOfDayDate)}
               loadError={dailyRecordState.error}
               loosePlans={loosePlans}
+              loosePlansLoadError={loosePlanState.error}
               onBack={closeEndOfDay}
               onSave={saveTodaysRecord}
               onSaveLoosePlan={saveLoosePlan}
@@ -215,6 +226,7 @@ function App() {
           <>
           <section className="card primary-card">
           <p className="section-label">今日の入口</p>
+          {(entryState.error || entryError) && <p className="storage-message" role="alert">{entryState.error || entryError}</p>}
 
           {isEditingEntry ? (
             <div className="entry-editor">
@@ -264,11 +276,11 @@ function App() {
           ) : (
             <>
               <h1 className="card-title">
-                {entry || 'まだ決まっていません'}
+                {entryState.status === 'error' ? '入口を確認できません' : entry || 'まだ決まっていません'}
               </h1>
 
               <p className="supporting-text">
-                {entry
+                {entryState.status === 'error' ? '保存済みの入口は変更せずに残しています。' : entry
                   ? 'この行動から始めれば十分です。'
                   : '次に迷わないよう、最初の一歩だけを決めます。'}
               </p>
@@ -277,6 +289,7 @@ function App() {
                 className="primary-button"
                 type="button"
                 onClick={startEditingEntry}
+                disabled={entryState.status === 'error'}
               >
                 {entry ? '入口を変更する' : '入口を決める'}
               </button>
@@ -286,6 +299,7 @@ function App() {
 
           <LoosePlanPanel
             plans={loosePlans}
+            loadError={loosePlanState.error}
             date={todayDate}
             heading="今日のゆるい予定"
             compact
@@ -359,6 +373,7 @@ function App() {
             <WeeklySchedule
               startHour={timetableSettings.weeklyStartHour ?? 0}
               loosePlans={loosePlans}
+              loosePlansLoadError={loosePlanState.error}
               todayDate={todayDate}
               tomorrowDate={tomorrowDate}
               onSaveLoosePlan={saveLoosePlan}
@@ -379,6 +394,7 @@ function App() {
               records={dailyRecordState.records}
               loadError={dailyRecordState.error}
               loosePlans={loosePlans}
+              loosePlansLoadError={loosePlanState.error}
               onReloadRecords={reloadRecords}
               onSaveRecord={saveRecord}
               onDeleteRecord={deleteRecord}

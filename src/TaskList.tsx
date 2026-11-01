@@ -5,7 +5,8 @@ import {
   useState,
 } from 'react'
 import { type Course } from './CourseStorage'
-import { TASKS_STORAGE_KEY, formatTaskDeadline, isValidTaskDeadline, loadTasks, sortTasks, type Task } from './TaskStorage'
+import { formatTaskDeadline, isValidTaskDeadline, loadTaskState, sortTasks, writeTasks, type Task } from './TaskStorage'
+import { requireStoredData, storageFailureMessage } from './StorageSafety'
 
 type TaskDraft = Omit<Task, 'id' | 'completed'>
 
@@ -25,7 +26,9 @@ export type TaskListHandle = {
 
 const TaskList = forwardRef<TaskListHandle, TaskListProps>(
   function TaskList({ courses }, ref) {
-  const [tasks, setTasks] = useState<Task[]>(loadTasks)
+  const [taskState, setTaskState] = useState(loadTaskState)
+  const tasks = taskState.data
+  const [taskError, setTaskError] = useState('')
 const [selectedCourseId, setSelectedCourseId] =
   useState('')
 
@@ -63,6 +66,7 @@ const sortedTasks = sortTasks(activeTasks)
   }
 
   function startAddingTask(course?: Course) {
+      if (taskState.status === 'error') return
       if (!canReplaceTaskDraft()) return
       const nextDraft = {
         ...emptyTask,
@@ -122,13 +126,16 @@ function selectCourse(courseId: string) {
 
   function saveTasks(nextTasks: Task[]) {
   const sortedNextTasks = sortTasks(nextTasks)
-
-  setTasks(sortedNextTasks)
-
-  localStorage.setItem(
-    TASKS_STORAGE_KEY,
-    JSON.stringify(sortedNextTasks),
-  )
+  try {
+    requireStoredData(taskState)
+    writeTasks(sortedNextTasks)
+    setTaskState({ status: 'ready', data: sortedNextTasks, error: '' })
+    setTaskError('')
+    return true
+  } catch (error) {
+    setTaskError(storageFailureMessage(error))
+    return false
+  }
 }
 
 function addTask() {
@@ -147,7 +154,7 @@ function addTask() {
     completed: false,
   }
 
-  saveTasks([...tasks, newTask])
+  if (!saveTasks([...tasks, newTask])) return
   setTaskDraft(emptyTask)
   setSelectedCourseId('')
   setIsAddingTask(false)
@@ -199,7 +206,7 @@ function saveEditedTask() {
     }
   })
 
-  saveTasks(updatedTasks)
+  if (!saveTasks(updatedTasks)) return
   setIsEditingSelectedTask(false)
 }
 
@@ -231,7 +238,7 @@ function completeSelectedTask() {
     }
   })
 
-  saveTasks(updatedTasks)
+  if (!saveTasks(updatedTasks)) return
   setSelectedTaskId(null)
   setIsEditingSelectedTask(false)
   setTaskDraft(emptyTask)
@@ -269,7 +276,7 @@ function deleteSelectedTask() {
     (task) => task.id !== selectedTaskId,
   )
 
-  saveTasks(remainingTasks)
+  if (!saveTasks(remainingTasks)) return
   setSelectedTaskId(null)
   setIsEditingSelectedTask(false)
   setTaskDraft(emptyTask)
@@ -282,17 +289,18 @@ function deleteSelectedTask() {
           <p className="section-label">次の課題</p>
 
           <h2 className="card-title">
-            {activeTasks.length === 0
+            {taskState.status === 'error' ? '課題を確認できません' : activeTasks.length === 0
               ? '登録された課題はありません'
               : `${activeTasks.length}件の課題があります`}
           </h2>
         </div>
 
         <span className="badge">
-          {activeTasks.length}件
+          {taskState.status === 'error' ? '確認' : `${activeTasks.length}件`}
         </span>
       </div>
 
+      {(taskState.error || taskError) && <p className="storage-message" role="alert">{taskState.error || taskError}</p>}
       {sortedTasks.length > 0 && (
   <div className="task-list">
     {sortedTasks.map((task) => {
@@ -518,7 +526,7 @@ function deleteSelectedTask() {
 
       {!isAddingTask && (
         <>
-          {activeTasks.length === 0 && (
+          {taskState.status !== 'error' && activeTasks.length === 0 && (
             <p className="supporting-text">
               最初の課題を追加します。
             </p>
@@ -528,6 +536,7 @@ function deleteSelectedTask() {
             className="secondary-button"
             type="button"
             onClick={() => startAddingTask()}
+            disabled={taskState.status === 'error'}
           >
             新しい課題を追加
           </button>

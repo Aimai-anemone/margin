@@ -105,6 +105,15 @@ button {
   margin-top: -4px;
 }
 
+.storage-message {
+  margin: 10px 0;
+  min-width: 0;
+  color: #696c64;
+  font-size: 14px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
 .card-heading {
   display: flex;
   align-items: flex-start;

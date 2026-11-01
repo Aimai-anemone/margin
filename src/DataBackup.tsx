@@ -6,6 +6,11 @@ import {
 import { MAX_BACKUP_FILE_SIZE, isValidBackupData, prepareBackupForRestore, type BackupData } from './BackupValidation'
 import { backupRestoreMessage, restoreBackupValues } from './BackupRestore'
 import { parseCourse } from './CourseStorage'
+import { loadEntryState } from './EntryStorage'
+import { loadTaskState } from './TaskStorage'
+import { loadLoosePlanState } from './LoosePlanStorage'
+import { loadWeeklyScheduleState } from './WeeklyScheduleStorage'
+import { requireStoredData, storageFailureMessage } from './StorageSafety'
 import {
   FIVE_MINUTE_STORAGE_KEY, hasFiveMinuteCounts, readFiveMinuteCounts,
 } from './FiveMinuteStorage'
@@ -53,15 +58,14 @@ function createBackupData(): BackupData {
   return {
     version: 1,
     createdAt: new Date().toISOString(),
-    entry:
-      localStorage.getItem(ENTRY_STORAGE_KEY) ?? '',
-    tasks: readSavedArray(TASKS_STORAGE_KEY),
+    entry: requireStoredData(loadEntryState()),
+    tasks: requireStoredData(loadTaskState()),
     courses: readSavedArray(COURSES_STORAGE_KEY).map((course) =>
       parseCourse(course, timetableSettings.legacyAcademicYear) ?? course),
-    loosePlans: readSavedArray(LOOSE_PLANS_STORAGE_KEY),
+    loosePlans: requireStoredData(loadLoosePlanState()),
     timetableSettings,
     dailyRecords: readDailyRecords(),
-    weeklySchedules: readSavedArray(WEEKLY_SCHEDULES_STORAGE_KEY, true),
+    weeklySchedules: requireStoredData(loadWeeklyScheduleState()),
     fiveMinuteStarts: readFiveMinuteCounts(),
   }
 }
@@ -234,8 +238,8 @@ async function restoreBackup(
           try {
             downloadBackup()
             setRestoreMessage('')
-          } catch {
-            setRestoreMessage('バックアップを書き出せませんでした。保存データや、ブラウザーの設定を確認してください。保存内容は変更していません。')
+          } catch (error) {
+            setRestoreMessage(`バックアップの書き出しを中止しました。${storageFailureMessage(error, '保存データや、ブラウザーの設定を確認してください。保存内容は変更していません。')}`)
           }
         }}
       >

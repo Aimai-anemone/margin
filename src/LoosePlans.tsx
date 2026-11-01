@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { storageFailureMessage } from './StorageSafety'
 import {
   dayPeriods,
   getLocalDate,
@@ -15,6 +16,7 @@ type LoosePlanPanelProps = {
   collapsible?: boolean
   stickyHeading?: boolean
   compact?: boolean
+  loadError?: string
   onSave: (plan: LoosePlan) => void
   onDelete: (planId: string) => void
   onToggleComplete: (planId: string) => void
@@ -77,6 +79,7 @@ function LoosePlanPanel({
   collapsible = false,
   stickyHeading = false,
   compact = false,
+  loadError = '',
   onSave,
   onDelete,
   onToggleComplete,
@@ -103,6 +106,17 @@ function LoosePlanPanel({
       plansForDate.filter((plan) => plan.dayPeriod === dayPeriod.value),
     ),
   }))
+
+  function runPlanAction(action: () => void) {
+    try {
+      action()
+      setPlanError('')
+      return true
+    } catch (error) {
+      setPlanError(storageFailureMessage(error))
+      return false
+    }
+  }
 
   function startAddingPlan(dayPeriod: DayPeriod) {
     const hasExistingPlan = plansForDate.some(
@@ -161,14 +175,14 @@ function LoosePlanPanel({
       return
     }
 
-    onSave({
+    if (!runPlanAction(() => onSave({
       id: editingPlanId ?? crypto.randomUUID(),
       title: cleanedTitle,
       date,
       dayPeriod: planDraft.dayPeriod,
       memo: planDraft.memo,
       completed: planDraft.completed,
-    })
+    }))) return
     cancelEditingPlan()
   }
 
@@ -185,9 +199,16 @@ function LoosePlanPanel({
       return
     }
 
-    onDelete(editingPlanId)
+    if (!runPlanAction(() => onDelete(editingPlanId))) return
     cancelEditingPlan()
   }
+
+  if (loadError) return (
+    <section className="card loose-plan-panel">
+      <h2 className="loose-plan-panel-title">{heading}</h2>
+      <p className="storage-message" role="alert">{loadError}</p>
+    </section>
+  )
 
   return (
     <section
@@ -252,6 +273,7 @@ function LoosePlanPanel({
         </div>
       )}
 
+      {planError && <p className="storage-message" role="alert">{planError}</p>}
       {(!collapsible || isExpanded) && (
         <div className="loose-plan-panel-content">
           {compact ? (
@@ -290,7 +312,7 @@ function LoosePlanPanel({
                                 plan.completed ? '未完了' : '完了'
                               }にする`}
                               aria-pressed={plan.completed}
-                              onClick={() => onToggleComplete(plan.id)}
+                              onClick={() => runPlanAction(() => onToggleComplete(plan.id))}
                             >
                               {plan.completed ? '✓' : '○'}
                             </button>
@@ -351,7 +373,7 @@ function LoosePlanPanel({
                                   plan.completed ? '未完了' : '完了'
                                 }にする`}
                                 aria-pressed={plan.completed}
-                                onClick={() => onToggleComplete(plan.id)}
+                                onClick={() => runPlanAction(() => onToggleComplete(plan.id))}
                               >
                                 {plan.completed ? '✓' : '○'}
                               </button>
@@ -441,10 +463,6 @@ function LoosePlanPanel({
                 />
                 完了にする
               </label>
-
-              {planError !== '' && (
-                <p className="weekly-editor-error">{planError}</p>
-              )}
 
               <div className="editor-actions">
                 <button
