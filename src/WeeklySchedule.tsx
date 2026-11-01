@@ -350,7 +350,7 @@ function WeeklySchedule({
         onClick={startAddingSchedule}
         disabled={scheduleState.status === 'error'}
       >
-        予定を追加する
+        ＋ 予定を追加
       </button>
 
       {(scheduleState.error || scheduleError) && <p className="storage-message" role="alert">{scheduleState.error || scheduleError}</p>}
