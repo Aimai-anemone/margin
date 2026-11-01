@@ -1,10 +1,12 @@
 import { Fragment, useRef, useState } from 'react'
 import { type Course } from './CourseStorage'
 import { courseWeekdays, getYearOptions, terms, type Term, type TimetableSettings } from './TimetableStorage'
+import { storageFailureMessage } from './StorageSafety'
 
 type CourseTimetableProps = {
   courses: Course[]
   settings: TimetableSettings
+  settingsLoadError?: string
   onSettingsChange: (settings: TimetableSettings) => void
   onAddTask: (courseId: string) => void
   onAddCourse: (weekday: string, period: string) => void
@@ -15,6 +17,7 @@ type CourseTimetableProps = {
 function CourseTimetable({
   courses,
   settings,
+  settingsLoadError = '',
   onSettingsChange,
   onAddTask,
   onAddCourse,
@@ -64,8 +67,8 @@ function CourseTimetable({
       onSettingsChange({ ...settings, academicYear, term })
       setSelectedCourseId(null)
       setSelectionError('')
-    } catch {
-      setSelectionError('年度・学期を保存できませんでした。ブラウザーの保存設定を確認してください。')
+    } catch (error) {
+      setSelectionError(storageFailureMessage(error))
     }
   }
 
@@ -86,7 +89,7 @@ function CourseTimetable({
       <div className="course-schedule-fields course-timetable-selection">
         <div className="form-field">
           <label className="input-label" htmlFor="timetable-year">年度</label>
-          <select id="timetable-year" className="entry-input" value={settings.academicYear}
+          <select id="timetable-year" className="entry-input" value={settings.academicYear} disabled={!!settingsLoadError}
             onChange={(event) => selectTerm(Number(event.target.value), settings.term)}>
             {getYearOptions(settings.academicYear, ...courses.map((course) => course.academicYear)).map((year) => (
               <option key={year} value={year}>{year}年度</option>
@@ -95,12 +98,13 @@ function CourseTimetable({
         </div>
         <div className="form-field">
           <label className="input-label" htmlFor="timetable-term">学期</label>
-          <select id="timetable-term" className="entry-input" value={settings.term}
+          <select id="timetable-term" className="entry-input" value={settings.term} disabled={!!settingsLoadError}
             onChange={(event) => selectTerm(settings.academicYear, Number(event.target.value) as Term)}>
             {terms.map((term) => <option key={term} value={term}>{term}学期</option>)}
           </select>
         </div>
       </div>
+      {settingsLoadError && <p className="weekly-editor-error" role="alert">{settingsLoadError} 時間割は一時的な設定で表示しています。</p>}
       {selectionError && <p className="weekly-editor-error" role="alert">{selectionError}</p>}
 
       <div className={`course-timetable-scroll ${settings.dayMode === 'weekdays' ? 'course-timetable-weekdays-only' : 'course-timetable-with-weekend'}`}>
@@ -157,6 +161,7 @@ function CourseTimetable({
                   >
                     {cellCourses.length === 0 && (
                       <button className="course-timetable-empty-button" type="button"
+                        disabled={!!settingsLoadError}
                         aria-label={`${settings.academicYear}年度 ${settings.term}学期 ${weekday.value} ${period.label}に授業を追加`}
                         onClick={() => onAddCourse(weekday.value, period.label)} />
                     )}

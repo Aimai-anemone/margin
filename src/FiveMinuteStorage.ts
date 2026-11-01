@@ -42,14 +42,15 @@ function isTimer(value: unknown): value is FiveMinuteTimer {
     timer.endsAt === timer.startedAt + FIVE_MINUTE_DURATION && typeof timer.counted === 'boolean'
 }
 
-function readStoredState(): { counts: FiveMinuteCount[]; activeTimer: unknown } {
+function readStoredState(): FiveMinuteState {
   try {
     const raw = localStorage.getItem(FIVE_MINUTE_STORAGE_KEY)
     if (raw === null) return { counts: [], activeTimer: null }
     const value: unknown = JSON.parse(raw)
     if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
       const saved = value as Record<string, unknown>
-      if (isFiveMinuteCounts(saved.counts)) {
+      if (isFiveMinuteCounts(saved.counts) &&
+        (saved.activeTimer === null || isTimer(saved.activeTimer))) {
         return { counts: saved.counts, activeTimer: saved.activeTimer }
       }
     }
@@ -89,11 +90,9 @@ export function reconcileFiveMinuteStart(now = Date.now()): { state: FiveMinuteS
   if (!Number.isSafeInteger(now) || now <= 0) throw new Error('端末の日付と時刻を確認してください。')
   const saved = readStoredState()
   if (saved.activeTimer === null) return { state: { ...saved, activeTimer: null }, notice: '' }
-  if (!isTimer(saved.activeTimer) || now < saved.activeTimer.startedAt - CLOCK_TOLERANCE ||
+  if (now < saved.activeTimer.startedAt - CLOCK_TOLERANCE ||
     now > saved.activeTimer.endsAt + MAX_TIMER_AGE) {
-    const state = { counts: saved.counts, activeTimer: null }
-    writeState(state)
-    return { state, notice: '前のタイマーは保存時刻を確認できないため終了しました。保存済みの回数は残っています。' }
+    throw new Error('前のタイマーの保存時刻を確認できません。タイマーと回数は変更せずに残しています。端末の日時やバックアップを確認してください。')
   }
 
   const timer = saved.activeTimer

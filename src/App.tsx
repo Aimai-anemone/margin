@@ -10,7 +10,7 @@ import { useFiveMinuteStart } from './useFiveMinuteStart'
 import { loadEntryState, saveEntryValue } from './EntryStorage'
 import { requireStoredData, storageFailureMessage } from './StorageSafety'
 import { deleteDailyRecord, loadDailyRecords, saveDailyRecord, type DailyRecordInput } from './DailyRecordStorage'
-import { TIMETABLE_SETTINGS_KEY, loadTimetableSettings, saveTimetableSettings, type TimetableSettings } from './TimetableStorage'
+import { loadTimetableSettingsState, saveTimetableSettings, type TimetableSettings } from './TimetableStorage'
 import {
   getLocalDate,
   loadLoosePlanState,
@@ -33,16 +33,30 @@ function App() {
   const [isShowingFiveMinute, setIsShowingFiveMinute] = useState(false)
   const fiveMinute = useFiveMinuteStart()
   const [dailyRecordState, setDailyRecordState] = useState(loadDailyRecords)
-  const [timetableSettings, setTimetableSettings] = useState(loadTimetableSettings)
+  const [timetableState, setTimetableState] = useState(loadTimetableSettingsState)
+  const timetableSettings = timetableState.data
+  const [timetableError, setTimetableError] = useState('')
   useEffect(() => {
-    if (localStorage.getItem(TIMETABLE_SETTINGS_KEY) === null) {
-      saveTimetableSettings(timetableSettings)
-    }
-  }, [timetableSettings])
+    if (timetableState.status !== 'missing') return
+    let cancelled = false
+    // 初回だけの保存を画面の初期描画後に行い、解除後には状態を更新しない。
+    queueMicrotask(() => {
+      if (cancelled) return
+      try {
+        saveTimetableSettings(timetableState.data)
+        setTimetableState({ status: 'ready', data: timetableState.data, error: '' })
+      } catch (error) {
+        setTimetableError(storageFailureMessage(error))
+      }
+    })
+    return () => { cancelled = true }
+  }, [timetableState])
 
   function updateTimetableSettings(settings: TimetableSettings) {
+    requireStoredData(timetableState)
     saveTimetableSettings(settings)
-    setTimetableSettings(settings)
+    setTimetableState({ status: 'ready', data: settings, error: '' })
+    setTimetableError('')
   }
   const [loosePlanState, setLoosePlanState] = useState(loadLoosePlanState)
   const loosePlans = loosePlanState.data
@@ -200,6 +214,7 @@ function App() {
       </header>
 
       <main className="main-content">
+        {timetableError && <p className="weekly-editor-error" role="alert">{timetableError}</p>}
         {activeTab === 'today' && (
           <div
             id="today-panel"
@@ -359,7 +374,7 @@ function App() {
             role="region"
             aria-labelledby="tasks-tab"
           >
-            <TasksPage settings={timetableSettings} onSettingsChange={updateTimetableSettings} />
+            <TasksPage settings={timetableSettings} settingsLoadError={timetableState.error} onSettingsChange={updateTimetableSettings} />
           </div>
         )}
 
@@ -370,6 +385,7 @@ function App() {
             role="region"
             aria-labelledby="weekly-tab"
           >
+            {timetableState.error && <p className="weekly-editor-error" role="alert">{timetableState.error} 開始時刻は一時的な既定値で表示しています。</p>}
             <WeeklySchedule
               startHour={timetableSettings.weeklyStartHour ?? 0}
               loosePlans={loosePlans}
@@ -412,7 +428,7 @@ function App() {
             role="region"
             aria-labelledby="settings-tab"
           >
-            <SettingsPage timetableSettings={timetableSettings} onSaveTimetableSettings={updateTimetableSettings} />
+            <SettingsPage timetableSettings={timetableSettings} loadError={timetableState.error} onSaveTimetableSettings={updateTimetableSettings} />
           </div>
         )}
       </main>

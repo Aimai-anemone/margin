@@ -3,19 +3,22 @@ import {
   MAX_PERIODS, isTimetableSettings, validatePeriodTimes,
   type DayMode, type TimetableSettings as Settings,
 } from './TimetableStorage'
+import { storageFailureMessage } from './StorageSafety'
 
 type Props = {
   settings: Settings
   onSave: (settings: Settings) => void
+  loadError?: string
 }
 
-function TimetableSettings({ settings, onSave }: Props) {
+function TimetableSettings({ settings, onSave, loadError = '' }: Props) {
   const [draft, setDraft] = useState(settings)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
   function save() {
     setMessage('')
+    if (loadError) { setError(loadError); return }
     const nextError = validatePeriodTimes(draft.periods, draft.periodCount)
     setError(nextError)
     if (nextError) return
@@ -32,8 +35,8 @@ function TimetableSettings({ settings, onSave }: Props) {
     try {
       onSave(nextSettings)
       setMessage('時間割の設定を保存しました。')
-    } catch {
-      setError('設定を保存できませんでした。端末の空き容量やブラウザーの保存設定を確認してください。')
+    } catch (error) {
+      setError(storageFailureMessage(error))
     }
   }
 
@@ -100,8 +103,8 @@ function TimetableSettings({ settings, onSave }: Props) {
       <p className="supporting-text">
         時限同士は重ならない順に設定してください。終了と次の開始が同時刻でも保存できます。
       </p>
-      {error && <p className="weekly-editor-error" role="alert">{error}</p>}
-      <button className="primary-button" type="button" onClick={save}>設定を保存する</button>
+      {(loadError || error) && <p className="weekly-editor-error" role="alert">{loadError || error}</p>}
+      <button className="primary-button" type="button" onClick={save} disabled={!!loadError}>設定を保存する</button>
       {message && <p className="supporting-text" role="status">{message}</p>}
     </section>
   )

@@ -2,21 +2,24 @@ import { useState } from 'react'
 import DataBackup from './DataBackup'
 import TimetableSettings from './TimetableSettings'
 import { type TimetableSettings as Settings } from './TimetableStorage'
+import { storageFailureMessage } from './StorageSafety'
 
 type Props = {
   timetableSettings: Settings
   onSaveTimetableSettings: (settings: Settings) => void
+  loadError?: string
 }
 
-function SettingsPage({ timetableSettings, onSaveTimetableSettings }: Props) {
+function SettingsPage({ timetableSettings, onSaveTimetableSettings, loadError = '' }: Props) {
   const [weeklyStartError, setWeeklyStartError] = useState('')
 
   function changeWeeklyStartHour(hour: number) {
+    if (loadError) { setWeeklyStartError(loadError); return }
     try {
       onSaveTimetableSettings({ ...timetableSettings, weeklyStartHour: hour })
       setWeeklyStartError('')
-    } catch {
-      setWeeklyStartError('開始時刻を保存できませんでした。端末の保存設定を確認してください。')
+    } catch (error) {
+      setWeeklyStartError(storageFailureMessage(error))
     }
   }
 
@@ -27,13 +30,14 @@ function SettingsPage({ timetableSettings, onSaveTimetableSettings }: Props) {
         <h1 className="card-title">設定</h1>
       </div>
 
-      <TimetableSettings settings={timetableSettings} onSave={onSaveTimetableSettings} />
+      <TimetableSettings settings={timetableSettings} onSave={onSaveTimetableSettings} loadError={loadError} />
 
       <section className="card weekly-start-settings">
         <h2 className="card-title">週間予定</h2>
         <div className="form-field weekly-start-field">
           <label className="input-label" htmlFor="weekly-start-hour">週間予定の開始時刻</label>
           <select id="weekly-start-hour" className="entry-input"
+            disabled={!!loadError}
             value={timetableSettings.weeklyStartHour ?? 0}
             onChange={(event) => changeWeeklyStartHour(Number(event.target.value))}>
             {Array.from({ length: 24 }, (_, hour) => (
@@ -42,7 +46,7 @@ function SettingsPage({ timetableSettings, onSaveTimetableSettings }: Props) {
           </select>
         </div>
         <p className="supporting-text">選んだ時刻から24時間分を表示します。</p>
-        {weeklyStartError && <p className="weekly-editor-error" role="alert">{weeklyStartError}</p>}
+        {(loadError || weeklyStartError) && <p className="weekly-editor-error" role="alert">{loadError || weeklyStartError}</p>}
       </section>
 
       <DataBackup />

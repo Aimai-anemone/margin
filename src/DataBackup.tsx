@@ -5,12 +5,12 @@ import {
 } from 'react'
 import { MAX_BACKUP_FILE_SIZE, isValidBackupData, prepareBackupForRestore, type BackupData } from './BackupValidation'
 import { backupRestoreMessage, restoreBackupValues } from './BackupRestore'
-import { parseCourse } from './CourseStorage'
+import { loadCourseState, parseCourse } from './CourseStorage'
 import { loadEntryState } from './EntryStorage'
 import { loadTaskState } from './TaskStorage'
 import { loadLoosePlanState } from './LoosePlanStorage'
 import { loadWeeklyScheduleState } from './WeeklyScheduleStorage'
-import { requireStoredData, storageFailureMessage } from './StorageSafety'
+import { requireStoredData, storageFailureMessage, StorageSafetyError } from './StorageSafety'
 import {
   FIVE_MINUTE_STORAGE_KEY, hasFiveMinuteCounts, readFiveMinuteCounts,
 } from './FiveMinuteStorage'
@@ -21,7 +21,7 @@ import {
 import {
   TIMETABLE_SETTINGS_KEY,
   createDefaultTimetableSettings,
-  loadTimetableSettings,
+  loadTimetableSettingsState,
 } from './TimetableStorage'
 const ENTRY_STORAGE_KEY = 'margin-entry'
 const TASKS_STORAGE_KEY = 'margin-tasks'
@@ -53,20 +53,28 @@ function readSavedArray(storageKey: string, rejectInvalid = false): unknown[] {
   }
 }
 
+function readForBackup<T>(label: string, read: () => T): T {
+  try {
+    return read()
+  } catch {
+    // 検証済みの読み込み処理を再利用し、内容や技術的な例外文は表示しない。
+    throw new StorageSafetyError('unreadable', `${label}の保存データを読み込めないため、書き出しを中止しました。保存内容は変更していません。バックアップやブラウザーの保存設定を確認してください。`)
+  }
+}
+
 function createBackupData(): BackupData {
-  const timetableSettings = loadTimetableSettings()
+  const timetableSettings = requireStoredData(loadTimetableSettingsState())
   return {
     version: 1,
     createdAt: new Date().toISOString(),
     entry: requireStoredData(loadEntryState()),
     tasks: requireStoredData(loadTaskState()),
-    courses: readSavedArray(COURSES_STORAGE_KEY).map((course) =>
-      parseCourse(course, timetableSettings.legacyAcademicYear) ?? course),
+    courses: requireStoredData(loadCourseState()),
     loosePlans: requireStoredData(loadLoosePlanState()),
     timetableSettings,
-    dailyRecords: readDailyRecords(),
+    dailyRecords: readForBackup('一日の記録', readDailyRecords),
     weeklySchedules: requireStoredData(loadWeeklyScheduleState()),
-    fiveMinuteStarts: readFiveMinuteCounts(),
+    fiveMinuteStarts: readForBackup('5分の着手', readFiveMinuteCounts),
   }
 }
 
