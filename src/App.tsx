@@ -181,6 +181,7 @@ function App() {
   }
 
   function openEndOfDay() {
+    habits.refresh()
     setDailyRecordState(loadDailyRecords())
     setEndOfDayDate(getLocalDate())
     window.scrollTo({ top: 0 })
@@ -235,6 +236,7 @@ function App() {
             <FiveMinuteStart controller={fiveMinute} onBack={closeFiveMinute} />
           ) : endOfDayDate !== null ? (
             <EndOfDay
+              habits={habits}
               date={endOfDayDate}
               record={dailyRecordState.records.find((record) => record.date === endOfDayDate)}
               loadError={dailyRecordState.error}
@@ -423,6 +425,7 @@ function App() {
             aria-labelledby="records-tab"
           >
             <RecordsPage
+              habits={habits}
               records={dailyRecordState.records}
               loadError={dailyRecordState.error}
               loosePlans={loosePlans}

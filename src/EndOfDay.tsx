@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { storageFailureMessage } from './StorageSafety'
 import LoosePlanPanel from './LoosePlans'
+import HabitDayList from './HabitDayList'
+import { type HabitsController } from './useHabits'
+import { isRecentHabitDate } from './HabitStorage'
 import { dayPeriods, getLocalDate, type LoosePlan } from './LoosePlanStorage'
 import { canCreateDailyRecord, parseDurationInput, type DailyRecord, type DailyRecordInput } from './DailyRecordStorage'
 
 type Props = {
+  habits?: HabitsController
   date: string
   mode?: 'today' | 'create' | 'edit'
   backLabel?: string
@@ -65,7 +69,7 @@ function DurationFields({ id, label, value, disabled = false, error, onChange }:
 }
 
 function EndOfDay({
-  date, mode = 'today', backLabel = '今日へ戻る', record, loadError, loosePlans, loosePlansLoadError = '', onBack, onSave,
+  date, mode = 'today', backLabel = '今日へ戻る', record, loadError, loosePlans, loosePlansLoadError = '', onBack, onSave, habits,
   onSaveLoosePlan, onDeleteLoosePlan, onToggleLoosePlanComplete,
 }: Props) {
   const [screenTime, setScreenTime] = useState(() => toTimeInput(record?.screenTimeMinutes))
@@ -229,6 +233,12 @@ function EndOfDay({
               )
             })}
           </section>
+
+          {habits && <section className="card end-of-day-section habit-end-of-day">
+            <h2 className="closing-title">{date === getLocalDate() ? '今日の習慣' : 'この日の習慣'}</h2>
+            {isRecentHabitDate(date) && <p className="supporting-text">習慣は選んだ時点で保存されます。</p>}
+            <HabitDayList controller={habits} targetDate={date} compact />
+          </section>}
 
           <section className="card end-of-day-section">
             <h2 className="closing-title">{mode === 'today' ? '今日のスクリーンタイム' : 'スクリーンタイム'}</h2>

@@ -4,18 +4,22 @@ import { habitsForDate, habitSteps, habitResultLabel, isRecentHabitDate, type Ha
 import { storageFailureMessage } from './StorageSafety'
 import { type HabitsController } from './useHabits'
 
-type Props = { controller: HabitsController; initialHabitId?: string | null; onBack: () => void; onManage: () => void }
+type Props = { controller: HabitsController; initialHabitId?: string | null; onBack?: () => void; onManage?: () => void; targetDate?: string; compact?: boolean }
 const formatDate = (date: string) => new Intl.DateTimeFormat('ja-JP', { month: 'long', day: 'numeric', weekday: 'short' }).format(new Date(`${date}T12:00:00`))
 
-export default function HabitDayList({ controller, initialHabitId, onBack, onManage }: Props) {
-  const [date, setDate] = useState(() => getLocalDate())
+export default function HabitDayList({ controller, initialHabitId, onBack, onManage, targetDate, compact = false }: Props) {
+  const [selectedDate, setDate] = useState(() => getLocalDate())
+  const date = targetDate ?? selectedDate
   const [selectedId, setSelectedId] = useState<string | null>(initialHabitId ?? null)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [showAll, setShowAll] = useState(false)
   const items = habitsForDate(controller.data, date)
   const habit = items.find((item) => item.id === selectedId)
   const record = habit && controller.data.records.find((item) => item.habitId === habit.id && item.date === date)
   const inRange = isRecentHabitDate(date)
+  const readOnly = compact && !inRange
+  const savedRecords = controller.data.records.filter((item) => item.date === date)
 
   function save(result: HabitResult) {
     if (!habit || controller.error) return
@@ -23,7 +27,7 @@ export default function HabitDayList({ controller, initialHabitId, onBack, onMan
     try {
       controller.record(habit.id, date, result)
       setError('')
-      setMessage('記録を保存しました。')
+      setMessage('習慣の記録を保存しました。')
     } catch (failure) { setError(storageFailureMessage(failure)) }
   }
 
@@ -33,12 +37,12 @@ export default function HabitDayList({ controller, initialHabitId, onBack, onMan
     try {
       controller.cancelRecord(habit.id, date)
       setError('')
-      setMessage('記録を取り消しました。')
+      setMessage('習慣の記録を取り消しました。')
     } catch (failure) { setError(storageFailureMessage(failure)) }
   }
 
-  return <div className="habits-page">
-    <header className="habit-page-heading">
+  return <div className={compact ? 'habit-day-content' : 'habits-page'}>
+    {!compact && <header className="habit-page-heading">
       <button className="cancel-button" type="button" onClick={habit ? () => { setSelectedId(null); setError(''); setMessage('') } : onBack}>
         {habit ? '選択日の習慣へ戻る' : '今日へ戻る'}
       </button>
@@ -55,12 +59,20 @@ export default function HabitDayList({ controller, initialHabitId, onBack, onMan
           }}>{label}<span>{formatDate(value)}</span></button>
         })}
       </div>
-    </header>
+    </header>}
     <p className="supporting-text">{formatDate(date)}</p>
-    {!inRange && <p className="storage-message" role="alert">日付が変わり、この日の習慣を記録できる期間を過ぎました。</p>}
+    {!inRange && <p className="supporting-text">{readOnly ? 'この日の習慣記録は閲覧のみです。' : '日付が変わり、この日の習慣を記録できる期間を過ぎました。'}</p>}
     {(controller.error || error) && <p className="storage-message" role="alert">{controller.error || error}</p>}
     {message && <p className="supporting-text" role="status">{message}</p>}
-    {!controller.error && (habit ? <section className="card habit-record-editor">
+    {!controller.error && (readOnly ? (
+      savedRecords.length === 0 ? <p className="supporting-text">この日に保存された習慣記録はありません。</p>
+        : savedRecords.map((saved) => <div className="habit-readonly-item" key={saved.id}>
+          <h3>{saved.habitName}</h3>
+          <p className="supporting-text">{habitResultLabel(saved.result)}</p>
+          {saved.selectedContent !== null && <p>{saved.selectedContent}</p>}
+        </div>)
+    ) : habit ? <section className={`${compact ? '' : 'card '}habit-record-editor`}>
+      {compact && <button className="cancel-button" type="button" onClick={() => { setSelectedId(null); setError(''); setMessage('') }}>習慣の一覧へ戻る</button>}
       <h2 className="closing-title">{habit.name}</h2>
       {habit.trigger && <p className="supporting-text">{habit.trigger}</p>}
       <p>今日はどこまでできましたか？</p>
@@ -76,15 +88,20 @@ export default function HabitDayList({ controller, initialHabitId, onBack, onMan
         <p className="supporting-text">記録時：{record.habitName}{record.selectedContent !== null && `・${record.selectedContent}`}</p>
         <button className="cancel-button" type="button" disabled={!inRange} onClick={cancel}>記録を取り消す</button>
       </>}
-    </section> : items.length === 0 ? <p className="card supporting-text">この日の対象の習慣はありません。</p>
-      : items.map((item) => {
+    </section> : items.length === 0 ? <p className={`${compact ? '' : 'card '}supporting-text`}>この日の対象の習慣はありません。</p>
+      : items.slice(0, compact && !showAll ? 5 : undefined).map((item) => {
         const saved = controller.data.records.find((entry) => entry.habitId === item.id && entry.date === date)
-        return <section className="card habit-day-item" key={item.id}>
+        return <section className={compact ? 'habit-compact-item' : 'card habit-day-item'} key={item.id}>
           <h2 className="closing-title">{item.name}</h2>
           {item.status !== 'active' && <p className="supporting-text">{item.status === 'paused' ? '休止中' : '非表示'}</p>}
           {item.trigger && <p className="habit-trigger-preview">{item.trigger}</p>}
           <button type="button" className="secondary-button" onClick={() => { setSelectedId(item.id); setMessage(''); setError('') }}>{habitResultLabel(saved?.result)}</button>
         </section>
       }))}
+    {compact && !controller.error && !readOnly && !habit && items.length > 5 && (
+      <button className="cancel-button" type="button" aria-expanded={showAll} onClick={() => setShowAll(!showAll)}>
+        {showAll ? '少なく表示する' : `残り${items.length - 5}件も表示する`}
+      </button>
+    )}
   </div>
 }
