@@ -2,19 +2,27 @@ import { useState } from 'react'
 import { habitSteps, habitWeekdays, type Habit, type HabitDraft } from './HabitStorage'
 import { storageFailureMessage } from './StorageSafety'
 import { type HabitsController } from './useHabits'
+import HabitDayList from './HabitDayList'
 
 const emptyDraft = (): HabitDraft => ({
   name: '', steps: { 1: '', 2: '', 3: '' }, frequency: 'daily', weekdays: [], trigger: '',
 })
 type Editor = { id?: string; draft: HabitDraft; initial: string }
-type Props = { controller: HabitsController; onBack: () => void }
+type Props = { controller: HabitsController; onBack: () => void; initialHabitId?: string | null }
 
 function frequencyLabel(habit: Habit) {
   return habit.frequency === 'daily' ? '毎日'
     : [...habit.weekdays].sort((a, b) => a - b).map((day) => habitWeekdays[day]).join('・')
 }
 
-export default function HabitsPage({ controller, onBack }: Props) {
+export default function HabitsPage({ controller, onBack, initialHabitId }: Props) {
+  const [view, setView] = useState<'daily' | 'manage'>(() => controller.data.habits.length === 0 && !controller.error ? 'manage' : 'daily')
+  return view === 'daily'
+    ? <HabitDayList controller={controller} initialHabitId={initialHabitId} onBack={onBack} onManage={() => setView('manage')} />
+    : <HabitManager controller={controller} onBack={onBack} onDaily={() => { controller.refresh(); setView('daily') }} />
+}
+
+function HabitManager({ controller, onBack, onDaily }: Props & { onDaily: () => void }) {
   const [editor, setEditor] = useState<Editor | null>(null)
   const [showHidden, setShowHidden] = useState(false)
   const [error, setError] = useState('')
@@ -76,6 +84,10 @@ export default function HabitsPage({ controller, onBack }: Props) {
       <header className="habit-page-heading">
         <button className="cancel-button" type="button" onClick={() => { if (canClose()) onBack() }}>今日へ戻る</button>
         <h1 className="card-title">習慣</h1>
+        <div className="habit-frequency-options" role="group" aria-label="習慣画面">
+          <button className="habit-choice" type="button" aria-pressed={false} onClick={() => { if (canClose()) onDaily() }}>今日の習慣</button>
+          <button className="habit-choice" type="button" aria-pressed={true}>習慣の管理</button>
+        </div>
         <p className="supporting-text">続けたいことを、無理のない形で整えます。</p>
       </header>
       {(controller.error || (!editor && error)) && <p className="storage-message" role="alert">{controller.error || error}</p>}

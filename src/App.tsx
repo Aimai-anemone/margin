@@ -35,6 +35,7 @@ function App() {
   const [endOfDayDate, setEndOfDayDate] = useState<string | null>(null)
   const [isShowingFiveMinute, setIsShowingFiveMinute] = useState(false)
   const [isShowingHabits, setIsShowingHabits] = useState(false)
+  const [habitToOpen, setHabitToOpen] = useState<string | null>(null)
   const habits = useHabits()
   const fiveMinute = useFiveMinuteStart()
   const [dailyRecordState, setDailyRecordState] = useState(loadDailyRecords)
@@ -229,7 +230,7 @@ function App() {
             aria-labelledby="today-tab"
           >
           {isShowingHabits ? (
-            <HabitsPage controller={habits} onBack={() => { setIsShowingHabits(false); window.scrollTo({ top: 0 }) }} />
+            <HabitsPage controller={habits} initialHabitId={habitToOpen} onBack={() => { setIsShowingHabits(false); window.scrollTo({ top: 0 }) }} />
           ) : isShowingFiveMinute ? (
             <FiveMinuteStart controller={fiveMinute} onBack={closeFiveMinute} />
           ) : endOfDayDate !== null ? (
@@ -331,7 +332,9 @@ function App() {
             onToggleComplete={toggleLoosePlanComplete}
           />
 
-          <TodayHabitsCard habits={habits.data.habits} error={habits.error} onOpen={() => {
+          <TodayHabitsCard habits={habits.data.habits} records={habits.data.records} today={habits.today} error={habits.error} onOpen={(id) => {
+            habits.refresh()
+            setHabitToOpen(id ?? null)
             setIsShowingHabits(true)
             window.scrollTo({ top: 0 })
           }} />

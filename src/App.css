@@ -2730,3 +2730,75 @@ select.entry-input {
   min-width: 0;
   overflow-wrap: anywhere;
 }
+
+.habit-date-picker {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.habit-date-picker span {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.habit-record-editor {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+  overflow-wrap: anywhere;
+}
+
+.habit-step-choice {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  text-align: left;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.habit-step-choice span:last-child {
+  font-weight: 400;
+}
+
+.habits-page .habit-rest-choice {
+  min-height: 44px;
+  color: #62675f;
+}
+
+.habit-rest-choice[aria-pressed="true"] {
+  text-decoration: underline;
+}
+
+.habit-day-item {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.habit-entry-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  gap: 8px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: #40513b;
+  text-align: left;
+  cursor: pointer;
+}
+
+.habit-entry-row span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.habit-entry-row span:last-child {
+  flex-shrink: 0;
+  font-size: 12px;
+}

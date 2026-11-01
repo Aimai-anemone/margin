@@ -219,7 +219,7 @@ export function deleteHiddenHabit(id: string, storage?: SafeStorage): HabitData 
   return { habits, records }
 }
 
-// 第3段階の実績UIから利用する保存窓口。現在はUIに接続しない。
+// 実績の候補全体を検証してから保存する共通窓口。
 export function writeHabitRecords(records: HabitRecord[], storage?: SafeStorage): HabitData {
   const current = readHabitData(storage)
   const checked = parseHabitRecords(records)
@@ -228,30 +228,53 @@ export function writeHabitRecords(records: HabitRecord[], storage?: SafeStorage)
   return { habits: current.habits, records: checked }
 }
 
+export function isRecentHabitDate(date: string) {
+  return isValidRecordDate(date) && [0, -1, -2].some((offset) => date === getLocalDate(offset))
+}
+
+export function isHabitDue(habit: Habit, date: string) {
+  if (!isValidRecordDate(date) || habit.status !== 'active') return false
+  const created = new Date(habit.createdAt)
+  const createdDate = `${created.getFullYear()}-${String(created.getMonth() + 1).padStart(2, '0')}-${String(created.getDate()).padStart(2, '0')}`
+  return date >= createdDate && (habit.frequency === 'daily' ||
+    habit.weekdays.includes(new Date(`${date}T12:00:00`).getDay()))
+}
+
+export function habitsForDate(data: HabitData, date: string) {
+  const recorded = new Set(data.records.filter((record) => record.date === date).map((record) => record.habitId))
+  return data.habits.filter((habit) => isHabitDue(habit, date) || recorded.has(habit.id))
+}
+
+export function habitResultLabel(result?: HabitResult) {
+  return result === 'rest' ? '今日は休み' : habitSteps.find((step) => step.value === result)?.label ?? '記録する'
+}
+
 function requireRecentDate(date: string) {
-  if (!isValidRecordDate(date) || ![0, -1, -2].some((offset) => date === getLocalDate(offset))) {
-    invalid('習慣を記録できるのは、今日・昨日・一昨日です。')
+  if (!isRecentHabitDate(date)) {
+    invalid('日付が変わり、この日の習慣を記録できる期間を過ぎました。')
   }
 }
 
 export function saveHabitRecord(habitId: string, date: string, result: HabitResult, storage?: SafeStorage): HabitData {
-  requireRecentDate(date)
   const current = readHabitData(storage)
+  requireRecentDate(date)
   const habit = current.habits.find((item) => item.id === habitId)
   if (!habit) invalid('対象の習慣が見つかりません。保存は行っていません。')
   const existing = current.records.find((record) => record.habitId === habitId && record.date === date)
+  if (!existing && !isHabitDue(habit, date)) invalid('この日は新しく記録する対象ではありません。保存済みの実績は残しています。')
   const now = new Date().toISOString()
   const record: HabitRecord = {
     id: existing?.id ?? crypto.randomUUID(), habitId, date, result,
     habitName: habit.name, selectedContent: result === 'rest' ? null : habit.steps[result],
     createdAt: existing?.createdAt ?? now, updatedAt: now,
   }
+  requireRecentDate(date)
   return writeHabitRecords(existing ? current.records.map((item) => item.id === existing.id ? record : item)
     : [...current.records, record], storage)
 }
 
 export function cancelHabitRecord(habitId: string, date: string, storage?: SafeStorage): HabitData {
-  requireRecentDate(date)
   const current = readHabitData(storage)
+  requireRecentDate(date)
   return writeHabitRecords(current.records.filter((record) => record.habitId !== habitId || record.date !== date), storage)
 }

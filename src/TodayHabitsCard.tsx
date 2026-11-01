@@ -1,10 +1,11 @@
-import { type Habit } from './HabitStorage'
+import { isHabitDue, habitResultLabel, type Habit, type HabitRecord } from './HabitStorage'
+import { getLocalDate } from './LoosePlanStorage'
 
-type Props = { habits: Habit[]; error: string; onOpen: () => void }
+type Props = { habits: Habit[]; records?: HabitRecord[]; today?: string; error: string; onOpen: (habitId?: string) => void }
 
-export default function TodayHabitsCard({ habits, error, onOpen }: Props) {
-  const active = habits.filter((habit) => habit.status === 'active')
-  const paused = habits.filter((habit) => habit.status === 'paused')
+export default function TodayHabitsCard({ habits, records = [], today = getLocalDate(), error, onOpen }: Props) {
+  const active = habits.filter((habit) => isHabitDue(habit, today))
+  const recorded = new Map(records.filter((record) => record.date === today).map((record) => [record.habitId, record]))
   return (
     <section className="card habit-entry">
       <h2 className="closing-title">今日の習慣</h2>
@@ -12,14 +13,16 @@ export default function TodayHabitsCard({ habits, error, onOpen }: Props) {
         <p className="supporting-text">続けたいことを、小さな行動から始めます。</p>
       ) : (
         <>
-          <p className="supporting-text">使用中 {active.length}件{paused.length > 0 && `・休止中 ${paused.length}件`}</p>
+          <p className="supporting-text">{active.length === 0 ? '今日は対象の習慣はありません。' : `${active.filter((habit) => recorded.has(habit.id)).length} / ${active.length}件を記録`}</p>
           {active.length > 0 && <ul className="habit-entry-names">
-            {active.slice(0, 5).map((habit) => <li key={habit.id}>{habit.name}</li>)}
+            {active.slice(0, 5).map((habit) => <li key={habit.id}><button type="button" className="habit-entry-row" onClick={() => onOpen(habit.id)}>
+              <span>{habit.name}</span><span>{habitResultLabel(recorded.get(habit.id)?.result)}</span>
+            </button></li>)}
           </ul>}
           {active.length > 5 && <p className="supporting-text">ほか{active.length - 5}件</p>}
         </>
       )}
-      <button type="button" className="secondary-button" onClick={onOpen}>
+      <button type="button" className="secondary-button" onClick={() => onOpen()}>
         {!error && habits.length === 0 ? '習慣を作る' : '習慣を見る'}
       </button>
     </section>
