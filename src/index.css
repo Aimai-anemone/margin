@@ -1,4 +1,62 @@
 :root {
+  /* 現在の温かい配色と寸法を、画面共通の役割名で参照する。 */
+  --color-page: #f5f6f2;
+  --color-outer: #eceee9;
+  --color-surface: #fcfcfa;
+  --color-surface-subtle: #f8faf6;
+  --color-control: #ffffff;
+  --color-on-accent: #ffffff;
+  --color-text: #20211f;
+  --color-text-muted: #696c64;
+  --color-text-control: #30312e;
+  --color-text-cancel: #555850;
+  --color-disabled-surface: #eceee8;
+  --color-disabled-text: #858a81;
+  --color-border: #dcddd7;
+  --color-border-control: #d6d8d1;
+  --color-border-input: #cfd2ca;
+  --color-accent: #304034;
+  --color-accent-soft: #edf2ea;
+  --color-accent-text: #3d5744;
+  --color-selected-surface: #e7ede2;
+  --color-selected-border: #80917b;
+  --color-segment-surface: #eceee8;
+  --color-segment-border: #ccd3c7;
+  --color-input-focus: #526456;
+  --color-warning: #705733;
+  --color-danger: #8b4d40;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-card: 20px;
+
+  --radius-small: 8px;
+  --radius-medium: 12px;
+  --radius-large: 16px;
+  --radius-card: 18px;
+  --radius-control: 13px;
+  --radius-segment: 10px;
+
+  --font-size-caption: 12px;
+  --font-size-body: 14px;
+  --font-size-label: 14px;
+  --font-size-title: 20px;
+  --font-size-heading: 27px;
+  --font-size-input: 16px;
+  --line-height-body: 1.7;
+
+  --control-height: 48px;
+  --control-height-input: 50px;
+  --control-height-compact: 44px;
+  --border-width: 1px;
+  --focus-ring-color: #3d5744;
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+
   font-family:
     -apple-system,
     BlinkMacSystemFont,
@@ -8,8 +66,8 @@
     "Yu Gothic",
     sans-serif;
 
-  color: #20211f;
-  background-color: #eceee9;
+  color: var(--color-text);
+  background-color: var(--color-outer);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -24,14 +82,14 @@
 html {
   min-width: 320px;
   min-height: 100%;
-  background-color: #eceee9;
+  background-color: var(--color-outer);
 }
 
 body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
-  background-color: #eceee9;
+  background-color: var(--color-outer);
 }
 
 button,

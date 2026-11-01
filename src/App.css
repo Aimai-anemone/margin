@@ -6,6 +6,16 @@ button {
   font: inherit;
 }
 
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible,
+[tabindex="0"]:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
 .app {
   position: relative;
   width: 100%;
@@ -13,8 +23,8 @@ button {
   min-height: 100vh;
   margin: 0 auto;
   padding-bottom: 96px;
-  background-color: #f5f6f2;
-  color: #20211f;
+  background-color: var(--color-page);
+  color: var(--color-text);
 }
 
 .app-header {
@@ -23,7 +33,7 @@ button {
 
 .app-name {
   margin: 0;
-  font-size: 27px;
+  font-size: var(--font-size-heading);
   font-weight: 700;
   letter-spacing: -0.04em;
 }
@@ -63,28 +73,28 @@ button {
 }
 
 .card {
-  padding: 20px;
-  border: 1px solid #dcddd7;
-  border-radius: 18px;
-  background-color: #fcfcfa;
+  padding: var(--space-card);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-card);
+  background-color: var(--color-surface);
 }
 
 .primary-card {
   border-color: #d6dcd2;
-  background-color: #f8faf6;
+  background-color: var(--color-surface-subtle);
 }
 
 .section-label {
   margin: 0 0 9px;
   color: #70736b;
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   font-weight: 650;
   letter-spacing: 0.08em;
 }
 
 .card-title {
   margin: 0;
-  font-size: 20px;
+  font-size: var(--font-size-title);
   font-weight: 650;
   line-height: 1.45;
   letter-spacing: -0.025em;
@@ -96,9 +106,9 @@ button {
 
 .supporting-text {
   margin: 10px 0 18px;
-  color: #696c64;
-  font-size: 14px;
-  line-height: 1.7;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
 }
 
 .data-storage-notice {
@@ -108,9 +118,9 @@ button {
 .storage-message {
   margin: 10px 0;
   min-width: 0;
-  color: #696c64;
-  font-size: 14px;
-  line-height: 1.7;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
   overflow-wrap: anywhere;
 }
 
@@ -118,7 +128,7 @@ button {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .badge {
@@ -134,24 +144,24 @@ button {
 .primary-button,
 .secondary-button {
   width: 100%;
-  min-height: 48px;
-  padding: 11px 16px;
-  border-radius: 13px;
-  font-size: 14px;
+  min-height: var(--control-height);
+  padding: 11px var(--space-4);
+  border-radius: var(--radius-control);
+  font-size: var(--font-size-body);
   font-weight: 650;
   cursor: pointer;
 }
 
 .primary-button {
-  border: 1px solid #304034;
-  background-color: #304034;
-  color: #ffffff;
+  border: var(--border-width) solid var(--color-accent);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
 }
 
 .secondary-button {
-  border: 1px solid #d6d8d1;
-  background-color: #ffffff;
-  color: #30312e;
+  border: var(--border-width) solid var(--color-border-control);
+  background-color: var(--color-control);
+  color: var(--color-text-control);
 }
 
 .primary-button:hover {
@@ -189,7 +199,7 @@ button {
   padding: 10px 0;
   border: 0;
   background-color: transparent;
-  color: #3d5744;
+  color: var(--color-accent-text);
   font-size: 13px;
   font-weight: 680;
   cursor: pointer;
@@ -234,7 +244,7 @@ button {
 }
 
 .nav-item.active {
-  color: #304034;
+  color: var(--color-accent);
   font-weight: 680;
 }
 
@@ -263,20 +273,20 @@ button {
 
 .input-label {
   color: #4f534c;
-  font-size: 14px;
+  font-size: var(--font-size-label);
   font-weight: 650;
 }
 
 .entry-input {
   width: 100%;
-  min-height: 50px;
-  padding: 12px 14px;
-  border: 1px solid #cfd2ca;
-  border-radius: 12px;
+  min-height: var(--control-height-input);
+  padding: var(--space-3) 14px;
+  border: var(--border-width) solid var(--color-border-input);
+  border-radius: var(--radius-medium);
   outline: none;
-  background-color: #ffffff;
-  color: #20211f;
-  font-size: 16px;
+  background-color: var(--color-control);
+  color: var(--color-text);
+  font-size: var(--font-size-input);
   line-height: 1.5;
 }
 
@@ -285,8 +295,12 @@ button {
 }
 
 .entry-input:focus {
-  border-color: #526456;
+  border-color: var(--color-input-focus);
   box-shadow: 0 0 0 3px rgba(82, 100, 86, 0.12);
+}
+
+.entry-input[aria-invalid="true"] {
+  border-color: var(--color-danger);
 }
 
 .editor-actions {
@@ -296,13 +310,13 @@ button {
 }
 
 .cancel-button {
-  min-height: 48px;
+  min-height: var(--control-height);
   padding: 11px 17px;
-  border: 1px solid #d6d8d1;
-  border-radius: 13px;
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: var(--radius-control);
   background-color: transparent;
-  color: #555850;
-  font-size: 14px;
+  color: var(--color-text-cancel);
+  font-size: var(--font-size-body);
   font-weight: 620;
   cursor: pointer;
 }
@@ -350,7 +364,7 @@ button {
 
 .form-field {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .task-summary {
@@ -1229,8 +1243,8 @@ select.entry-input {
 
 .weekday-button.active {
   border-color: #526456;
-  background-color: #edf2ea;
-  color: #304034;
+  background-color: var(--color-accent-soft);
+  color: var(--color-accent);
 }
 
 .weekly-add-button {
@@ -2039,8 +2053,8 @@ select.entry-input {
 }
 
 .end-of-day-time-field .entry-input:disabled {
-  background-color: #eceee8;
-  color: #858a81;
+  background-color: var(--color-disabled-surface);
+  color: var(--color-disabled-text);
   cursor: not-allowed;
 }
 
@@ -2055,8 +2069,8 @@ select.entry-input {
 
 .end-of-day-error {
   margin: 0;
-  color: #8b4d40;
-  font-size: 14px;
+  color: var(--color-danger);
+  font-size: var(--font-size-body);
   line-height: 1.6;
   overflow-wrap: anywhere;
 }
@@ -2229,13 +2243,13 @@ select.entry-input {
 }
 
 .record-delete-button {
-  min-height: 44px;
+  min-height: var(--control-height-compact);
   padding: 8px 12px;
   border: 1px solid #dedbd4;
   border-radius: 12px;
   background-color: transparent;
-  color: #8b4d40;
-  font-size: 14px;
+  color: var(--color-danger);
+  font-size: var(--font-size-body);
   cursor: pointer;
 }
 
@@ -2257,19 +2271,19 @@ select.entry-input {
 .record-summary-periods {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 4px;
-  padding: 4px;
+  gap: var(--space-1);
+  padding: var(--space-1);
   border: 1px solid #dfe3dc;
   border-radius: 14px;
-  background-color: #eceee8;
+  background-color: var(--color-segment-surface);
 }
 
 .record-summary-period {
   min-width: 0;
-  min-height: 44px;
+  min-height: var(--control-height-compact);
   padding: 8px 6px;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: var(--radius-segment);
   background-color: transparent;
   color: #62675f;
   font-size: 14px;
@@ -2278,9 +2292,9 @@ select.entry-input {
 }
 
 .record-summary-period.selected {
-  border-color: #ccd3c7;
-  background-color: #fcfcfa;
-  color: #304034;
+  border-color: var(--color-segment-border);
+  background-color: var(--color-surface);
+  color: var(--color-accent);
   font-weight: 650;
 }
 
@@ -2676,8 +2690,8 @@ select.entry-input {
 .habit-frequency-options {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin-block: 8px;
+  gap: var(--space-2);
+  margin-block: var(--space-2);
 }
 
 .habit-weekdays {
@@ -2688,19 +2702,19 @@ select.entry-input {
 
 .habit-choice {
   min-width: 0;
-  min-height: 44px;
+  min-height: var(--control-height-compact);
   padding: 8px 2px;
   border: 1px solid #d8ddd3;
-  border-radius: 10px;
-  background: #fcfcfa;
+  border-radius: var(--radius-segment);
+  background: var(--color-surface);
   color: #62675f;
   cursor: pointer;
 }
 
 .habit-choice[aria-pressed="true"] {
-  border-color: #80917b;
-  background: #e7ede2;
-  color: #304034;
+  border-color: var(--color-selected-border);
+  background: var(--color-selected-surface);
+  color: var(--color-accent);
   font-weight: 700;
 }
 
@@ -2858,4 +2872,18 @@ select.entry-input {
 .habit-day-content button:focus-visible {
   outline: 2px solid #3d5744;
   outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary-button:active,
+  .secondary-button:active,
+  .text-button:active,
+  .nav-item:active,
+  .cancel-button:active,
+  .delete-button:active,
+  .delete-task-button:active,
+  .complete-task-button:active,
+  .restore-task-button:active {
+    transform: none;
+  }
 }
