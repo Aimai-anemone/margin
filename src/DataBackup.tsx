@@ -250,52 +250,56 @@ async function restoreBackup(
 
       <p className="supporting-text">
         今日の入口、課題、授業テンプレート、ゆるい予定、時間割設定、一日の記録、週間予定、5分の着手回数、習慣と実績を
-        1つのファイルに保存します。
+        1つのJSONファイルに保存できます。
       </p>
 
-      <p className="supporting-text data-storage-notice">
-        Marginのデータは、この端末のブラウザー内に保存されます。別の端末へ自動同期されません。ブラウザーのWebサイトデータを削除すると記録が消える可能性があるため、定期的にバックアップを保存してください。
-      </p>
-      <p className="supporting-text">復元前に、現在のデータをバックアップしておくことをおすすめします。</p>
-
-      <button
-        className="secondary-button"
-        type="button"
-        onClick={() => {
-          try {
-            downloadBackup()
+      <div className="data-backup-action">
+        <p className="supporting-text">現在のデータをファイルに保存します。</p>
+        <button
+          className="primary-button"
+          type="button"
+          onClick={() => {
+            try {
+              downloadBackup()
+              setRestoreMessage('')
+            } catch (error) {
+              setRestoreMessage(`バックアップの書き出しを中止しました。${storageFailureMessage(error, '保存データや、ブラウザーの設定を確認してください。保存内容は変更していません。')}`)
+            }
+          }}
+        >
+          バックアップを書き出す
+        </button>
+      </div>
+      <div className="data-backup-action data-backup-restore">
+        <p className="supporting-text">選んだバックアップの内容で、現在のデータを置き換えます。復元前に現在のデータをバックアップしてください。</p>
+        <button
+          className="secondary-button"
+          type="button"
+          onClick={() => {
             setRestoreMessage('')
-          } catch (error) {
-            setRestoreMessage(`バックアップの書き出しを中止しました。${storageFailureMessage(error, '保存データや、ブラウザーの設定を確認してください。保存内容は変更していません。')}`)
-          }
-        }}
-      >
-        バックアップを書き出す
-      </button>
-      <button
-  className="secondary-button"
-  type="button"
-  onClick={() => {
-    setRestoreMessage('')
-    restoreInputRef.current?.click()
-  }}
->
-  バックアップから復元する
-</button>
+            restoreInputRef.current?.click()
+          }}
+        >
+          バックアップから復元する
+        </button>
+      </div>
 
-<input
-  ref={restoreInputRef}
-  type="file"
-  accept=".json,application/json"
-  onChange={restoreBackup}
-  hidden
-/>
+      <input
+        ref={restoreInputRef}
+        type="file"
+        accept=".json,application/json"
+        onChange={restoreBackup}
+        hidden
+      />
 
-{restoreMessage !== '' && (
-  <p className="supporting-text" role="status">
-    {restoreMessage}
-  </p>
-)}
+      {restoreMessage !== '' && (
+        <p className="supporting-text" role="status">
+          {restoreMessage}
+        </p>
+      )}
+      <p className="supporting-text data-storage-notice">
+        Marginのデータはこの端末のブラウザー内に保存され、別の端末へ自動同期されません。ブラウザーのWebサイトデータを削除すると記録が消える可能性があります。バックアップには個人データが平文で含まれるため、定期的に書き出し、安全な場所に保管してください。
+      </p>
     </section>
   )
 }

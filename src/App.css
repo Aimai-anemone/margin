@@ -108,19 +108,26 @@ a:focus-visible,
 
 .settings-page {
   display: grid;
-  gap: 14px;
+  gap: var(--space-3);
 }
 
 .settings-page-heading {
   padding: 2px 4px 0;
 }
 
-.settings-page-heading .section-label {
-  margin-bottom: 4px;
+.settings-page > .card {
+  min-width: 0;
+  padding-block: var(--space-4);
 }
 
 .settings-about .supporting-text {
-  margin-bottom: 0;
+  margin: var(--space-2) 0 0;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.settings-about .section-label {
+  margin-bottom: var(--space-1);
 }
 
 .card {
@@ -268,8 +275,9 @@ a:focus-visible,
   max-width: 430px;
   margin: 0 auto;
   padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
-  border-top: 1px solid #dcddd7;
+  border-top: 1px solid var(--color-border);
   background-color: rgba(252, 252, 250, 0.96);
+  background-color: color-mix(in srgb, var(--color-surface-subtle) 96%, transparent);
   backdrop-filter: blur(16px);
 }
 
@@ -284,7 +292,7 @@ a:focus-visible,
   padding: 4px 2px;
   border: 0;
   background-color: transparent;
-  color: #85877f;
+  color: var(--color-text-muted);
   font-size: 11px;
   cursor: pointer;
 }
@@ -717,12 +725,12 @@ select.entry-input {
 }
 
 .timetable-settings {
-  gap: 14px;
+  gap: var(--space-3);
 }
 
 .weekly-start-settings {
   display: grid;
-  gap: 10px;
+  gap: var(--space-2);
   min-width: 0;
 }
 
@@ -738,10 +746,12 @@ select.entry-input {
   width: 100px;
   max-width: 100%;
   min-height: 44px;
+  font-size: var(--font-size-input);
 }
 
 .weekly-start-settings .supporting-text {
   margin: 0;
+  line-height: 1.6;
 }
 
 .timetable-period-settings {
@@ -768,11 +778,11 @@ select.entry-input {
 }
 
 .timetable-days-field {
-  flex: 1 1 168px;
+  flex: 1 1 196px;
 }
 
 .timetable-count-field {
-  flex: 0 1 116px;
+  flex: 0 1 152px;
 }
 
 .timetable-inline-field .entry-input {
@@ -780,19 +790,21 @@ select.entry-input {
   min-width: 0;
   min-height: 44px;
   padding: 8px;
-  font-size: 13px;
+  font-size: var(--font-size-input);
 }
 
 .timetable-days-field .entry-input {
-  width: 112px;
+  width: 136px;
 }
 
 .timetable-count-field .entry-input {
-  width: 92px;
+  width: 108px;
 }
 
 .timetable-settings .supporting-text {
   margin: 0;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 
 .timetable-period-setting {
@@ -834,7 +846,7 @@ select.entry-input {
   min-width: 0;
   min-height: 44px;
   padding: 7px 5px;
-  font-size: 14px;
+  font-size: var(--font-size-input);
 }
 
 .timetable-period-time-label {
@@ -1265,8 +1277,38 @@ select.entry-input {
   width: 100%;
 }
 
-.data-backup > .secondary-button + .secondary-button {
-   margin-top: 5px; 
+.data-backup {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.data-backup .section-label {
+  margin-bottom: var(--space-1);
+}
+
+.data-backup .supporting-text {
+  min-width: 0;
+  margin: 0;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.data-backup-action {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.data-backup-restore {
+  padding-top: var(--space-3);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.data-backup .data-storage-notice {
+  padding-top: var(--space-3);
+  border-top: var(--border-width) solid var(--color-border);
+  font-size: 13px;
 }
 
 .weekly-schedule {
