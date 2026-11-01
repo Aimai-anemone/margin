@@ -1,30 +1,30 @@
 :root {
-  /* 現在の温かい配色と寸法を、画面共通の役割名で参照する。 */
-  --color-page: #f5f6f2;
-  --color-outer: #eceee9;
-  --color-surface: #fcfcfa;
-  --color-surface-subtle: #f8faf6;
+  /* Quiet Precision の色を、既存の役割名で参照する。 */
+  --color-page: #f5f6f7;
+  --color-outer: #e9edf0;
+  --color-surface: #ffffff;
+  --color-surface-subtle: #eef1f3;
   --color-control: #ffffff;
   --color-on-accent: #ffffff;
-  --color-text: #20211f;
-  --color-text-muted: #696c64;
-  --color-text-control: #30312e;
-  --color-text-cancel: #555850;
-  --color-disabled-surface: #eceee8;
-  --color-disabled-text: #858a81;
-  --color-border: #dcddd7;
-  --color-border-control: #d6d8d1;
-  --color-border-input: #cfd2ca;
-  --color-accent: #304034;
-  --color-accent-soft: #edf2ea;
-  --color-accent-text: #3d5744;
-  --color-selected-surface: #e7ede2;
-  --color-selected-border: #80917b;
-  --color-segment-surface: #eceee8;
-  --color-segment-border: #ccd3c7;
-  --color-input-focus: #526456;
-  --color-warning: #705733;
-  --color-danger: #8b4d40;
+  --color-text: #121a23;
+  --color-text-muted: #626a73;
+  --color-text-control: #121a23;
+  --color-text-cancel: #626a73;
+  --color-disabled-surface: #eef1f3;
+  --color-disabled-text: #626a73;
+  --color-border: #d7dce1;
+  --color-border-control: #d7dce1;
+  --color-border-input: #bfc7cf;
+  --color-accent: #176b78;
+  --color-accent-soft: #e5f0f2;
+  --color-accent-text: #176b78;
+  --color-selected-surface: #e5f0f2;
+  --color-selected-border: #176b78;
+  --color-segment-surface: #eef1f3;
+  --color-segment-border: #bfc7cf;
+  --color-input-focus: #176b78;
+  --color-warning: #7c6030;
+  --color-danger: #9a3f3f;
 
   --space-1: 4px;
   --space-2: 8px;
@@ -53,7 +53,7 @@
   --control-height-input: 50px;
   --control-height-compact: 44px;
   --border-width: 1px;
-  --focus-ring-color: #3d5744;
+  --focus-ring-color: #176b78;
   --focus-ring-width: 2px;
   --focus-ring-offset: 2px;
 

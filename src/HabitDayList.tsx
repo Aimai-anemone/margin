@@ -48,6 +48,7 @@ export default function HabitDayList({ controller, initialHabitId, onBack, onMan
         {habit ? '選択日の習慣へ戻る' : '今日へ戻る'}
       </button>
       <h1 className="card-title">習慣</h1>
+      <p className="habit-day-count">記録 <strong>{items.filter((item) => savedRecords.some((saved) => saved.habitId === item.id)).length}</strong> / {items.length}</p>
       <div className="habit-frequency-options" role="group" aria-label="習慣画面">
         <button className="habit-choice" type="button" aria-pressed={true}>今日の習慣</button>
         <button className="habit-choice" type="button" aria-pressed={false} onClick={onManage}>習慣の管理</button>

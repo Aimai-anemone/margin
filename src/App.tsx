@@ -217,10 +217,14 @@ function App() {
   return (
     <div className="app">
       {!isTodayDedicated && <header className={`app-header${activeTab === 'today' ? ' today-app-header' : ''}`}>
-        <div>
+        {activeTab === 'today' ? <div className="today-editorial-header">
+          <p className="today-kicker">今日</p>
+          <p className="today-date">{today}</p>
+          <p className="app-name">Margin</p>
+        </div> : <div>
           <p className="app-name">Margin</p>
           <p className="today-date">{today}</p>
-        </div>
+        </div>}
       </header>}
 
       <main className={`main-content${isTodayDedicated ? ' main-content-dedicated' : ''}`}>
@@ -314,7 +318,7 @@ function App() {
               </p>
 
               <button
-                className="primary-button"
+                className="secondary-button today-entry-open"
                 type="button"
                 onClick={startEditingEntry}
                 disabled={entryState.status === 'error'}
@@ -360,7 +364,7 @@ function App() {
             手をつけにくいことを、5分だけ始めます。
           </p>
 
-          {fiveMinuteCount > 0 && <p className="supporting-text">今日、{fiveMinuteCount}回取り組みました</p>}
+          <p className="today-five-minute-count" aria-label={`今日、${fiveMinuteCount}回取り組みました`}>{fiveMinuteCount}<span>回</span></p>
           {fiveMinute.error && <p className="five-minute-entry-message" role="alert">{fiveMinute.error}</p>}
           {fiveMinute.notice && <p className="five-minute-entry-message" role="status">{fiveMinute.notice}</p>}
           <button className="secondary-button" type="button" onClick={openFiveMinute}>

@@ -3138,3 +3138,370 @@ select.entry-input {
     transform: none;
   }
 }
+
+/* Quiet Precision: 今日・習慣・設定だけを行と文字階層で構成する。 */
+.today-app-header {
+  padding: 24px 20px 16px;
+}
+
+.today-editorial-header {
+  display: grid;
+  gap: 2px;
+}
+
+.today-kicker {
+  margin: 0;
+  color: var(--color-accent);
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: .12em;
+}
+
+.today-editorial-header .today-date {
+  margin: 0;
+  color: var(--color-text);
+  font-size: clamp(32px, 10vw, 44px);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -.04em;
+}
+
+.today-editorial-header .app-name {
+  margin-top: 6px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .08em;
+}
+
+.tab-panel.today-tab-panel {
+  gap: 0;
+}
+
+.today-tab-panel > .card,
+.today-tab-panel > .loose-plan-panel {
+  min-width: 0;
+  padding: 16px 0;
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+}
+
+.today-tab-panel .section-label {
+  color: var(--color-text-muted);
+  letter-spacing: .04em;
+}
+
+.today-tab-panel .card-title,
+.today-tab-panel .closing-title,
+.today-tab-panel .loose-plan-panel-title {
+  color: var(--color-text);
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.today-entry-card .card-title {
+  font-size: 21px;
+}
+
+.today-tab-panel .supporting-text {
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.today-tab-panel .entry-editor {
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.today-tab-panel .primary-button,
+.today-tab-panel .secondary-button,
+.today-tab-panel .cancel-button,
+.habits-page .primary-button,
+.habits-page .secondary-button,
+.habits-page .cancel-button,
+.settings-page .primary-button,
+.settings-page .secondary-button,
+.settings-page .entry-input {
+  border-radius: 8px;
+}
+
+.today-tab-panel .primary-button:hover,
+.habits-page .primary-button:hover,
+.settings-page .primary-button:hover {
+  background: var(--color-accent);
+  filter: brightness(.92);
+}
+
+.today-tab-panel .today-entry-open,
+.today-tab-panel .habit-entry > .secondary-button,
+.today-tab-panel .today-five-minute-entry > .secondary-button,
+.today-tab-panel .end-of-day-entry > .secondary-button {
+  justify-self: start;
+  width: auto;
+  min-height: 44px;
+  padding-inline: 14px;
+}
+
+.today-tab-panel .loose-plan-compact-summary {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.today-tab-panel .loose-plan-compact-period {
+  grid-template-columns: 42px minmax(0, 1fr);
+  border-top: 1px solid var(--color-border);
+}
+
+.today-tab-panel .loose-plan-compact-period-label,
+.today-tab-panel .loose-plan-compact-title-button {
+  color: var(--color-text);
+}
+
+.today-tab-panel .loose-plan-compact-complete-button {
+  color: var(--color-accent);
+}
+
+.habit-entry-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+
+.habit-entry-count {
+  color: var(--color-accent);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.today-tab-panel .habit-entry-names {
+  margin: 4px 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.today-tab-panel .habit-entry-names li {
+  overflow: visible;
+  border-bottom: 1px solid var(--color-border);
+  white-space: normal;
+}
+
+.today-tab-panel .habit-entry-row {
+  color: var(--color-text);
+}
+
+.today-tab-panel .habit-entry-row span:first-child {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.today-five-minute-count {
+  margin: 0 0 12px;
+  color: var(--color-text);
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.today-five-minute-count span {
+  margin-left: 4px;
+  color: var(--color-text-muted);
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.habits-page {
+  gap: 12px;
+}
+
+.habits-page .habit-page-heading .card-title {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.habit-day-count {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 17px;
+}
+
+.habit-day-count strong {
+  color: var(--color-text);
+  font-size: 32px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.habits-page .habit-page-heading .habit-frequency-options,
+.habits-page .habit-date-picker {
+  gap: 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.habits-page .habit-page-heading .habit-choice,
+.habits-page .habit-date-picker .habit-choice {
+  min-height: 48px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.habits-page .habit-page-heading .habit-choice[aria-pressed="true"],
+.habits-page .habit-date-picker .habit-choice[aria-pressed="true"] {
+  border-bottom-color: var(--color-accent);
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.habits-page > .habit-day-item,
+.habits-page > .habit-group {
+  padding: 14px 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+}
+
+.habits-page > .habit-day-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.habits-page > .habit-day-item > .secondary-button {
+  grid-column: 2;
+  grid-row: 1;
+  width: auto;
+  min-height: 44px;
+  padding-inline: 12px;
+}
+
+.habits-page > .habit-day-item > p {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.habits-page .habit-record-editor {
+  gap: 8px;
+  padding-block: 16px;
+}
+
+.habits-page .habit-step-choice {
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text);
+}
+
+.habits-page .habit-step-choice[aria-pressed="true"] {
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.habits-page .habit-rest-choice {
+  justify-self: start;
+  width: auto;
+  border-color: var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.habits-page button:focus-visible {
+  outline-color: var(--focus-ring-color);
+}
+
+.habits-page .habit-editor {
+  border-radius: 10px;
+}
+
+.habits-page .habit-group .habit-item + .habit-item {
+  border-top-color: var(--color-border);
+}
+
+.habits-page .habit-hidden-toggle {
+  color: var(--color-accent);
+}
+
+.settings-page {
+  gap: 0;
+}
+
+.settings-page-heading {
+  padding: 0 0 16px;
+}
+
+.settings-page-heading .card-title {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.settings-page > .card {
+  padding: 18px 0;
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+}
+
+.settings-page .card-title {
+  font-size: 17px;
+}
+
+.settings-page .section-label,
+.settings-page .supporting-text {
+  color: var(--color-text-muted);
+}
+
+.settings-page .entry-input {
+  background: var(--color-surface);
+  border-color: var(--color-border-input);
+  border-radius: 8px;
+}
+
+.settings-page .timetable-period-setting + .timetable-period-setting {
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+}
+
+.settings-page .data-backup-restore,
+.settings-page .data-storage-notice {
+  border-top-color: var(--color-border);
+}
+
+.settings-page .settings-about .card-title {
+  margin-bottom: 4px;
+}
+
+.bottom-navigation {
+  border-top-color: var(--color-border);
+  background: var(--color-surface);
+  backdrop-filter: none;
+}
+
+.nav-item.active {
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+@media (min-width: 700px) {
+  .app {
+    border-color: var(--color-border);
+    border-radius: var(--radius-large);
+    box-shadow: none;
+  }
+
+  .bottom-navigation {
+    border-color: var(--color-border);
+    border-radius: 0 0 var(--radius-large) var(--radius-large);
+  }
+}
