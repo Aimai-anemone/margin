@@ -1,6 +1,7 @@
 import {
   courseWeekdays, isAcademicYear, isTerm, loadTimetableSettings, type Term,
 } from './TimetableStorage'
+import { readStoredJson, saveStoredJson, type SafeStorage } from './StorageSafety'
 
 export const COURSES_STORAGE_KEY = 'margin-courses'
 
@@ -99,29 +100,26 @@ export function parseCourse(
   }
 }
 
-export function loadCourses(): Course[] {
-  const savedCourses = localStorage.getItem(COURSES_STORAGE_KEY)
-
-  if (savedCourses === null) {
-    return []
+function parseCourses(value: unknown): Course[] | null {
+  if (!Array.isArray(value)) return null
+  const courses: Course[] = []
+  const ids = new Set<string>()
+  const legacyYear = loadTimetableSettings().legacyAcademicYear
+  for (const item of value) {
+    if (!isValidCourseBackup(item)) return null
+    const course = parseCourse(item, legacyYear)
+    if (!course || course.id.trim() === '' || ids.has(course.id)) return null
+    ids.add(course.id)
+    courses.push(course)
   }
-
-  try {
-    const parsedCourses: unknown = JSON.parse(savedCourses)
-
-    if (!Array.isArray(parsedCourses)) {
-      return []
-    }
-
-    return parsedCourses
-      .map((value) => parseCourse(value))
-      .filter((course): course is Course => course !== null)
-  } catch {
-    return []
-  }
+  return courses
 }
 
-export function saveCourses(courses: Course[]) {
-  localStorage.setItem(COURSES_STORAGE_KEY, JSON.stringify(courses))
+export function loadCourseState(storage?: SafeStorage) {
+  return readStoredJson(COURSES_STORAGE_KEY, '授業', [] as Course[], parseCourses, storage)
+}
+
+export function saveCourses(courses: Course[], storage?: SafeStorage) {
+  saveStoredJson(COURSES_STORAGE_KEY, '授業', courses, parseCourses, [], storage)
 }
 

@@ -6,6 +6,7 @@ import {
 } from 'react'
 import { isCoursePeriod, isCourseWeekday, type Course } from './CourseStorage'
 import { getAcademicYear, getYearOptions, isAcademicYear, isTerm, terms, type Term } from './TimetableStorage'
+import { storageFailureMessage } from './StorageSafety'
 
 type CourseDraft = Omit<Course, 'id'>
 export type CoursePlacement = Pick<Course, 'weekday' | 'period' | 'academicYear' | 'term'>
@@ -92,8 +93,8 @@ const CourseTemplates = forwardRef<
     try {
       onSaveCourses(nextCourses)
       return true
-    } catch {
-      setCourseError('授業を保存できませんでした。ブラウザーの保存設定を確認してください。')
+    } catch (error) {
+      setCourseError(storageFailureMessage(error))
       return false
     }
   }

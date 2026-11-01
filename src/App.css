@@ -105,6 +105,15 @@ button {
   margin-top: -4px;
 }
 
+.storage-message {
+  margin: 10px 0;
+  min-width: 0;
+  color: #696c64;
+  font-size: 14px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
 .card-heading {
   display: flex;
   align-items: flex-start;
@@ -2571,4 +2580,282 @@ select.entry-input {
 .five-minute-stop-confirm {
   padding-top: 10px;
   border-top: 1px solid #e1e4dc;
+}
+
+.habits-page,
+.habit-editor,
+.habit-group {
+  display: grid;
+  min-width: 0;
+  gap: 14px;
+}
+
+.habit-page-heading .card-title {
+  margin-block: 12px 8px;
+}
+
+.habit-entry,
+.habit-item,
+.habit-editor .form-field {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.habit-entry-names {
+  margin: 8px 0;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.habit-entry-names li {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.habit-item h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.habit-item + .habit-item {
+  border-top: 1px solid #e1e4dc;
+  padding-top: 14px;
+}
+
+.habit-item .supporting-text,
+.habit-editor .supporting-text {
+  margin: 0;
+}
+
+.habit-editor .entry-input {
+  width: 100%;
+  min-width: 0;
+  font-size: 16px;
+}
+
+.habit-editor textarea {
+  resize: vertical;
+}
+
+.habit-trigger-preview {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  color: #70736b;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.habit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.habits-page .habit-actions > button {
+  width: auto;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px 12px;
+  overflow-wrap: anywhere;
+}
+
+.habit-frequency {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.habit-frequency-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-block: 8px;
+}
+
+.habit-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.habit-choice {
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 2px;
+  border: 1px solid #d8ddd3;
+  border-radius: 10px;
+  background: #fcfcfa;
+  color: #62675f;
+  cursor: pointer;
+}
+
+.habit-choice[aria-pressed="true"] {
+  border-color: #80917b;
+  background: #e7ede2;
+  color: #304034;
+  font-weight: 700;
+}
+
+.habit-hidden-toggle {
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: #62675f;
+  text-align: left;
+  cursor: pointer;
+}
+
+.habits-page button:focus-visible {
+  outline: 2px solid #3d5744;
+  outline-offset: 2px;
+}
+
+.habits-page .habit-delete {
+  display: block;
+  width: auto;
+  min-height: 44px;
+  margin-top: 14px;
+  padding: 8px;
+}
+
+.habits-page .storage-message {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.habit-date-picker {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.habit-date-picker span {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.habit-record-editor {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+  overflow-wrap: anywhere;
+}
+
+.habit-step-choice {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  text-align: left;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.habit-step-choice span:last-child {
+  font-weight: 400;
+}
+
+.habits-page .habit-rest-choice {
+  min-height: 44px;
+  color: #62675f;
+}
+
+.habit-rest-choice[aria-pressed="true"] {
+  text-decoration: underline;
+}
+
+.habit-day-item {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.habit-entry-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  gap: 8px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: #40513b;
+  text-align: left;
+  cursor: pointer;
+}
+
+.habit-entry-row span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.habit-entry-row span:last-child {
+  flex-shrink: 0;
+  font-size: 12px;
+}
+
+.habit-day-content {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+  overflow-wrap: anywhere;
+}
+
+.habit-compact-item,
+.habit-readonly-item {
+  min-width: 0;
+  padding-block: 8px;
+  overflow-wrap: anywhere;
+}
+
+.habit-compact-item h2,
+.habit-readonly-item h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.habit-compact-item .secondary-button {
+  width: auto;
+  min-height: 44px;
+  margin-block: 4px 0;
+  padding: 8px 12px;
+}
+
+.habit-compact-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.habit-compact-item > button {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.habit-compact-item > p {
+  grid-column: 1 / -1;
+}
+
+.habit-day-content .cancel-button {
+  min-height: 44px;
+}
+
+.habit-day-content .habit-rest-choice {
+  color: #62675f;
+}
+
+.habit-day-content button:focus-visible {
+  outline: 2px solid #3d5744;
+  outline-offset: 2px;
 }

@@ -7,46 +7,65 @@ import EndOfDay from './EndOfDay'
 import RecordsPage from './RecordsPage'
 import FiveMinuteStart from './FiveMinuteStart'
 import { useFiveMinuteStart } from './useFiveMinuteStart'
+import { useHabits } from './useHabits'
+import HabitsPage from './HabitsPage'
+import TodayHabitsCard from './TodayHabitsCard'
+import { loadEntryState, saveEntryValue } from './EntryStorage'
+import { requireStoredData, storageFailureMessage } from './StorageSafety'
 import { deleteDailyRecord, loadDailyRecords, saveDailyRecord, type DailyRecordInput } from './DailyRecordStorage'
-import { TIMETABLE_SETTINGS_KEY, loadTimetableSettings, saveTimetableSettings, type TimetableSettings } from './TimetableStorage'
+import { loadTimetableSettingsState, saveTimetableSettings, type TimetableSettings } from './TimetableStorage'
 import {
   getLocalDate,
-  loadLoosePlans,
-  LOOSE_PLANS_STORAGE_KEY,
+  loadLoosePlanState,
+  writeLoosePlans,
   type LoosePlan,
 } from './LoosePlanStorage'
 import './App.css'
 
-const ENTRY_STORAGE_KEY = 'margin-entry'
-
 type ActiveTab = 'today' | 'tasks' | 'weekly' | 'records' | 'settings'
 
 function App() {
-  const [entry, setEntry] = useState(() => {
-  return localStorage.getItem(ENTRY_STORAGE_KEY) ?? ''
-})
+  const [entryState, setEntryState] = useState(loadEntryState)
+  const entry = entryState.data
+  const [entryError, setEntryError] = useState('')
 
   const [entryDraft, setEntryDraft] = useState('')
   const [isEditingEntry, setIsEditingEntry] = useState(false)
   const [activeTab, setActiveTab] = useState<ActiveTab>('today')
   const [endOfDayDate, setEndOfDayDate] = useState<string | null>(null)
   const [isShowingFiveMinute, setIsShowingFiveMinute] = useState(false)
+  const [isShowingHabits, setIsShowingHabits] = useState(false)
+  const [habitToOpen, setHabitToOpen] = useState<string | null>(null)
+  const habits = useHabits()
   const fiveMinute = useFiveMinuteStart()
   const [dailyRecordState, setDailyRecordState] = useState(loadDailyRecords)
-  const [timetableSettings, setTimetableSettings] = useState(loadTimetableSettings)
+  const [timetableState, setTimetableState] = useState(loadTimetableSettingsState)
+  const timetableSettings = timetableState.data
+  const [timetableError, setTimetableError] = useState('')
   useEffect(() => {
-    if (localStorage.getItem(TIMETABLE_SETTINGS_KEY) === null) {
-      saveTimetableSettings(timetableSettings)
-    }
-  }, [timetableSettings])
+    if (timetableState.status !== 'missing') return
+    let cancelled = false
+    // 初回だけの保存を画面の初期描画後に行い、解除後には状態を更新しない。
+    queueMicrotask(() => {
+      if (cancelled) return
+      try {
+        saveTimetableSettings(timetableState.data)
+        setTimetableState({ status: 'ready', data: timetableState.data, error: '' })
+      } catch (error) {
+        setTimetableError(storageFailureMessage(error))
+      }
+    })
+    return () => { cancelled = true }
+  }, [timetableState])
 
   function updateTimetableSettings(settings: TimetableSettings) {
+    requireStoredData(timetableState)
     saveTimetableSettings(settings)
-    setTimetableSettings(settings)
+    setTimetableState({ status: 'ready', data: settings, error: '' })
+    setTimetableError('')
   }
-  const [loosePlans, setLoosePlans] = useState<LoosePlan[]>(
-    loadLoosePlans,
-  )
+  const [loosePlanState, setLoosePlanState] = useState(loadLoosePlanState)
+  const loosePlans = loosePlanState.data
 
   const todayDate = getLocalDate()
   const tomorrowDate = getLocalDate(1)
@@ -60,6 +79,7 @@ function App() {
   }).format(new Date())
 
   function startEditingEntry() {
+    if (entryState.status === 'error') return
     setEntryDraft(entry)
     setIsEditingEntry(true)
   }
@@ -71,9 +91,15 @@ function App() {
       return
     }
 
-    setEntry(cleanedEntry)
-    localStorage.setItem(ENTRY_STORAGE_KEY, cleanedEntry)
-    setIsEditingEntry(false)
+    try {
+      requireStoredData(entryState)
+      saveEntryValue(cleanedEntry)
+      setEntryState({ status: 'ready', data: cleanedEntry, error: '' })
+      setEntryError('')
+      setIsEditingEntry(false)
+    } catch (error) {
+      setEntryError(storageFailureMessage(error))
+    }
   }
 
   function cancelEditingEntry() {
@@ -82,18 +108,22 @@ function App() {
   }
 
   function deleteEntry() {
-  setEntry('')
-  setEntryDraft('')
-  localStorage.removeItem(ENTRY_STORAGE_KEY)
-  setIsEditingEntry(false)
+  try {
+    requireStoredData(entryState)
+    saveEntryValue(null)
+    setEntryState({ status: 'missing', data: '', error: '' })
+    setEntryDraft('')
+    setEntryError('')
+    setIsEditingEntry(false)
+  } catch (error) {
+    setEntryError(storageFailureMessage(error))
+  }
 }
 
   function saveLoosePlans(nextPlans: LoosePlan[]) {
-    setLoosePlans(nextPlans)
-    localStorage.setItem(
-      LOOSE_PLANS_STORAGE_KEY,
-      JSON.stringify(nextPlans),
-    )
+    requireStoredData(loosePlanState)
+    writeLoosePlans(nextPlans)
+    setLoosePlanState({ status: 'ready', data: nextPlans, error: '' })
   }
 
   function saveLoosePlan(nextPlan: LoosePlan) {
@@ -127,6 +157,7 @@ function App() {
   }
 
   function selectTab(tab: ActiveTab) {
+    setIsShowingHabits(false)
     setEndOfDayDate(null)
     setIsShowingFiveMinute(false)
     if (tab === 'records') reloadRecords()
@@ -150,6 +181,7 @@ function App() {
   }
 
   function openEndOfDay() {
+    habits.refresh()
     setDailyRecordState(loadDailyRecords())
     setEndOfDayDate(getLocalDate())
     window.scrollTo({ top: 0 })
@@ -190,6 +222,7 @@ function App() {
       </header>
 
       <main className="main-content">
+        {timetableError && <p className="weekly-editor-error" role="alert">{timetableError}</p>}
         {activeTab === 'today' && (
           <div
             id="today-panel"
@@ -197,14 +230,18 @@ function App() {
             role="region"
             aria-labelledby="today-tab"
           >
-          {isShowingFiveMinute ? (
+          {isShowingHabits ? (
+            <HabitsPage controller={habits} initialHabitId={habitToOpen} onBack={() => { setIsShowingHabits(false); window.scrollTo({ top: 0 }) }} />
+          ) : isShowingFiveMinute ? (
             <FiveMinuteStart controller={fiveMinute} onBack={closeFiveMinute} />
           ) : endOfDayDate !== null ? (
             <EndOfDay
+              habits={habits}
               date={endOfDayDate}
               record={dailyRecordState.records.find((record) => record.date === endOfDayDate)}
               loadError={dailyRecordState.error}
               loosePlans={loosePlans}
+              loosePlansLoadError={loosePlanState.error}
               onBack={closeEndOfDay}
               onSave={saveTodaysRecord}
               onSaveLoosePlan={saveLoosePlan}
@@ -215,6 +252,7 @@ function App() {
           <>
           <section className="card primary-card">
           <p className="section-label">今日の入口</p>
+          {(entryState.error || entryError) && <p className="storage-message" role="alert">{entryState.error || entryError}</p>}
 
           {isEditingEntry ? (
             <div className="entry-editor">
@@ -264,11 +302,11 @@ function App() {
           ) : (
             <>
               <h1 className="card-title">
-                {entry || 'まだ決まっていません'}
+                {entryState.status === 'error' ? '入口を確認できません' : entry || 'まだ決まっていません'}
               </h1>
 
               <p className="supporting-text">
-                {entry
+                {entryState.status === 'error' ? '保存済みの入口は変更せずに残しています。' : entry
                   ? 'この行動から始めれば十分です。'
                   : '次に迷わないよう、最初の一歩だけを決めます。'}
               </p>
@@ -277,6 +315,7 @@ function App() {
                 className="primary-button"
                 type="button"
                 onClick={startEditingEntry}
+                disabled={entryState.status === 'error'}
               >
                 {entry ? '入口を変更する' : '入口を決める'}
               </button>
@@ -286,6 +325,7 @@ function App() {
 
           <LoosePlanPanel
             plans={loosePlans}
+            loadError={loosePlanState.error}
             date={todayDate}
             heading="今日のゆるい予定"
             compact
@@ -293,6 +333,13 @@ function App() {
             onDelete={deleteLoosePlan}
             onToggleComplete={toggleLoosePlanComplete}
           />
+
+          <TodayHabitsCard habits={habits.data.habits} records={habits.data.records} today={habits.today} error={habits.error} onOpen={(id) => {
+            habits.refresh()
+            setHabitToOpen(id ?? null)
+            setIsShowingHabits(true)
+            window.scrollTo({ top: 0 })
+          }} />
 
           <section className="card">
           <div className="card-heading">
@@ -345,7 +392,7 @@ function App() {
             role="region"
             aria-labelledby="tasks-tab"
           >
-            <TasksPage settings={timetableSettings} onSettingsChange={updateTimetableSettings} />
+            <TasksPage settings={timetableSettings} settingsLoadError={timetableState.error} onSettingsChange={updateTimetableSettings} />
           </div>
         )}
 
@@ -356,9 +403,11 @@ function App() {
             role="region"
             aria-labelledby="weekly-tab"
           >
+            {timetableState.error && <p className="weekly-editor-error" role="alert">{timetableState.error} 開始時刻は一時的な既定値で表示しています。</p>}
             <WeeklySchedule
               startHour={timetableSettings.weeklyStartHour ?? 0}
               loosePlans={loosePlans}
+              loosePlansLoadError={loosePlanState.error}
               todayDate={todayDate}
               tomorrowDate={tomorrowDate}
               onSaveLoosePlan={saveLoosePlan}
@@ -376,9 +425,11 @@ function App() {
             aria-labelledby="records-tab"
           >
             <RecordsPage
+              habits={habits}
               records={dailyRecordState.records}
               loadError={dailyRecordState.error}
               loosePlans={loosePlans}
+              loosePlansLoadError={loosePlanState.error}
               onReloadRecords={reloadRecords}
               onSaveRecord={saveRecord}
               onDeleteRecord={deleteRecord}
@@ -396,7 +447,7 @@ function App() {
             role="region"
             aria-labelledby="settings-tab"
           >
-            <SettingsPage timetableSettings={timetableSettings} onSaveTimetableSettings={updateTimetableSettings} />
+            <SettingsPage timetableSettings={timetableSettings} loadError={timetableState.error} onSaveTimetableSettings={updateTimetableSettings} />
           </div>
         )}
       </main>

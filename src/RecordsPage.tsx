@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import EndOfDay from './EndOfDay'
+import { type HabitsController } from './useHabits'
 import RecordSummary from './RecordSummary'
 import { formatRecordMinutes as formatMinutes, type RecordPeriod } from './DailyRecordSummary'
 import { dayPeriods, getLocalDate, type LoosePlan } from './LoosePlanStorage'
@@ -11,9 +12,11 @@ import {
 } from './DailyRecordStorage'
 
 type Props = {
+  habits?: HabitsController
   records: DailyRecord[]
   loadError: string
   loosePlans: LoosePlan[]
+  loosePlansLoadError?: string
   onReloadRecords: () => { records: DailyRecord[]; error: string }
   onSaveRecord: (record: DailyRecordInput, operation: 'create' | 'update') => void
   onDeleteRecord: (date: string) => void
@@ -40,7 +43,7 @@ function planSummary(record: DailyRecord) {
 }
 
 function RecordsPage({
-  records, loadError, loosePlans, onReloadRecords, onSaveRecord, onDeleteRecord,
+  records, loadError, loosePlans, loosePlansLoadError, onReloadRecords, onSaveRecord, onDeleteRecord, habits,
   onSaveLoosePlan, onDeleteLoosePlan, onToggleLoosePlanComplete,
 }: Props) {
   const [view, setView] = useState<RecordsView>({ kind: 'list' })
@@ -62,6 +65,7 @@ function RecordsPage({
   }
 
   function showDetail(date: string) {
+    habits?.refresh()
     setView({ kind: 'detail', date })
     setMessage('')
     setActionError('')
@@ -69,6 +73,7 @@ function RecordsPage({
   }
 
   function startCreating(date: string) {
+    habits?.refresh()
     const latest = onReloadRecords()
     setActionError('')
     if (latest.error) return
@@ -125,6 +130,7 @@ function RecordsPage({
   if (view.kind === 'create' || (view.kind === 'edit' && selectedRecord)) {
     return (
       <EndOfDay
+        habits={habits}
         key={`${view.kind}-${view.date}`}
         date={view.date}
         mode={view.kind === 'edit' ? 'edit' : view.isToday ? 'today' : 'create'}
@@ -132,6 +138,7 @@ function RecordsPage({
         record={selectedRecord}
         loadError={loadError}
         loosePlans={loosePlans}
+        loosePlansLoadError={loosePlansLoadError}
         onBack={view.kind === 'edit' ? () => showDetail(view.date) : showList}
         onSave={saveRecord}
         onSaveLoosePlan={onSaveLoosePlan}

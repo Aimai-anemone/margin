@@ -1,3 +1,5 @@
+import { readStoredJson, saveStoredJson, type SafeStorage } from './StorageSafety'
+
 export const TIMETABLE_SETTINGS_KEY = 'margin-timetable-settings'
 export const MAX_PERIODS = 8
 export const courseWeekdays = [
@@ -92,26 +94,25 @@ export function isTimetableSettings(value: unknown): value is TimetableSettings 
   return validatePeriodTimes(settings.periods, Number(settings.periodCount)) === ''
 }
 
-export function loadTimetableSettings(): TimetableSettings {
-  try {
-    const value: unknown = JSON.parse(localStorage.getItem(TIMETABLE_SETTINGS_KEY) ?? 'null')
-    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      const saved = value as Record<string, unknown>
-      const normalized = {
-        ...saved,
-        weeklyStartHour: isWeeklyStartHour(saved.weeklyStartHour) ? saved.weeklyStartHour : 0,
-      }
-      if (isTimetableSettings(normalized)) return normalized
-    }
-  } catch { /* 保存内容を消さず、既定値で表示する。 */ }
-  return createDefaultTimetableSettings()
+function parseTimetableSettings(value: unknown): TimetableSettings | null {
+  if (!isTimetableSettings(value)) return null
+  // 開始時刻の項目がない旧形式だけを、表示時に補う。元キーは変更しない。
+  return { ...value, weeklyStartHour: value.weeklyStartHour ?? 0 }
 }
 
-export function saveTimetableSettings(settings: TimetableSettings) {
-  if (!isTimetableSettings(settings)) {
-    throw new Error('時間割の設定が正しくありません。')
-  }
-  localStorage.setItem(TIMETABLE_SETTINGS_KEY, JSON.stringify(settings))
+export function loadTimetableSettingsState(storage?: SafeStorage) {
+  return readStoredJson(TIMETABLE_SETTINGS_KEY, '時間割の設定',
+    createDefaultTimetableSettings(), parseTimetableSettings, storage)
+}
+
+export function loadTimetableSettings(): TimetableSettings {
+  // 旧授業の表示用。通常保存と書き出しでは、別途読み込み状態を確認する。
+  return loadTimetableSettingsState().data
+}
+
+export function saveTimetableSettings(settings: TimetableSettings, storage?: SafeStorage) {
+  saveStoredJson(TIMETABLE_SETTINGS_KEY, '時間割の設定', settings,
+    parseTimetableSettings, createDefaultTimetableSettings(), storage)
 }
 
 export function getYearOptions(...years: number[]) {

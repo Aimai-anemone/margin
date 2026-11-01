@@ -1,3 +1,5 @@
+import { readStoredJson, saveStoredJson, type SafeStorage } from './StorageSafety'
+
 export const LOOSE_PLANS_STORAGE_KEY = 'margin-loose-plans'
 
 export const dayPeriods = [
@@ -22,12 +24,12 @@ function isDayPeriod(value: unknown): value is DayPeriod {
 }
 
 function isLocalDate(value: unknown): value is string {
-  return (
-    typeof value === 'string' &&
-    /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])$/.test(
-      value,
-    )
-  )
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const [year, month, day] = value.split('-').map(Number)
+  const date = new Date(0)
+  date.setFullYear(year, month - 1, day)
+  date.setHours(12, 0, 0, 0)
+  return year > 0 && date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
 }
 
 function parseLoosePlan(value: unknown): LoosePlan | null {
@@ -42,11 +44,12 @@ function parseLoosePlan(value: unknown): LoosePlan | null {
   const plan = value as Record<string, unknown>
 
   if (
-    typeof plan.id !== 'string' ||
+    typeof plan.id !== 'string' || !plan.id.trim() ||
     typeof plan.title !== 'string' ||
     !isLocalDate(plan.date) ||
     !isDayPeriod(plan.dayPeriod) ||
-    typeof plan.completed !== 'boolean'
+    typeof plan.completed !== 'boolean' ||
+    (plan.memo !== undefined && typeof plan.memo !== 'string')
   ) {
     return null
   }
@@ -61,27 +64,21 @@ function parseLoosePlan(value: unknown): LoosePlan | null {
   }
 }
 
-export function loadLoosePlans(): LoosePlan[] {
-  const savedPlans = localStorage.getItem(LOOSE_PLANS_STORAGE_KEY)
-
-  if (savedPlans === null) {
-    return []
+function parseLoosePlans(value: unknown): LoosePlan[] | null {
+  if (!Array.isArray(value)) return null
+  const plans: LoosePlan[] = []
+  const ids = new Set<string>()
+  for (const item of value) {
+    const plan = parseLoosePlan(item)
+    if (!plan || ids.has(plan.id)) return null
+    ids.add(plan.id)
+    plans.push(plan)
   }
-
-  try {
-    const parsedPlans: unknown = JSON.parse(savedPlans)
-
-    if (!Array.isArray(parsedPlans)) {
-      return []
-    }
-
-    return parsedPlans
-      .map(parseLoosePlan)
-      .filter((plan): plan is LoosePlan => plan !== null)
-  } catch {
-    return []
-  }
+  return plans
 }
+
+export const loadLoosePlanState = (storage?: SafeStorage) => readStoredJson(LOOSE_PLANS_STORAGE_KEY, 'ゆるい予定', [], parseLoosePlans, storage)
+export const writeLoosePlans = (plans: LoosePlan[], storage?: SafeStorage) => saveStoredJson(LOOSE_PLANS_STORAGE_KEY, 'ゆるい予定', plans, parseLoosePlans, [], storage)
 
 export function getLocalDate(daysFromToday = 0) {
   const date = new Date()
