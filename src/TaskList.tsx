@@ -7,6 +7,7 @@ import {
 import { type Course } from './CourseStorage'
 import { formatTaskDeadline, isValidTaskDeadline, loadTaskState, sortTasks, writeTasks, type Task } from './TaskStorage'
 import { requireStoredData, storageFailureMessage } from './StorageSafety'
+import { createId } from './IdGeneration'
 
 type TaskDraft = Omit<Task, 'id' | 'completed'>
 
@@ -145,8 +146,16 @@ function addTask() {
     return
   }
 
+  let id: string
+  try {
+    id = createId()
+  } catch (error) {
+    setTaskError(storageFailureMessage(error))
+    return
+  }
+
   const newTask: Task = {
-    id: crypto.randomUUID(),
+    id,
     title: cleanedTitle,
     deadline: taskDraft.deadline,
     format: taskDraft.format,

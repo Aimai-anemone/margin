@@ -1,5 +1,6 @@
 import { isValidRecordDate } from './DailyRecordStorage'
 import { getLocalDate } from './LoosePlanStorage'
+import { createId } from './IdGeneration'
 
 export const FIVE_MINUTE_STORAGE_KEY = 'margin-five-minute-starts'
 export const FIVE_MINUTE_DURATION = 5 * 60 * 1000
@@ -122,7 +123,7 @@ export function startFiveMinuteStart(content: string, taskId?: string, now = Dat
   const nextState: FiveMinuteState = {
     ...state,
     activeTimer: {
-      id: crypto.randomUUID(), date: getLocalDate(), startedAt: now,
+      id: createId(), date: getLocalDate(), startedAt: now,
       endsAt: now + FIVE_MINUTE_DURATION, content: title,
       ...(taskId ? { taskId } : {}), counted: false,
     },

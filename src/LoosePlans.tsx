@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { storageFailureMessage } from './StorageSafety'
+import { createId } from './IdGeneration'
 import {
   dayPeriods,
   getLocalDate,
@@ -176,7 +177,7 @@ function LoosePlanPanel({
     }
 
     if (!runPlanAction(() => onSave({
-      id: editingPlanId ?? crypto.randomUUID(),
+      id: editingPlanId ?? createId(),
       title: cleanedTitle,
       date,
       dayPeriod: planDraft.dayPeriod,

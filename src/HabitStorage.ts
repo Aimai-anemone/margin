@@ -1,6 +1,7 @@
 import { restoreBackupValues } from './BackupRestore'
 import { isValidRecordDate } from './DailyRecordStorage'
 import { getLocalDate } from './LoosePlanStorage'
+import { createId } from './IdGeneration'
 import {
   readStoredJson, requireStoredData, saveStoredJson, StorageSafetyError, type SafeStorage,
 } from './StorageSafety'
@@ -172,7 +173,7 @@ export function saveHabit(draft: HabitDraft, id?: string, storage?: SafeStorage)
   if (!existing && current.habits.length >= MAX_HABITS) invalid('習慣は100件まで保存できます。新しい習慣を保存する前に、非表示の習慣を整理してください。')
   const now = new Date().toISOString()
   const next: Habit = {
-    id: existing?.id ?? crypto.randomUUID(), name: draft.name.trim(),
+    id: existing?.id ?? createId(), name: draft.name.trim(),
     steps: { 1: draft.steps[1].trim(), 2: draft.steps[2].trim(), 3: draft.steps[3].trim() },
     frequency: draft.frequency,
     weekdays: draft.frequency === 'daily' ? [] : [...draft.weekdays].sort((a, b) => a - b),
@@ -264,7 +265,7 @@ export function saveHabitRecord(habitId: string, date: string, result: HabitResu
   if (!existing && !isHabitDue(habit, date)) invalid('この日は新しく記録する対象ではありません。保存済みの実績は残しています。')
   const now = new Date().toISOString()
   const record: HabitRecord = {
-    id: existing?.id ?? crypto.randomUUID(), habitId, date, result,
+    id: existing?.id ?? createId(), habitId, date, result,
     habitName: habit.name, selectedContent: result === 'rest' ? null : habit.steps[result],
     createdAt: existing?.createdAt ?? now, updatedAt: now,
   }
