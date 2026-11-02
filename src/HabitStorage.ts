@@ -12,7 +12,7 @@ export const MAX_HABITS = 100
 export const MAX_HABIT_RECORDS = 10000
 export const habitWeekdays = ['日', '月', '火', '水', '木', '金', '土'] as const
 export const habitSteps = [
-  { value: 1, label: '小さく', help: '忙しい日でもできる、最初の一歩' },
+  { value: 1, label: 'ちいさく', help: '忙しい日でもできる、最初の一歩' },
   { value: 2, label: 'いつもの', help: '普段取り組みたい内容' },
   { value: 3, label: 'しっかり', help: '余裕がある日に取り組む内容' },
 ] as const

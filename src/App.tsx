@@ -340,7 +340,7 @@ function App() {
             onToggleComplete={toggleLoosePlanComplete}
           />
 
-          <TodayHabitsCard habits={habits.data.habits} records={habits.data.records} today={habits.today} error={habits.error} onOpen={(id) => {
+          <TodayHabitsCard controller={habits} onOpen={(id) => {
             habits.refresh()
             setHabitToOpen(id ?? null)
             setIsShowingHabits(true)

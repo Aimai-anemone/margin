@@ -3247,13 +3247,17 @@ select.entry-input {
 }
 
 .today-tab-panel .loose-plan-compact-summary {
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
 }
 
 .today-tab-panel .loose-plan-compact-period {
-  grid-template-columns: 42px minmax(0, 1fr);
-  border-top: 1px solid var(--color-border);
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+}
+
+.today-tab-panel .loose-plan-compact-plan-list {
+  padding-inline: 0;
 }
 
 .today-tab-panel .loose-plan-compact-period-label,
@@ -4350,4 +4354,92 @@ select.entry-input {
 
 .settings-page .timetable-period-time-field {
   width: 98px;
+}
+
+/* 今日と一日の終わりで共通の、1行の習慣記録操作。 */
+.habit-quick-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  height: 44px;
+  min-width: 0;
+}
+
+.habit-quick-name-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  height: 44px;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.habit-quick-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.habit-quick-rest {
+  flex: none;
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.habit-quick-choices {
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+}
+
+.habit-quick-choice {
+  min-width: 0;
+  height: 44px;
+  padding: 0 4px;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.habit-quick-choice[aria-pressed="true"] {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.habit-quick-choice:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.habit-quick-name-button:focus-visible,
+.habit-quick-choice:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: -2px;
+}
+
+.habit-quick-name-button:hover,
+.habit-quick-name-button:active,
+.habit-quick-choice:not(:disabled):hover {
+  background: var(--color-accent-soft);
+}
+
+.habit-day-content .habit-quick-row {
+  border-bottom: 1px solid var(--color-border);
 }

@@ -3,6 +3,7 @@ import { getLocalDate } from './LoosePlanStorage'
 import { habitsForDate, habitSteps, habitResultLabel, isRecentHabitDate, type HabitResult } from './HabitStorage'
 import { storageFailureMessage } from './StorageSafety'
 import { type HabitsController } from './useHabits'
+import HabitQuickRow from './HabitQuickRow'
 
 type Props = { controller: HabitsController; initialHabitId?: string | null; onBack?: () => void; onManage?: () => void; targetDate?: string; compact?: boolean }
 const formatDate = (date: string) => new Intl.DateTimeFormat('ja-JP', { month: 'long', day: 'numeric', weekday: 'short' }).format(new Date(`${date}T12:00:00`))
@@ -21,11 +22,12 @@ export default function HabitDayList({ controller, initialHabitId, onBack, onMan
   const readOnly = compact && !inRange
   const savedRecords = controller.data.records.filter((item) => item.date === date)
 
-  function save(result: HabitResult) {
-    if (!habit || controller.error) return
+  function saveForHabit(habitId: string, result: HabitResult) {
+    if (controller.error || controller.data.records.some((item) =>
+      item.habitId === habitId && item.date === date && item.result === result)) return
     setMessage('')
     try {
-      controller.record(habit.id, date, result)
+      controller.record(habitId, date, result)
       setError('')
       setMessage('習慣の記録を保存しました。')
     } catch (failure) { setError(storageFailureMessage(failure)) }
@@ -80,12 +82,12 @@ export default function HabitDayList({ controller, initialHabitId, onBack, onMan
       <p>今日はどこまでできましたか？</p>
       {!compact && <p className="supporting-text">選ぶとすぐに保存します。あとから選び直せます。</p>}
       {habitSteps.map((step) => <button type="button" className="habit-choice habit-step-choice" key={step.value}
-        disabled={!inRange} aria-pressed={record?.result === step.value} onClick={() => save(step.value)}>
+        disabled={!inRange} aria-pressed={record?.result === step.value} onClick={() => saveForHabit(habit.id, step.value)}>
         <span>{step.label}{record?.result === step.value && '（記録済み）'}</span>
         <span>{habit.steps[step.value]}</span>
       </button>)}
       <button type="button" className="cancel-button habit-rest-choice" disabled={!inRange}
-        aria-pressed={record?.result === 'rest'} onClick={() => save('rest')}>今日は休む{record?.result === 'rest' && '（記録済み）'}</button>
+        aria-pressed={record?.result === 'rest'} onClick={() => saveForHabit(habit.id, 'rest')}>今日は休む{record?.result === 'rest' && '（記録済み）'}</button>
       {record && <>
         <p className="supporting-text">記録時：{record.habitName}{record.selectedContent !== null && `・${record.selectedContent}`}</p>
         <button className="cancel-button" type="button" disabled={!inRange} onClick={cancel}>記録を取り消す</button>
@@ -93,6 +95,9 @@ export default function HabitDayList({ controller, initialHabitId, onBack, onMan
     </section> : items.length === 0 ? <p className={`${compact ? '' : 'card '}supporting-text quiet-empty`}>この日の対象の習慣はありません。</p>
       : items.slice(0, compact && !showAll ? 5 : undefined).map((item) => {
         const saved = controller.data.records.find((entry) => entry.habitId === item.id && entry.date === date)
+        if (compact) return <HabitQuickRow key={item.id} habit={item} result={saved?.result}
+          disabled={!inRange} onOpen={() => { setSelectedId(item.id); setMessage(''); setError('') }}
+          onSelect={(result) => saveForHabit(item.id, result)} />
         return <section className={compact ? 'habit-compact-item' : 'card habit-day-item'} key={item.id}>
           <h2 className="closing-title">{item.name}</h2>
           {item.status !== 'active' && <p className="supporting-text">{item.status === 'paused' ? '休止中' : '非表示'}</p>}
