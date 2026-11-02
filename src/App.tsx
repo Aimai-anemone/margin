@@ -10,6 +10,8 @@ import { useFiveMinuteStart } from './useFiveMinuteStart'
 import { useHabits } from './useHabits'
 import HabitsPage from './HabitsPage'
 import TodayHabitsCard from './TodayHabitsCard'
+import TodayHeader from './TodayHeader'
+import { useLocalToday } from './useLocalToday'
 import { loadEntryState, saveEntryValue } from './EntryStorage'
 import { requireStoredData, storageFailureMessage } from './StorageSafety'
 import { deleteDailyRecord, loadDailyRecords, saveDailyRecord, type DailyRecordInput } from './DailyRecordStorage'
@@ -32,6 +34,7 @@ function App() {
   const [entryDraft, setEntryDraft] = useState('')
   const [isEditingEntry, setIsEditingEntry] = useState(false)
   const [activeTab, setActiveTab] = useState<ActiveTab>('today')
+  const [recordToOpen, setRecordToOpen] = useState<string | null>(null)
   const [endOfDayDate, setEndOfDayDate] = useState<string | null>(null)
   const [isShowingFiveMinute, setIsShowingFiveMinute] = useState(false)
   const [isShowingHabits, setIsShowingHabits] = useState(false)
@@ -67,7 +70,7 @@ function App() {
   const [loosePlanState, setLoosePlanState] = useState(loadLoosePlanState)
   const loosePlans = loosePlanState.data
 
-  const todayDate = getLocalDate()
+  const todayDate = useLocalToday()
   const tomorrowDate = getLocalDate(1)
   const todaysRecord = dailyRecordState.records.find((record) => record.date === todayDate)
   const fiveMinuteCount = fiveMinute.state.counts.find((item) => item.date === fiveMinute.today)?.count ?? 0
@@ -76,7 +79,19 @@ function App() {
     month: 'long',
     day: 'numeric',
     weekday: 'long',
-  }).format(new Date())
+  }).format(new Date(`${todayDate}T12:00:00`))
+
+  useEffect(() => {
+    const refresh = () => setDailyRecordState(loadDailyRecords())
+    window.addEventListener('focus', refresh)
+    window.addEventListener('pageshow', refresh)
+    document.addEventListener('visibilitychange', refresh)
+    return () => {
+      window.removeEventListener('focus', refresh)
+      window.removeEventListener('pageshow', refresh)
+      document.removeEventListener('visibilitychange', refresh)
+    }
+  }, [])
 
   function startEditingEntry() {
     if (entryState.status === 'error') return
@@ -157,10 +172,11 @@ function App() {
   }
 
   function selectTab(tab: ActiveTab) {
+    setRecordToOpen(null)
     setIsShowingHabits(false)
     setEndOfDayDate(null)
     setIsShowingFiveMinute(false)
-    if (tab === 'records') reloadRecords()
+    if (tab === 'records' || tab === 'today') reloadRecords()
     setActiveTab(tab)
   }
 
@@ -217,11 +233,14 @@ function App() {
   return (
     <div className="app">
       {!isTodayDedicated && <header className={`app-header${activeTab === 'today' ? ' today-app-header' : ''}`}>
-        {activeTab === 'today' ? <div className="today-editorial-header">
-          <p className="today-kicker">今日</p>
-          <p className="today-date">{today}</p>
-          <p className="app-name">Margin</p>
-        </div> : <div>
+        {activeTab === 'today' ? <TodayHeader date={todayDate}
+          records={dailyRecordState.records} loadError={dailyRecordState.error}
+          onOpenRecord={(date) => {
+            reloadRecords()
+            setRecordToOpen(date)
+            setActiveTab('records')
+            window.scrollTo({ top: 0 })
+          }} /> : <div>
           <p className="app-name">Margin</p>
           <p className="today-date">{today}</p>
         </div>}
@@ -431,6 +450,7 @@ function App() {
             aria-labelledby="records-tab"
           >
             <RecordsPage
+              initialDate={recordToOpen}
               habits={habits}
               records={dailyRecordState.records}
               loadError={dailyRecordState.error}

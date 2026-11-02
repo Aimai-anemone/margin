@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Local scenery sources and superseded public copies (not used by the app).
+/scenery-originals/
+/public/scenery-40/
+/public/public/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

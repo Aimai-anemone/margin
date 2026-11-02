@@ -9,6 +9,11 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
+        // Legacy public copies remain untouched on disk, but are not precached.
+        globIgnores: ['**/scenery-40/**', 'public/**'],
+      },
       manifest: {
         name: 'Margin',
         short_name: 'Margin',

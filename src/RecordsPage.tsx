@@ -12,6 +12,7 @@ import {
 } from './DailyRecordStorage'
 
 type Props = {
+  initialDate?: string | null
   habits?: HabitsController
   records: DailyRecord[]
   loadError: string
@@ -43,10 +44,12 @@ function planSummary(record: DailyRecord) {
 }
 
 function RecordsPage({
+  initialDate,
   records, loadError, loosePlans, loosePlansLoadError, onReloadRecords, onSaveRecord, onDeleteRecord, habits,
   onSaveLoosePlan, onDeleteLoosePlan, onToggleLoosePlanComplete,
 }: Props) {
-  const [view, setView] = useState<RecordsView>({ kind: 'list' })
+  const [view, setView] = useState<RecordsView>(() => initialDate
+    ? { kind: 'detail', date: initialDate } : { kind: 'list' })
   const [summaryPeriod, setSummaryPeriod] = useState<RecordPeriod>('week')
   const [message, setMessage] = useState('')
   const [actionError, setActionError] = useState('')
